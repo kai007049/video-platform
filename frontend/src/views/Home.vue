@@ -3,8 +3,8 @@
     <div class="tabs">
       <button class="tab" :class="{ active: activeTab === 'recommend' }" @click="switchTab('recommend')">推荐</button>
       <button class="tab" :class="{ active: activeTab === 'latest' }" @click="switchTab('latest')">最新</button>
-      <button class="tab" :class="{ active: activeTab === 'hot' }" @click="switchTab('hot')">最热</button>
-      <button v-if="currentKeyword" class="tab" :class="{ active: activeTab === 'search' }">
+      <button class="tab" :class="{ active: activeTab === 'hot' }" @click="switchTab('hot')">热门</button>
+      <button v-if="currentKeyword" class="tab active">
         搜索：{{ currentKeyword }}
       </button>
     </div>
@@ -22,19 +22,25 @@
             class="cover"
             @error="onCoverError"
           />
-          <span class="play-count">
-            <span class="icon">▶</span> {{ formatCount(item.playCount) }}
-          </span>
-          <span class="comment-count">
-            <span class="icon">💬</span> {{ formatCount(item.commentCount) }}
+          <span class="stats">
+            <span class="play-count">
+              <span class="icon">▶</span> {{ formatCount(item.playCount) }}
+            </span>
+            <span class="comment-count">
+              <span class="icon">💬</span> {{ formatCount(item.commentCount) }}
+            </span>
           </span>
           <span class="duration">{{ formatDuration(item.durationSeconds) }}</span>
         </div>
         <div class="info">
           <h3 class="title">{{ item.title }}</h3>
-          <div class="meta" @click.stop="goProfile(item.authorId)">
-            <img :src="resolveAvatar(item.authorAvatar)" class="avatar" alt="" @error="onAvatarError" />
+          <div class="author-line" @click.stop="goProfile(item.authorId)">
             <span class="author">{{ item.authorName || '用户' }}</span>
+          </div>
+          <div class="meta-line">
+            <span class="tag">{{ item.categoryName || '视频' }}</span>
+            <span>·</span>
+            <span>{{ item.createTime ? String(item.createTime).slice(5, 10) : '' }}</span>
           </div>
         </div>
       </div>
@@ -61,7 +67,7 @@ const hasMore = ref(true)
 const pageSize = 12
 const currentKeyword = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
-const defaultAvatar = new URL('../assets/avatar-placeholder.png', import.meta.url).href
+const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'
 
 const fetchApi = (p) => {
   if (activeTab.value === 'search') {
@@ -137,16 +143,6 @@ function onCoverError(event) {
   event.target.src = placeholderCover
 }
 
-function resolveAvatar(avatar) {
-  if (!avatar) return defaultAvatar
-  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
-  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
-}
-
-function onAvatarError(event) {
-  event.target.src = defaultAvatar
-}
-
 function formatCount(n) {
   if (!n) return '0'
   if (n >= 10000) return (n / 10000).toFixed(1) + '万'
@@ -154,10 +150,10 @@ function formatCount(n) {
 }
 
 function formatDuration(sec) {
-  if (sec === null || sec === undefined) return '--:--'
+  if (!sec) return '--:--'
   const m = Math.floor(sec / 60)
   const s = sec % 60
-  return `${String(m)}:${String(s).padStart(2, '0')}`
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 watch(() => route.query, () => {
@@ -174,59 +170,65 @@ watch(() => route.query, () => {
 
 .tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: 24px;
+  margin-bottom: 16px;
+  padding: 0 6px;
 }
 
 .tab {
-  padding: 8px 20px;
+  position: relative;
+  padding: 6px 0;
   font-size: 14px;
-  color: var(--text-primary);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
+  color: #61666d;
+  background: transparent;
+  border: none;
   cursor: pointer;
 }
 
 .tab.active {
   color: var(--bili-pink);
-  border-color: rgba(251,114,153,.5);
-  box-shadow: 0 2px 6px rgba(251,114,153,.2);
 }
 
-.meta {
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--bili-pink);
+}
+
+.author-line {
   cursor: pointer;
 }
 
-.meta:hover .author {
+.author-line:hover .author {
   color: var(--bili-pink);
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px 16px;
 }
 
 .video-card {
   cursor: pointer;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 
 .video-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  transform: translateY(-2px);
 }
 
 .cover-wrap {
   position: relative;
   aspect-ratio: 16/9;
   background: var(--bg-gray);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .cover {
@@ -235,26 +237,19 @@ watch(() => route.query, () => {
   object-fit: cover;
 }
 
-.play-count {
+.stats {
   position: absolute;
-  left: 8px;
+  left: 6px;
   bottom: 8px;
-  padding: 2px 6px;
-  font-size: 12px;
-  color: #fff;
-  background: rgba(0,0,0,.6);
-  border-radius: 4px;
+  display: inline-flex;
+  gap: 10px;
 }
 
+.play-count,
 .comment-count {
-  position: absolute;
-  left: 8px;
-  bottom: 32px;
-  padding: 2px 6px;
   font-size: 12px;
   color: #fff;
-  background: rgba(0,0,0,.6);
-  border-radius: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
 .icon {
@@ -263,43 +258,45 @@ watch(() => route.query, () => {
 
 .duration {
   position: absolute;
-  right: 8px;
+  right: 6px;
   bottom: 8px;
   font-size: 12px;
   color: #fff;
-  background: rgba(0,0,0,.6);
-  padding: 2px 6px;
-  border-radius: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .info {
-  padding: 12px;
+  padding: 8px 2px 0;
 }
 
 .title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  color: #18191c;
 }
 
-.meta {
+.author {
+  font-size: 12px;
+  color: #61666d;
+}
+
+.meta-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  margin-top: 4px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #9499a0;
 }
 
-.avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
+.tag {
+  color: #9499a0;
 }
 
 .loading,
@@ -324,7 +321,7 @@ watch(() => route.query, () => {
 
 @media (max-width: 1200px) {
   .video-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
