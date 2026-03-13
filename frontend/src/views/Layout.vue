@@ -1,29 +1,27 @@
 <template>
   <div class="layout">
     <header class="header">
-      <router-link to="/" class="logo">
-        <span class="logo-icon">b</span>
-        <span class="logo-text">哔哩哔哩</span>
-      </router-link>
-      <div class="nav-center">
-        <router-link to="/" class="nav-item" :class="{ active: $route.path === '/' }">首页</router-link>
-        <router-link to="/upload" class="nav-item">投稿</router-link>
-        <router-link to="/message" class="nav-item">消息</router-link>
-        <router-link to="/creator" class="nav-item" v-if="userStore.isLoggedIn">个人中心</router-link>
-        <router-link to="/admin" class="nav-item" v-if="userStore.userInfo?.isAdmin">管理后台</router-link>
+      <div class="header-left">
+        <router-link to="/" class="logo">
+          <span class="logo-text">bilibili</span>
+        </router-link>
+        <nav class="top-nav">
+          <router-link class="top-nav-item" to="/">直播</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/' }" to="/">推荐</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/message' }" to="/message">热门</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/creator' }" to="/creator">追番</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/upload' }" to="/upload">影视</router-link>
+        </nav>
       </div>
+
       <div class="nav-right">
         <div class="search-bar">
-          <input v-model="keyword" type="text" placeholder="请输入感兴趣的内容" @keyup.enter="goSearch" />
-          <button class="search-btn" @click="goSearch">搜索</button>
+          <input v-model="keyword" type="text" placeholder="搜索你感兴趣的视频" @keyup.enter="goSearch" />
+          <button class="search-btn" @click="goSearch">⌕</button>
         </div>
-        <button class="theme-toggle" @click="toggleTheme">
-          {{ themeLabel }}
-        </button>
         <template v-if="userStore.isLoggedIn">
           <div class="user-area" @click="showUserMenu = !showUserMenu">
             <img :src="userStore.userInfo?.avatar || defaultAvatar" class="avatar" alt="avatar" />
-            <span class="username">{{ userStore.userInfo?.username }}</span>
             <div v-if="showUserMenu" class="user-menu" @click.stop>
               <div class="menu-item" @click="goCreator">个人中心</div>
               <div class="menu-item" @click="handleLogout">退出登录</div>
@@ -36,6 +34,26 @@
         </template>
       </div>
     </header>
+
+    <aside class="side-nav">
+      <router-link class="side-item" :class="{ active: $route.path === '/' }" to="/">
+        <span class="side-icon">🏠</span>
+        <span class="side-label">首页</span>
+      </router-link>
+      <router-link class="side-item" to="/">
+        <span class="side-icon">▶</span>
+        <span class="side-label">精选</span>
+      </router-link>
+      <router-link class="side-item" :class="{ active: $route.path === '/message' }" to="/message">
+        <span class="side-icon">✦</span>
+        <span class="side-label">动态</span>
+      </router-link>
+      <router-link class="side-item" :class="{ active: $route.path === '/creator' }" to="/creator">
+        <span class="side-icon">👤</span>
+        <span class="side-label">我的</span>
+      </router-link>
+    </aside>
+
     <main class="main">
       <router-view />
     </main>
@@ -43,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
@@ -54,14 +72,10 @@ const showUserMenu = ref(false)
 const keyword = ref('')
 const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
 
-const theme = ref(localStorage.getItem('theme') || 'light')
-const themeLabel = computed(() => (theme.value === 'dark' ? '亮色' : '暗色'))
-
 onMounted(() => {
   if (userStore.isLoggedIn && !userStore.userInfo) {
     userStore.fetchUserInfo()
   }
-  applyTheme()
 })
 
 function openLogin() {
@@ -83,16 +97,6 @@ function handleLogout() {
   router.push('/')
 }
 
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', theme.value)
-  localStorage.setItem('theme', theme.value)
-}
-
-function toggleTheme() {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-  applyTheme()
-}
-
 function goSearch() {
   const value = keyword.value.trim()
   if (!value) return
@@ -109,170 +113,127 @@ function goSearch() {
 .header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 50;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  height: 70px;
-  padding: 0 32px;
+  height: 72px;
+  padding: 0 24px 0 28px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
 }
 
-.logo {
+.header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  background: var(--bg-surface);
+  gap: 24px;
 }
 
-.logo-icon {
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--bili-pink);
-  border-radius: 8px;
+.logo {
+  color: var(--bili-pink);
 }
 
 .logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -1px;
 }
 
-.nav-center {
+.top-nav {
   display: flex;
-  gap: 16px;
-  flex: 1;
+  align-items: center;
+  gap: 26px;
 }
 
-.nav-item {
-  padding: 8px 20px;
+.top-nav-item {
+  position: relative;
+  padding: 6px 0;
   font-size: 14px;
   color: var(--text-primary);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  transition: all 0.2s;
+  transition: color 0.2s;
 }
 
-.nav-item:hover,
-.nav-item.active {
+.top-nav-item:hover,
+.top-nav-item.active {
   color: var(--bili-pink);
-  border-color: rgba(251,114,153,.5);
-  box-shadow: 0 2px 6px rgba(251,114,153,.2);
+}
+
+.top-nav-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -17px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--bili-pink);
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  width: 320px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  padding: 6px 12px;
+  width: 430px;
+  height: 42px;
+  background: #f1f2f3;
+  border-radius: 8px;
+  padding: 0 10px 0 14px;
 }
 
 .search-bar input {
   flex: 1;
   border: none;
   background: transparent;
-  color: var(--text-primary);
+  color: #61666d;
   font-size: 14px;
   outline: none;
 }
 
 .search-btn {
   background: transparent;
-  font-size: 14px;
-  color: var(--bili-pink);
-  border: 1px solid rgba(251,114,153,.3);
-  border-radius: 999px;
-  padding: 4px 10px;
-}
-
-.theme-toggle {
-  padding: 8px 12px;
-  font-size: 13px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  color: var(--text-primary);
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  font-size: 18px;
+  color: #61666d;
 }
 
 .btn-login,
 .btn-register {
-  padding: 8px 18px;
-  font-size: 14px;
-  border-radius: 12px;
-  transition: all 0.2s;
+  padding: 7px 14px;
+  font-size: 13px;
+  border-radius: 7px;
 }
 
 .btn-login {
-  color: var(--text-primary);
-  background: var(--bg-surface);
+  color: #18191c;
+  background: #fff;
   border: 1px solid var(--border-color);
 }
 
 .btn-register {
   color: #fff;
   background: var(--bili-pink);
-}
-
-.btn-register:hover {
-  background: var(--bili-pink-hover);
-}
-
-.btn-upload {
-  padding: 8px 18px;
-  font-size: 14px;
-  color: #fff;
-  background: var(--bili-pink);
-  border-radius: 12px;
-  transition: background 0.2s;
-}
-
-.btn-upload:hover {
-  background: var(--bili-pink-hover);
 }
 
 .user-area {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
-  border-radius: 10px;
   cursor: pointer;
 }
 
-.user-area:hover {
-  background: var(--bg-gray);
-}
-
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
-}
-
-.username {
-  font-size: 14px;
-  color: var(--text-primary);
 }
 
 .user-menu {
@@ -300,8 +261,66 @@ function goSearch() {
 }
 
 .main {
-  padding: 24px 32px;
-  max-width: 1400px;
-  margin: 0 auto;
+  margin-left: 86px;
+  padding: 20px 20px 28px;
+}
+
+.side-nav {
+  position: fixed;
+  top: 86px;
+  left: 10px;
+  width: 64px;
+  z-index: 30;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 10px 0;
+}
+
+.side-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 0;
+  color: #61666d;
+}
+
+.side-item.active {
+  color: var(--bili-pink);
+}
+
+.side-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.side-label {
+  font-size: 12px;
+}
+
+@media (max-width: 1280px) {
+  .search-bar {
+    width: 320px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .top-nav {
+    display: none;
+  }
+
+  .side-nav {
+    display: none;
+  }
+
+  .main {
+    margin-left: 0;
+  }
+
+  .search-bar {
+    width: 260px;
+  }
 }
 </style>

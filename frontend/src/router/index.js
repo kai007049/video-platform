@@ -11,7 +11,8 @@ const routes = [
       { path: 'upload', name: 'Upload', component: () => import('../views/Upload.vue'), meta: { title: '投稿', auth: true } },
       { path: 'user/:id', name: 'UpProfile', component: () => import('../views/UpProfile.vue'), meta: { title: 'UP主主页' } },
       { path: 'creator', name: 'Creator', component: () => import('../views/CreatorDashboard.vue'), meta: { title: '创作者中心', auth: true } },
-      { path: 'admin', name: 'Admin', component: () => import('../views/AdminPage.vue'), meta: { title: '管理后台', auth: true } }
+      { path: 'admin', name: 'Admin', component: () => import('../views/AdminPage.vue'), meta: { title: '管理后台', auth: true } },
+      { path: 'message', name: 'MessageCenter', component: () => import('../views/MessageCenter.vue'), meta: { title: '消息中心', auth: true } }
     ]
   }
 ]
