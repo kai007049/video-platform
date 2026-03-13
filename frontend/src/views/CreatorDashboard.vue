@@ -34,10 +34,12 @@
 
       <div class="tab-body">
         <div v-if="currentList.length === 0" class="empty">暂无数据</div>
-        <div v-else class="video-grid">
+
+        <!-- 视频相关列表 -->
+        <div v-else-if="['works', 'liked', 'favorite', 'history'].includes(activeTab)" class="video-grid">
           <div v-for="video in currentList" :key="video.id" class="video-card">
             <div class="cover">
-              <img :src="resolveCover(video)" alt="cover" />
+              <img :src="resolveCover(video)" alt="cover" @error="onCoverError" />
               <span class="duration">{{ formatDuration(video.durationSeconds) }}</span>
             </div>
             <div class="info">
@@ -53,6 +55,24 @@
             </div>
           </div>
         </div>
+
+        <!-- 关注/粉丝列表 -->
+        <div v-else class="user-list">
+          <div v-for="user in currentList" :key="user.id" class="user-card">
+            <img :src="resolveAvatar(user.avatar)" class="user-avatar" alt="" @error="onAvatarError" />
+            <div class="user-info">
+              <div class="user-name">{{ user.username }}</div>
+              <div class="user-meta">
+                <span v-if="user.followed">已关注</span>
+                <span v-else>未关注</span>
+              </div>
+            </div>
+            <div class="user-actions">
+              <button class="btn-message" @click="goMessage(user)">私信</button>
+              <button class="btn-profile" @click="router.push(`/user/${user.id}`)">主页</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -60,6 +80,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getCreatorStats } from '../api/user'
 import {
   getCreatorVideos,
@@ -68,6 +89,11 @@ import {
   getHistoryVideos,
   deleteVideo
 } from '../api/video'
+import { getFollowingList, getFanList } from '../api/follow'
+import { useUserStore } from '../stores/user'
+
+const router = useRouter()
+const userStore = useUserStore()
 
 const stats = ref(null)
 const loading = ref(true)
@@ -76,17 +102,22 @@ const listMap = ref({
   works: [],
   liked: [],
   favorite: [],
-  history: []
+  history: [],
+  following: [],
+  fans: []
 })
 
 const tabs = [
   { key: 'works', label: '我的作品' },
   { key: 'liked', label: '点赞记录' },
   { key: 'favorite', label: '收藏记录' },
-  { key: 'history', label: '历史观看' }
+  { key: 'history', label: '历史观看' },
+  { key: 'following', label: '关注列表' },
+  { key: 'fans', label: '粉丝列表' }
 ]
 
-const defaultCover = '/favicon.svg'
+const defaultCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
+const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 
 const currentList = computed(() => listMap.value[activeTab.value] || [])
 
@@ -103,7 +134,23 @@ async function loadList(key) {
     listMap.value.favorite = (await getFavoriteVideos()).records || []
   } else if (key === 'history') {
     listMap.value.history = (await getHistoryVideos()).records || []
+  } else if (key === 'following') {
+    listMap.value.following = await getFollowingListUser()
+  } else if (key === 'fans') {
+    listMap.value.fans = await getFanListUser()
   }
+}
+
+async function getFollowingListUser() {
+  const uid = userStore.userInfo?.id
+  if (!uid) return []
+  return await getFollowingList(uid)
+}
+
+async function getFanListUser() {
+  const uid = userStore.userInfo?.id
+  if (!uid) return []
+  return await getFanList(uid)
 }
 
 async function switchTab(key) {
@@ -127,6 +174,16 @@ async function load() {
   }
 }
 
+function goMessage(user) {
+  router.push({
+    path: '/message',
+    query: {
+      targetId: user.id,
+      targetName: user.username
+    }
+  })
+}
+
 function formatCount(n) {
   if (!n) return '0'
   if (n >= 10000) return (n / 10000).toFixed(1) + '万'
@@ -141,10 +198,25 @@ function formatDuration(seconds) {
 }
 
 function resolveCover(video) {
+  if (video.previewUrl) return video.previewUrl
   if (video.coverUrl) {
     return `/api/file/cover?url=${encodeURIComponent(video.coverUrl)}`
   }
   return defaultCover
+}
+
+function resolveAvatar(avatar) {
+  if (!avatar) return avatarPlaceholder
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
+function onAvatarError(event) {
+  event.target.src = avatarPlaceholder
+}
+
+function onCoverError(event) {
+  event.target.src = defaultCover
 }
 
 onMounted(load)
@@ -224,6 +296,65 @@ h2 {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-message,
+.btn-profile {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.btn-message {
+  background: var(--bili-pink);
+  color: #fff;
+}
+
+.btn-profile {
+  background: #fff;
+  border: 1px solid var(--border-color);
 }
 
 .video-card {

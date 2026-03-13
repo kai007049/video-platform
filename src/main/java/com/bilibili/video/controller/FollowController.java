@@ -2,6 +2,7 @@ package com.bilibili.video.controller;
 
 import com.bilibili.video.common.Result;
 import com.bilibili.video.service.FollowService;
+import com.bilibili.video.model.vo.FollowUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +46,20 @@ public class FollowController {
         long following = followService.getFollowingCount(userId);
         long fans = followService.getFanCount(userId);
         return Result.success(new FollowCountVO(following, fans));
+    }
+
+    @GetMapping("/following/{userId}")
+    @Operation(summary = "关注列表")
+    public Result<java.util.List<FollowUserVO>> following(@PathVariable Long userId, HttpServletRequest request) {
+        Long currentUserId = getUserIdNullable(request);
+        return Result.success(followService.getFollowingList(userId, currentUserId));
+    }
+
+    @GetMapping("/fans/{userId}")
+    @Operation(summary = "粉丝列表")
+    public Result<java.util.List<FollowUserVO>> fans(@PathVariable Long userId, HttpServletRequest request) {
+        Long currentUserId = getUserIdNullable(request);
+        return Result.success(followService.getFanList(userId, currentUserId));
     }
 
     private Long getUserIdNullable(HttpServletRequest request) {

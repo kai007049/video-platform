@@ -58,6 +58,7 @@ minio:
   secret-key: 12345678
   bucket-video: video
   bucket-cover: cover
+  bucket-avatar: avatar
 
 # RocketMQ
 rocketmq:

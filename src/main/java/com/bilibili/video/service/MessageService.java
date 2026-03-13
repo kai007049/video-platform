@@ -2,6 +2,7 @@ package com.bilibili.video.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.bilibili.video.model.dto.SendMessageDTO;
+import com.bilibili.video.model.vo.MessageConversationVO;
 import com.bilibili.video.model.vo.MessageVO;
 
 public interface MessageService {
@@ -13,4 +14,8 @@ public interface MessageService {
     void markRead(Long userId, Long targetId);
 
     Long getUnreadCount(Long userId);
+
+    java.util.List<MessageConversationVO> listConversations(Long userId);
+
+    void revokeMessage(Long userId, Long messageId);
 }

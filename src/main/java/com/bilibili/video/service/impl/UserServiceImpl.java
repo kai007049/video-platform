@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtUtils jwtUtils;
     private final CaptchaService captchaService;
+    private final com.bilibili.video.utils.MinioUtils minioUtils;
 
     @Override
     public void register(UserRegisterDTO dto) {
@@ -102,6 +103,26 @@ public class UserServiceImpl implements UserService {
         vo.setVideoCount(videos.size());
         vo.setFanCount(followService.getFanCount(userId));
         return vo;
+    }
+
+    @Override
+    public String updateAvatar(Long userId, org.springframework.web.multipart.MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BizException(400, "头像文件不能为空");
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BizException(404, "用户不存在");
+        }
+        String avatarUrl;
+        try {
+            avatarUrl = minioUtils.uploadAvatar(file);
+        } catch (Exception e) {
+            throw new BizException(500, "头像上传失败: " + e.getMessage());
+        }
+        user.setAvatar(avatarUrl);
+        userMapper.updateById(user);
+        return avatarUrl;
     }
 
     private LoginVO buildLoginResponse(User user) {

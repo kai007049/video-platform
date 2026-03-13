@@ -1,7 +1,17 @@
 <template>
   <div class="up-profile" v-if="profile">
     <div class="profile-header">
-      <img :src="profile.avatar || defaultAvatar" class="avatar" alt="" />
+      <div class="avatar-wrapper">
+        <img :src="resolveAvatar(profile.avatar)" class="avatar" alt="" @error="onAvatarError" />
+        <label
+          v-if="canEditAvatar"
+          class="avatar-upload"
+          title="点击更换头像"
+        >
+          <input type="file" accept="image/*" @change="onAvatarChange" />
+          更换头像
+        </label>
+      </div>
       <div class="info">
         <h1 class="username">{{ profile.username }}</h1>
         <div class="stats">
@@ -29,7 +39,7 @@
           @click="goVideo(item.id)"
         >
           <div class="cover-wrap">
-            <img :src="item.previewUrl || item.coverUrl || placeholderCover" class="cover" alt="" />
+            <img :src="resolveCover(item)" class="cover" alt="" @error="onCoverError" />
             <span class="play-count"><span class="icon">▶</span> {{ formatCount(item.playCount) }}</span>
             <span class="duration">{{ formatDuration(item.durationSeconds) }}</span>
           </div>
@@ -48,7 +58,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getUpProfile } from '../api/user'
+import { getUpProfile, updateAvatar } from '../api/user'
 import { getVideoByAuthor } from '../api/video'
 import { follow, unfollow } from '../api/follow'
 import { useUserStore } from '../stores/user'
@@ -62,7 +72,10 @@ const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
 const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'
-const placeholderCover = 'https://placehold.co/320x180/f4f4f4/999?text=封面'
+const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
+const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
+const canEditAvatar = computed(() => userStore.isLoggedIn && profile.value?.id === userStore.userInfo?.id)
+const maxAvatarSize = 2 * 1024 * 1024
 
 const upId = computed(() => Number(route.params.id))
 
@@ -109,12 +122,62 @@ async function toggleFollow() {
   }
 }
 
+async function onAvatarChange(event) {
+  const file = event.target.files && event.target.files[0]
+  event.target.value = ''
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    alert('请选择图片文件')
+    return
+  }
+  if (file.size > maxAvatarSize) {
+    alert('头像不能超过 2MB')
+    return
+  }
+  try {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const objectName = await updateAvatar(formData)
+    if (!profile.value) return
+    profile.value.avatar = objectName
+    if (userStore.userInfo) {
+      userStore.userInfo.avatar = objectName
+      sessionStorage.setItem('userInfo', JSON.stringify(userStore.userInfo))
+    }
+  } catch (e) {
+    console.error(e)
+    alert('头像上传失败')
+  }
+}
+
+function resolveAvatar(avatar) {
+  if (!avatar) return avatarPlaceholder
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
+function onAvatarError(event) {
+  event.target.src = avatarPlaceholder
+}
+
 function goVideo(id) {
   router.push(`/video/${id}`)
 }
 
 function loadMore() {
   fetchVideos(true)
+}
+
+function resolveCover(item) {
+  if (item.previewUrl) return item.previewUrl
+  if (item.coverUrl) {
+    return `/api/file/cover?url=${encodeURIComponent(item.coverUrl)}`
+  }
+  return placeholderCover
+}
+
+function onCoverError(event) {
+  event.target.src = placeholderCover
 }
 
 function formatCount(n) {
@@ -151,11 +214,30 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
+.avatar-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 96px;
+}
+
 .avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.avatar-upload {
+  font-size: 12px;
+  color: var(--bili-pink);
+  cursor: pointer;
+}
+
+.avatar-upload input {
+  display: none;
 }
 
 .info {

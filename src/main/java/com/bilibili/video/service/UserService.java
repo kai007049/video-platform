@@ -18,4 +18,6 @@ public interface UserService {
     UpProfileVO getUpProfile(Long upId, Long currentUserId);
 
     CreatorStatsVO getCreatorStats(Long userId);
+
+    String updateAvatar(Long userId, org.springframework.web.multipart.MultipartFile file);
 }

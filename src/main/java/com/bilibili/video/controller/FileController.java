@@ -42,6 +42,22 @@ public class FileController {
         }
     }
 
+    @GetMapping("/avatar")
+    @Operation(summary = "头像转发")
+    public ResponseEntity<byte[]> avatar(@RequestParam("url") String objectName) {
+        try (InputStream in = minioUtils.getAvatarStreamByObjectName(objectName)) {
+            byte[] bytes = in.readAllBytes();
+            MediaType mediaType = resolveMediaType(objectName).orElse(MediaType.IMAGE_JPEG);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "max-age=86400")
+                    .contentType(mediaType)
+                    .body(bytes);
+        } catch (Exception e) {
+            log.warn("avatar proxy failed: {}", objectName, e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private Optional<MediaType> resolveMediaType(String url) {
         try {
             return MediaTypeFactory.getMediaType(url);

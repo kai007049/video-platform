@@ -22,9 +22,10 @@
         </button>
         <template v-if="userStore.isLoggedIn">
           <div class="user-area" @click="showUserMenu = !showUserMenu">
-            <img :src="userStore.userInfo?.avatar || defaultAvatar" class="avatar" alt="avatar" />
+            <img :src="resolveAvatar(userStore.userInfo?.avatar)" class="avatar" alt="avatar" @error="onAvatarError" />
             <span class="username">{{ userStore.userInfo?.username }}</span>
             <div v-if="showUserMenu" class="user-menu" @click.stop>
+              <div class="menu-item" @click="goMyProfile">我的主页</div>
               <div class="menu-item" @click="goCreator">个人中心</div>
               <div class="menu-item" @click="handleLogout">退出登录</div>
             </div>
@@ -52,7 +53,7 @@ const router = useRouter()
 const route = useRoute()
 const showUserMenu = ref(false)
 const keyword = ref('')
-const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
+const defaultAvatar = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 
 const theme = ref(localStorage.getItem('theme') || 'light')
 const themeLabel = computed(() => (theme.value === 'dark' ? '亮色' : '暗色'))
@@ -77,10 +78,27 @@ function goCreator() {
   showUserMenu.value = false
 }
 
+function goMyProfile() {
+  if (userStore.userInfo?.id) {
+    router.push(`/user/${userStore.userInfo.id}`)
+  }
+  showUserMenu.value = false
+}
+
 function handleLogout() {
   userStore.logout()
   showUserMenu.value = false
   router.push('/')
+}
+
+function resolveAvatar(avatar) {
+  if (!avatar) return defaultAvatar
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
+function onAvatarError(event) {
+  event.target.src = defaultAvatar
 }
 
 function applyTheme() {

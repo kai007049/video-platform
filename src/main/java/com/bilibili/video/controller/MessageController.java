@@ -45,4 +45,19 @@ public class MessageController {
         messageService.markRead(userId, targetId);
         return Result.success();
     }
+
+    @GetMapping("/conversations")
+    @Operation(summary = "会话列表")
+    public Result<java.util.List<com.bilibili.video.model.vo.MessageConversationVO>> conversations(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return Result.success(messageService.listConversations(userId));
+    }
+
+    @PostMapping("/revoke")
+    @Operation(summary = "撤回私信")
+    public Result<Void> revoke(@RequestParam Long id, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        messageService.revokeMessage(userId, id);
+        return Result.success();
+    }
 }

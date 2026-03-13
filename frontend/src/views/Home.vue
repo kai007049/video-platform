@@ -33,7 +33,7 @@
         <div class="info">
           <h3 class="title">{{ item.title }}</h3>
           <div class="meta" @click.stop="goProfile(item.authorId)">
-            <img :src="item.authorAvatar || defaultAvatar" class="avatar" alt="" />
+            <img :src="resolveAvatar(item.authorAvatar)" class="avatar" alt="" @error="onAvatarError" />
             <span class="author">{{ item.authorName || '用户' }}</span>
           </div>
         </div>
@@ -61,7 +61,7 @@ const hasMore = ref(true)
 const pageSize = 12
 const currentKeyword = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
-const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'
+const defaultAvatar = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 
 const fetchApi = (p) => {
   if (activeTab.value === 'search') {
@@ -137,6 +137,16 @@ function onCoverError(event) {
   event.target.src = placeholderCover
 }
 
+function resolveAvatar(avatar) {
+  if (!avatar) return defaultAvatar
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
+function onAvatarError(event) {
+  event.target.src = defaultAvatar
+}
+
 function formatCount(n) {
   if (!n) return '0'
   if (n >= 10000) return (n / 10000).toFixed(1) + '万'
@@ -144,10 +154,10 @@ function formatCount(n) {
 }
 
 function formatDuration(sec) {
-  if (!sec) return '--:--'
+  if (sec === null || sec === undefined) return '--:--'
   const m = Math.floor(sec / 60)
   const s = sec % 60
-  return `${m}:${String(s).padStart(2, '0')}`
+  return `${String(m)}:${String(s).padStart(2, '0')}`
 }
 
 watch(() => route.query, () => {

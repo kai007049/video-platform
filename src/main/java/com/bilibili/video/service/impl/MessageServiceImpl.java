@@ -7,6 +7,7 @@ import com.bilibili.video.entity.Message;
 import com.bilibili.video.mapper.MessageMapper;
 import com.bilibili.video.model.dto.SendMessageDTO;
 import com.bilibili.video.model.mq.MessageNotifyMessage;
+import com.bilibili.video.model.vo.MessageConversationVO;
 import com.bilibili.video.model.vo.MessageVO;
 import com.bilibili.video.service.MQService;
 import com.bilibili.video.service.MessageService;
@@ -27,6 +28,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageMapper messageMapper;
     private final MQService mqService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final com.bilibili.video.mapper.UserMapper userMapper;
 
     @Override
     public void sendMessage(Long senderId, SendMessageDTO dto) {
@@ -49,18 +51,22 @@ public class MessageServiceImpl implements MessageService {
                 .and(w -> w.eq(Message::getSenderId, userId).eq(Message::getReceiverId, targetId)
                         .or()
                         .eq(Message::getSenderId, targetId).eq(Message::getReceiverId, userId))
-                .orderByDesc(Message::getCreateTime);
+                .orderByAsc(Message::getCreateTime);
         IPage<Message> result = messageMapper.selectPage(pageParam, qw);
         return result.convert(this::toVO);
     }
 
     @Override
     public void markRead(Long userId, Long targetId) {
-        messageMapper.update(null, new LambdaQueryWrapper<Message>()
-                .eq(Message::getReceiverId, userId)
+        Message update = new Message();
+        update.setStatus(1); // 给实体对象设置要更新的字段
+
+        LambdaQueryWrapper<Message> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Message::getReceiverId, userId)
                 .eq(Message::getSenderId, targetId)
-                .eq(Message::getStatus, 0)
-                .set(Message::getStatus, 1));
+                .eq(Message::getStatus, 0);
+
+        messageMapper.update(update, wrapper);
         redisTemplate.delete(UNREAD_KEY + userId);
     }
 
@@ -73,6 +79,52 @@ public class MessageServiceImpl implements MessageService {
                 .eq(Message::getStatus, 0));
         redisTemplate.opsForValue().set(UNREAD_KEY + userId, cnt);
         return cnt;
+    }
+
+    @Override
+    public java.util.List<MessageConversationVO> listConversations(Long userId) {
+        java.util.List<Message> all = messageMapper.selectList(new LambdaQueryWrapper<Message>()
+                .eq(Message::getSenderId, userId)
+                .or()
+                .eq(Message::getReceiverId, userId)
+                .orderByDesc(Message::getCreateTime));
+        java.util.Map<Long, Message> latestMap = new java.util.LinkedHashMap<>();
+        for (Message m : all) {
+            Long targetId = m.getSenderId().equals(userId) ? m.getReceiverId() : m.getSenderId();
+            latestMap.putIfAbsent(targetId, m);
+        }
+        java.util.Map<Long, Long> unreadMap = messageMapper.selectList(new LambdaQueryWrapper<Message>()
+                .eq(Message::getReceiverId, userId)
+                .eq(Message::getStatus, 0))
+                .stream()
+                .collect(java.util.stream.Collectors.groupingBy(Message::getSenderId, java.util.stream.Collectors.counting()));
+        java.util.Map<Long, com.bilibili.video.entity.User> userMap = userMapper.selectBatchIds(latestMap.keySet())
+                .stream()
+                .collect(java.util.stream.Collectors.toMap(com.bilibili.video.entity.User::getId, u -> u));
+        return latestMap.entrySet().stream().map(e -> {
+            Message m = e.getValue();
+            MessageConversationVO vo = new MessageConversationVO();
+            vo.setTargetId(e.getKey());
+            com.bilibili.video.entity.User target = userMap.get(e.getKey());
+            if (target != null) {
+                vo.setTargetName(target.getUsername());
+                vo.setTargetAvatar(target.getAvatar());
+            }
+            vo.setLastContent(m.getContent());
+            vo.setUnread(unreadMap.getOrDefault(e.getKey(), 0L).intValue());
+            vo.setLastTime(m.getCreateTime());
+            return vo;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public void revokeMessage(Long userId, Long messageId) {
+        Message message = messageMapper.selectById(messageId);
+        if (message == null || !message.getSenderId().equals(userId)) {
+            return;
+        }
+        message.setContent("[已撤回]");
+        messageMapper.updateById(message);
     }
 
     private MessageVO toVO(Message message) {

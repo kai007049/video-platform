@@ -75,4 +75,12 @@ public class UserController {
         Long userId = (Long) request.getAttribute("userId");
         return Result.success(userService.getCreatorStats(userId));
     }
+
+    @PostMapping("/avatar")
+    @Operation(summary = "更新头像")
+    public Result<String> updateAvatar(@RequestParam("avatar") org.springframework.web.multipart.MultipartFile avatar,
+                                       HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return Result.success(userService.updateAvatar(userId, avatar));
+    }
 }

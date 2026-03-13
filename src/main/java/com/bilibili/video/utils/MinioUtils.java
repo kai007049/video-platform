@@ -25,6 +25,9 @@ public class MinioUtils {
     @Value("${minio.bucket-cover}")
     private String bucketCover;
 
+    @Value("${minio.bucket-avatar}")
+    private String bucketAvatar;
+
     @Value("${minio.endpoint}")
     private String endpoint;
 
@@ -38,6 +41,10 @@ public class MinioUtils {
 
     public String uploadCover(MultipartFile file) throws Exception {
         return uploadCoverObject(file);
+    }
+
+    public String uploadAvatar(MultipartFile file) throws Exception {
+        return uploadAvatarObject(file);
     }
 
     /**
@@ -101,6 +108,28 @@ public class MinioUtils {
     }
 
     /**
+     * 上传头像 MultipartFile，返回对象名（objectName）
+     */
+    private String uploadAvatarObject(MultipartFile file) throws Exception {
+        ensureBucketExists(bucketAvatar);
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
+        String objectName = UUID.randomUUID() + ext;
+
+        try (InputStream is = file.getInputStream()) {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketAvatar)
+                    .object(objectName)
+                    .stream(is, file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
+        }
+
+        return objectName;
+    }
+
+    /**
      * 从 MinIO 获取视频文件流，用于后端转发播放（解决私有桶浏览器无法直接访问的问题）
      */
     public InputStream getVideoStream(String videoUrl) throws Exception {
@@ -134,6 +163,27 @@ public class MinioUtils {
         return minioClient.getObject(GetObjectArgs.builder()
                 .bucket(bucketCover)
                 .object(objectName)
+                .build());
+    }
+
+    /** 仅允许 avatar 桶对象名，防止任意文件读取 */
+    public InputStream getAvatarStreamByObjectName(String objectName) throws Exception {
+        String[] bucketAndObject = parseBucketAndObject(objectName);
+        if (bucketAndObject == null) {
+            if (objectName == null || !objectName.matches("^[a-zA-Z0-9._-]+$")) {
+                throw new IllegalArgumentException("无效的对象名: " + objectName);
+            }
+            return minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucketAvatar)
+                    .object(objectName)
+                    .build());
+        }
+        if (!bucketAvatar.equals(bucketAndObject[0])) {
+            throw new IllegalArgumentException("无效的对象桶: " + bucketAndObject[0]);
+        }
+        return minioClient.getObject(GetObjectArgs.builder()
+                .bucket(bucketAndObject[0])
+                .object(bucketAndObject[1])
                 .build());
     }
 
@@ -179,15 +229,27 @@ public class MinioUtils {
      */
     //TODO MQ异步删除
     public void deleteCoverByObjectName(String objectName) throws Exception {
-        if (objectName == null || objectName.isBlank()) return;
+        String object = normalizeCoverObject(objectName);
+        if (object == null) return;
         minioClient.removeObject(io.minio.RemoveObjectArgs.builder()
                 .bucket(bucketCover)
-                .object(objectName)
+                .object(object)
                 .build());
     }
 
-
-
+    /**
+     * 兼容 coverUrl（完整URL）和 objectName 两种格式
+     */
+    private String normalizeCoverObject(String value) {
+        if (value == null || value.isBlank()) return null;
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            String[] bucketAndObject = parseBucketAndObject(value);
+            if (bucketAndObject == null) return null;
+            if (!bucketCover.equals(bucketAndObject[0])) return null;
+            return bucketAndObject[1];
+        }
+        return value;
+    }
 
     private void ensureBucketExists(String bucket) {
         try {
