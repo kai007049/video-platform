@@ -1,8 +1,7 @@
 package com.bilibili.video.config;
 
-import com.bilibili.video.websocket.DanmuWebSocketHandler;
+import com.bilibili.video.ws.DanmuWebSocketHandler;
 import com.bilibili.video.ws.MessageWebSocketServer;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;

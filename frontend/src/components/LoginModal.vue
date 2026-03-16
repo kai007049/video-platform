@@ -1,5 +1,11 @@
 <template>
   <div class="modal-overlay" @click.self="close">
+    <transition name="bili-toast">
+      <div v-if="toast.show" class="bili-toast" :class="toast.type">
+        <span class="toast-icon">✓</span>
+        <span class="toast-text">{{ toast.message }}</span>
+      </div>
+    </transition>
     <div class="modal">
       <div class="modal-header">
         <h2>登录</h2>
@@ -42,6 +48,7 @@ const userStore = useUserStore()
 const loading = ref(false)
 const captchaLoading = ref(false)
 const error = ref('')
+const toast = reactive({ show: false, message: '', type: 'success', timer: null })
 const form = reactive({ account: '', password: '', captchaKey: '', captchaValue: '' })
 const captcha = reactive({ imageBase64: '' })
 
@@ -53,6 +60,7 @@ watch(() => props.modelValue, (v) => {
     form.captchaKey = ''
     form.captchaValue = ''
     captcha.imageBase64 = ''
+    hideToast()
     refreshCaptcha()
   }
 })
@@ -67,6 +75,23 @@ function close() {
 function switchToRegister() {
   close()
   router.push({ path: router.currentRoute.value.path, query: { ...router.currentRoute.value.query, register: '1' } })
+}
+
+function showToast(message, type = 'success') {
+  toast.message = message
+  toast.type = type
+  toast.show = true
+  if (toast.timer) clearTimeout(toast.timer)
+  toast.timer = setTimeout(() => {
+    toast.show = false
+    toast.timer = null
+  }, 1600)
+}
+
+function hideToast() {
+  if (toast.timer) clearTimeout(toast.timer)
+  toast.show = false
+  toast.timer = null
 }
 
 async function refreshCaptcha() {
@@ -88,8 +113,11 @@ async function handleSubmit() {
   loading.value = true
   try {
     await userStore.login(form)
-    close()
-    emit('update:modelValue', false)
+    showToast('登录成功', 'success')
+    setTimeout(() => {
+      close()
+      emit('update:modelValue', false)
+    }, 600)
   } catch (e) {
     error.value = e.message || '登录失败'
     await refreshCaptcha()
@@ -108,6 +136,56 @@ async function handleSubmit() {
   align-items: center;
   justify-content: center;
   background: rgba(0,0,0,.5);
+}
+
+.bili-toast {
+  position: fixed;
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #18191c;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  border: 1px solid rgba(0,0,0,.06);
+  z-index: 1200;
+}
+
+.bili-toast.success {
+  border-color: rgba(251,114,153,.35);
+}
+
+.toast-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(251,114,153,.15);
+  color: var(--bili-pink-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bili-toast .toast-text {
+  font-weight: 500;
+}
+
+.bili-toast-enter-active,
+.bili-toast-leave-active {
+  transition: all .2s ease;
+}
+
+.bili-toast-enter-from,
+.bili-toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 
 .modal {

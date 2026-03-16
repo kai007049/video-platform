@@ -103,10 +103,15 @@ public class VideoServiceImpl implements VideoService {
         video.setPlayCount(0L);
         video.setLikeCount(0L);
         video.setSaveCount(0L);
-        videoMapper.insert(video);
-
-        video.setDurationSeconds(0);
+        Integer durationSeconds = null;
+        try {
+            durationSeconds = videoCoverExtractor.extractDurationSeconds(videoUrl);
+        } catch (Exception e) {
+            log.warn("获取视频时长失败: videoUrl={}", videoUrl, e);
+        }
+        video.setDurationSeconds(durationSeconds != null ? durationSeconds : 0);
         video.setIsRecommended(false);
+        videoMapper.insert(video);
 
         mqService.sendVideoProcess(new com.bilibili.video.model.mq.VideoProcessMessage(video.getId(), authorId));
         mqService.sendSearchSync(new com.bilibili.video.model.mq.SearchSyncMessage("video", video.getId(), "create"));
@@ -160,22 +165,23 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public VideoVO getById(Long videoId, Long userId) {
-        return getVideoById(videoId);
+        VideoVO vo = getVideoById(videoId);
+        if (vo != null && userId != null) {
+            vo.setLiked(likeService.isLiked(videoId, userId));
+            vo.setFavorited(favoriteService.isFavorited(userId, videoId));
+            Integer lastWatch = watchHistoryService.getLastWatchSeconds(userId, videoId);
+            if (lastWatch != null) vo.setLastWatchSeconds(lastWatch);
+        }
+        return vo;
     }
 
     @Override
     public VideoVO getVideoById(Long id) {
-        VideoVO vo = videoCacheService.getVideoWithLoader(id, () -> {
-            Video video = videoMapper.selectById(id);
-            if (video == null) {
-                return null;
-            }
-            return toVideoVO(video, null, null, null);
-        });
-        if (vo == null) {
+        Video video = videoMapper.selectById(id);
+        if (video == null) {
             throw new BizException(404, "视频不存在");
         }
-        return vo;
+        return toVideoVO(video, null, null, null);
     }
 
     /**
@@ -333,6 +339,7 @@ public class VideoServiceImpl implements VideoService {
             throw new BizException(403, "无权删除该视频");
         }
         videoMapper.deleteById(videoId);
+        // 清除缓存
         videoCacheService.evictVideoCache(videoId);
         try {
             minioUtils.deleteVideoByUrl(video.getVideoUrl());

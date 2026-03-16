@@ -28,7 +28,7 @@ public class User {
     private String password;
 
     @Schema(description = "头像")
-    @TableField("avator")
+    @TableField("avatar")
     private String avatar;
 
     @Schema(description = "邮箱")

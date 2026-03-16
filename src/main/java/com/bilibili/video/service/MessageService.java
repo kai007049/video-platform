@@ -18,4 +18,6 @@ public interface MessageService {
     java.util.List<MessageConversationVO> listConversations(Long userId);
 
     void revokeMessage(Long userId, Long messageId);
+
+    void clearConversation(Long userId, Long targetId);
 }

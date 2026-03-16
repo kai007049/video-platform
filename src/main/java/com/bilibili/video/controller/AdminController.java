@@ -26,6 +26,7 @@ public class AdminController {
 
     private final VideoService videoService;
     private final UserMapper userMapper;
+    private final com.bilibili.video.utils.MinioUtils minioUtils;
 
     @GetMapping("/videos")
     @Operation(summary = "视频列表")
@@ -73,6 +74,18 @@ public class AdminController {
         res.put("current", page);
         res.put("pages", (total + size - 1) / size);
         return Result.success(res);
+    }
+
+    @PostMapping("/avatar/default")
+    @Operation(summary = "上传默认头像")
+    public Result<String> uploadDefaultAvatar(@RequestParam("avatar") org.springframework.web.multipart.MultipartFile avatar,
+                                              HttpServletRequest request) {
+        ensureAdmin(request);
+        try {
+            return Result.success(minioUtils.uploadDefaultAvatar(avatar));
+        } catch (Exception e) {
+            throw new BizException(500, "上传失败: " + e.getMessage());
+        }
     }
 
     private void ensureAdmin(HttpServletRequest request) {

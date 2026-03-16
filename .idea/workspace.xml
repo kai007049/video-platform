@@ -5,434 +5,44 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/RevokeMessageDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/FollowUserVO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/MessageConversationVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/follow.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/follow.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/LikeVo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/admin.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/message.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/message.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/api/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/LoginModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/LoginModal.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/RegisterModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/RegisterModal.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/stores/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/stores/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/AdminPage.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/AdminPage.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/views/CreatorDashboard.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/CreatorDashboard.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Home.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/views/Layout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Layout.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/VideoPlatformApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/VideoPlatformApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Result.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Result.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/ResultCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/ResultCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/MinioConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/MinioConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/RedisConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/SwaggerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/SwaggerConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/WebMvcConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/WebMvcConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Upload.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/WebSocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/AdminController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Comment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Comment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Danmu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Danmu.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Follow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Follow.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Message.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/VideoLike.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/VideoLike.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/exception/BizException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/exception/BizException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/CommentMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/CommentMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/DanmuMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/DanmuMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/UserMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/UserMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoLikeMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoLikeMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/CommentDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/CommentDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/DanmuDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/DanmuDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/UserRegisterDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/UserRegisterDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/CommentVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/CommentVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/CreatorStatsVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/CreatorStatsVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/LoginVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/LoginVO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/MessageConversationVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/MessageConversationVO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/MessageSummaryVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/MessageSummaryVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/UpProfileVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/UpProfileVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/UserInfoVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/UserInfoVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/CommentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/DanmuService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/DanmuService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/FavoriteService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/FavoriteService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/FollowService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/FollowService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/LikeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/LikeService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MessageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MessageService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/VideoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/VideoService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/WatchHistoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/WatchHistoryService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/CommentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/DanmuServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/DanmuServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FollowServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FollowServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/VideoCacheService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/VideoCacheService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MessageCenterServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MessageCenterServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MessageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MessageServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/UserServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/JwtInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/JwtInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/JwtUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/JwtUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/VideoCoverExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/VideoCoverExtractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/websocket/DanmuWebSocketHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/websocket/DanmuWebSocketHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/websocket/DanmuWebSocketHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/ws/DanmuWebSocketHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/db/migration.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/db/migration.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_47.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_47.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_47.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_47_d.liv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_48.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_48.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_48.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_49.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_49.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_49.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4a.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4a.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4a.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4b.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4b.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4b.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4c.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4c.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4c.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4d.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4d.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4d.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4e.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4e.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4e.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4f.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4f.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4f.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4g.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4g.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4g.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4h.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4h.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4h.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4i.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4i.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4i.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4j.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4j.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4j.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4k.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4k.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/_4k.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/manifest-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/node-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/segments_6j" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/_state/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/_state/retention-leases-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_1.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_1.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_1.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_2.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_2.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_2.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/segments_7" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/_state/state-7.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/_state/retention-leases-18.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1e.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1e.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1e.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1f.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1f.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1f.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i_3.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i_3_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i_3_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1j.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1j.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1j.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1k.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1k.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1k.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1l.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1l.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1l.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1m.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1m.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1m.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1n.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1n.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1n.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1o.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1o.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1o.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_n.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_n.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_n.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/segments_e" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/translog/translog-17.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_1.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_1.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_1.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_2.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_2.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_2.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/_state/retention-leases-52.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55_1.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55_1_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55_1_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57_1.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57_1_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57_1_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h_2.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h_2_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h_2_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k_1.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k_1_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k_1_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/segments_1d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/translog/translog-50.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_1.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_1.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_1.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_2.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_2.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_2.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_3.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_3.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_3.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/translog/translog-9.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/node.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/nodes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/snapshot_cache/segments_4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/es_data/snapshot_cache/write.lock" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" afterDir="false" />
@@ -441,491 +51,45 @@
       <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/config/iam/sts/2V4MO1K5YHSLTHI4ECGW/identity.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mapper/VideoLikeMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mapper/VideoLikeMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mapper/VideoMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mapper/VideoMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/cover/3ce1a0aa-9a71-4a99-80db-3b4a0e601cf6.jpg/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/cover/b193b555-3ffe-4514-9240-69cc755ead06.jpg/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/cover/b973d544-cf5c-4957-89b5-a439b29c03de.jpg/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/video/video/69b0aed4-358e-434a-8942-a6982349319d.mp4/dc97c079-5163-41bd-9142-e89ee9db3233/part.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/video/video/69b0aed4-358e-434a-8942-a6982349319d.mp4/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/video/video/70cec105-672b-43ab-8534-98a627313564.mp4/0d53d4fd-cdf7-42c1-b200-ac8bc5ef988c/part.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/video/video/70cec105-672b-43ab-8534-98a627313564.mp4/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/video/video/da7a8d36-0791-4bb1-ad6a-9e783ad8e4f5.mp4/3b86e059-acf4-4e59-8ff7-c4e63b5ad1bd/part.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/video/video/da7a8d36-0791-4bb1-ad6a-9e783ad8e4f5.mp4/xl.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/VideoPlatformApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/VideoPlatformApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/Constants.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/Constants.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/MqTopics.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/MqTopics.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/Result.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/Result.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/ResultCode.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/ResultCode.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/CacheExecutorConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/CacheExecutorConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/CaffeineConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/CaffeineConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/FfmpegConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/FfmpegConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/MinioConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/MinioConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/RedisConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/RedisConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/SwaggerConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/SwaggerConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/WebMvcConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/WebMvcConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/WebSocketConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/WebSocketConfig.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/AdminController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/AdminController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/CaptchaController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/CaptchaController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/CommentController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/CommentController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/DanmuController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/DanmuController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FavoriteController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FavoriteController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FileController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FileController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FollowController$FollowCountVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FollowController$FollowCountVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FollowController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FollowController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/LikeController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/LikeController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/MessageCenterController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/MessageCenterController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/MessageController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/MessageController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/NotificationController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/NotificationController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/UserController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/VideoController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/VideoController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Category.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Category.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Comment.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Comment.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Danmu.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Danmu.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Favorite.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Favorite.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Follow.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Follow.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Message.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Message.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Notification.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Notification.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Video.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Video.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/VideoCategory.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/VideoCategory.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/VideoLike.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/VideoLike.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/WatchHistory.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/WatchHistory.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/exception/BizException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/exception/BizException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/exception/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/exception/GlobalExceptionHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/CommentMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/CommentMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/DanmuMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/DanmuMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/FavoriteMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/FavoriteMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/FollowMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/FollowMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/MessageMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/MessageMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/NotificationMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/NotificationMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/UserMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/UserMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/VideoLikeMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/VideoLikeMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/VideoMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/VideoMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/WatchHistoryMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/WatchHistoryMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/AccountLoginDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/AccountLoginDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CaptchaLoginDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CaptchaLoginDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CaptchaVerifyDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CaptchaVerifyDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CommentDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CommentDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/DanmuDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/DanmuDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/SendMessageDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/SendMessageDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/UserRegisterDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/UserRegisterDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/VideoUploadDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/VideoUploadDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/DanmuMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/DanmuMessage.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/MessageNotifyMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/MessageNotifyMessage.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/NotifyMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/NotifyMessage.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/SearchSyncMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/SearchSyncMessage.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/VideoDeleteMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/VideoDeleteMessage.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/VideoProcessMessage.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/VideoProcessMessage.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CaptchaVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CaptchaVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CommentVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CommentVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CreatorStatsVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CreatorStatsVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/DanmuVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/DanmuVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/LoginVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/LoginVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageSummaryVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageSummaryVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/NotificationVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/NotificationVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/UpProfileVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/UpProfileVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/UserInfoVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/UserInfoVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/VideoVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/VideoVO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/DanmuConsumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/DanmuConsumer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/MessageNotifyConsumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/MessageNotifyConsumer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/NotifyConsumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/NotifyConsumer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/SearchSyncConsumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/SearchSyncConsumer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/VideoDeleteConsumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/VideoDeleteConsumer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/VideoProcessConsumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/VideoProcessConsumer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/CaptchaService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/CaptchaService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/CommentService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/CommentService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/DanmuService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/DanmuService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/FavoriteService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/FavoriteService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/FollowService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/FollowService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/LikeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/LikeService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MQService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MQService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MessageCenterService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MessageCenterService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageConversationVO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageConversationVO.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MessageService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MessageService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/NotificationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/NotificationService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/SearchService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/SearchService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/UserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/UserService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/VideoCacheService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/VideoCacheService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/VideoService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/VideoService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/WatchHistoryService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/WatchHistoryService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/CaptchaServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/CaptchaServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/CommentServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/CommentServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/DanmuServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/DanmuServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/FavoriteServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/FavoriteServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/FollowServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/FollowServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/LikeServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/LikeServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MessageCenterServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MessageCenterServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MessageServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MessageServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/NotificationServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/NotificationServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/SearchServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/SearchServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/UserServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/UserServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/VideoCacheServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/VideoCacheServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/VideoServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/VideoServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/WatchHistoryServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/WatchHistoryServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/task/PlayCountSyncTask.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/task/PlayCountSyncTask.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/JwtInterceptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/JwtInterceptor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/JwtUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/JwtUtils.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/MinioUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/MinioUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/MyBCr.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/MyBCr.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/VideoCoverExtractor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/VideoCoverExtractor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/websocket/DanmuWebSocketHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/websocket/DanmuWebSocketHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/ws/MessageWebSocketServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/ws/MessageWebSocketServer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/db/migration.sql" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/db/migration.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_47.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_47.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_47.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_47_d.liv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_48.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_48.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_48.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_49.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_49.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_49.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4a.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4a.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4a.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4b.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4b.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4b.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4c.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4c.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4c.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4d.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4d.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4d.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4e.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4e.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4e.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4f.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4f.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4f.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4g.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4g.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4g.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4h.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4h.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4h.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4i.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4i.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4i.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4j.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4j.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4j.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4k.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4k.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/_4k.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/manifest-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/node-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/segments_6j" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/_state/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/-Uj_2cdIQoWx33NfUAo99w/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/29EW9B7WSeGFbnfaYMEFag/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/2BTsLUgdQdG8aOFa1SVbWQ/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/_state/retention-leases-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_1.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_1.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_1.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_2.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_2.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/_2.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/segments_7" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/7dwk6tyeT3ez3U6GHMwCOA/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/BadJbI7vQYOOhBhwLU4ILw/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/EUKYTkTWQYme7c3_LsmlQQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/GMeOlDCfRfGLrHD09igmHg/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/H6YFDY3KSqG3ngNnh9h17w/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/JmJj_y2VTbGabLjhM5yWpA/_state/state-7.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Pwg6MyfiREKOOYP0VIgH0Q/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Qf4N8RTXQx-anvCJNxWMMw/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/QjTnhMasRuy0ZQWCt9Eq9g/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/Uh5sySS3RiCNlIzRhyIFNw/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/_state/retention-leases-18.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1e.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1e.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1e.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1f.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1f.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1f.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i_3.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i_3_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1i_3_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1j.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1j.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1j.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1k.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1k.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1k.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1l.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1l.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1l.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1m.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1m.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1m.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1n.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1n.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1n.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1o.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1o.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_1o.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_n.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_n.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/_n.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/segments_e" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/translog/translog-17.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/YxLsamJySbCpzZACS8W8aw/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZFub61iCRfykOCDXQ5RiXg/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/ZbRegND8QsGIpmAwZmftlQ/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/_oynTay_Q8yjTB-J1T4hJg/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dFCcOOlNRful97_TXQy8-A/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/dippKmA8Rx2gjBGz1de6PQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/index/segments_5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/eg9H53DIRruLEKezRlKCrQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_1.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_1.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_1.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_2.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_2.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/_2.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/g69KnPI_T66DJ23hJDVZ8A/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/translog/translog-6.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/hLPgF7ztSs253GgBUTF-iQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qY15JbU4Tieto23XPO6G6w/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/_state/retention-leases-52.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55_1.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55_1_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_55_1_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57_1.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57_1_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_57_1_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h_2.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h_2_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5h_2_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k_1.fnm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k_1_Lucene90_0.dvd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/_5k_1_Lucene90_0.dvm" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/segments_1d" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/translog/translog-50.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/qs7wbWggSQ2QnwDq6Af7aw/_state/state-5.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/r8iiQviNQfeCc0XKJr-USA/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/rdnPZ-a6TaOnp6Wr13omsQ/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/tQ3W1CVhRiCxvBB0xHkUxw/_state/state-8.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/translog/translog-5.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/unKZnMNDQtm_uqQCNlFa8Q/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/_state/retention-leases-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/_state/state-3.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_0.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_0.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_0.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_1.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_1.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_1.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_2.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_2.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_2.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_3.cfe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_3.cfs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/_3.si" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/segments_6" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/index/write.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/translog/translog-9.tlog" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/0/translog/translog.ckp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/indices/vaL92mG4T6i-djEsU9yJIA/_state/state-4.st" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/node.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/nodes" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/snapshot_cache/segments_4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/es_data/snapshot_cache/write.lock" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage.json/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage.json/xl.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.usage-cache.bin/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/config/iam/sts/2V4MO1K5YHSLTHI4ECGW/identity.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/VideoLikeMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/VideoLikeMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/VideoMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/VideoMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/3ce1a0aa-9a71-4a99-80db-3b4a0e601cf6.jpg/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/b193b555-3ffe-4514-9240-69cc755ead06.jpg/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/b973d544-cf5c-4957-89b5-a439b29c03de.jpg/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/69b0aed4-358e-434a-8942-a6982349319d.mp4/dc97c079-5163-41bd-9142-e89ee9db3233/part.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/69b0aed4-358e-434a-8942-a6982349319d.mp4/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/70cec105-672b-43ab-8534-98a627313564.mp4/0d53d4fd-cdf7-42c1-b200-ac8bc5ef988c/part.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/70cec105-672b-43ab-8534-98a627313564.mp4/xl.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/da7a8d36-0791-4bb1-ad6a-9e783ad8e4f5.mp4/3b86e059-acf4-4e59-8ff7-c4e63b5ad1bd/part.1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/da7a8d36-0791-4bb1-ad6a-9e783ad8e4f5.mp4/xl.meta" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -938,6 +102,9 @@
         <option value="Class" />
       </list>
     </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="gitee/main" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -987,39 +154,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Docker.docker.mysql: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.video-platform [clean].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Spring Boot.VideoPlatformApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;lx&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Java-Project/Bilibili/Video-Platform&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.23665893&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Docker.docker.mysql: Compose 部署.executor": "Run",
+    "Docker.docker: Compose 部署.executor": "Run",
+    "Maven.video-platform [clean].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.VideoPlatformApplication.executor": "Run",
+    "git-widget-placeholder": "lx",
+    "last_opened_file_path": "E:/Java-Project/Bilibili/Video-Platform",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "项目",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.23665893",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -1090,5 +257,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="删除垃圾文件提交" />
+    <option name="LAST_COMMIT_MESSAGE" value="删除垃圾文件提交" />
   </component>
 </project>

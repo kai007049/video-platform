@@ -1,4 +1,4 @@
-package com.bilibili.video.websocket;
+package com.bilibili.video.ws;
 
 import com.bilibili.video.model.dto.DanmuDTO;
 import com.bilibili.video.entity.User;

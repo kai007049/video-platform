@@ -43,6 +43,15 @@
     </div>
 
     <div v-if="tab === 'users'" class="section">
+      <div class="default-avatar">
+        <h3>默认头像</h3>
+        <p>上传到 `avatar/default/` 目录，用于新用户随机头像。</p>
+        <label class="upload-btn" :class="{ disabled: uploadingAvatar }">
+          <input type="file" accept="image/*" @change="onDefaultAvatarChange" />
+          {{ uploadingAvatar ? '上传中...' : '上传默认头像' }}
+        </label>
+      </div>
+
       <table class="table">
         <thead>
           <tr>
@@ -72,7 +81,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { getAdminVideos, getAdminUsers, setVideoRecommend } from '../api/admin'
+import { getAdminVideos, getAdminUsers, setVideoRecommend, uploadDefaultAvatar } from '../api/admin'
 
 const tab = ref('videos')
 const videos = ref([])
@@ -82,6 +91,7 @@ const userPage = ref(1)
 const videoPages = ref(1)
 const userPages = ref(1)
 const error = ref('')
+const uploadingAvatar = ref(false)
 
 async function loadVideos() {
   try {
@@ -111,6 +121,27 @@ async function toggleRecommend(v) {
     v.isRecommended = !v.isRecommended
   } catch (e) {
     error.value = e.message || '操作失败'
+  }
+}
+
+async function onDefaultAvatarChange(event) {
+  const file = event.target.files && event.target.files[0]
+  event.target.value = ''
+  if (!file || uploadingAvatar.value) return
+  if (!file.type.startsWith('image/')) {
+    error.value = '请选择图片文件'
+    return
+  }
+  try {
+    uploadingAvatar.value = true
+    const formData = new FormData()
+    formData.append('avatar', file)
+    await uploadDefaultAvatar(formData)
+    error.value = ''
+  } catch (e) {
+    error.value = e.message || '上传失败'
+  } finally {
+    uploadingAvatar.value = false
   }
 }
 
@@ -163,6 +194,47 @@ h2 {
 
 .tabs {
   margin-bottom: 24px;
+}
+
+.default-avatar {
+  background: #fff7f7;
+  border: 1px solid #f5c2c7;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.default-avatar h3 {
+  margin-bottom: 6px;
+  color: #c0392b;
+}
+
+.default-avatar p {
+  margin-bottom: 12px;
+  color: #b35d5d;
+  font-size: 13px;
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.upload-btn input {
+  display: none;
+}
+
+.upload-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .tabs button {

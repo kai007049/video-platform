@@ -39,6 +39,15 @@
                 </div>
                 <div class="subtitle">{{ item.lastContent }}</div>
               </div>
+              <div class="actions" @click.stop>
+                <button class="more-btn" @click="toggleActionMenu(item)">⋯</button>
+                <div
+                  v-if="actionMenu.visible && actionMenu.target?.targetId === item.targetId"
+                  class="action-menu"
+                >
+                  <button class="menu-item" @click="handleClearConversation(item)">清空聊天记录</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -98,7 +107,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import {
@@ -108,6 +117,7 @@ import {
   sendMessageApi,
   readMessageApi,
   revokeMessageApi,
+  clearConversationApi,
   getNotifications,
   readNotificationApi
 } from '../api/message'
@@ -125,6 +135,7 @@ const messageItems = ref([])
 const messageText = ref('')
 const notifications = ref([])
 const systemNotifications = ref([])
+const actionMenu = ref({ visible: false, target: null })
 
 async function loadSummary() {
   summary.value = await getMessageSummary()
@@ -170,6 +181,19 @@ async function loadNotifications() {
 async function markNotificationRead(id) {
   await readNotificationApi(id)
   await loadNotifications()
+  await loadSummary()
+}
+
+async function clearConversation(item) {
+  if (!item?.targetId) return
+  if (!confirm('确定要清空该会话的聊天记录吗？')) return
+  await clearConversationApi(item.targetId)
+  if (currentTarget.value?.targetId === item.targetId) {
+    currentTarget.value = null
+    messages.value = []
+    messageItems.value = []
+  }
+  await loadConversations()
   await loadSummary()
 }
 
@@ -223,6 +247,30 @@ function onAvatarError(event) {
   event.target.src = avatarPlaceholder
 }
 
+function toggleActionMenu(item) {
+  if (actionMenu.value.visible && actionMenu.value.target?.targetId === item.targetId) {
+    actionMenu.value.visible = false
+    actionMenu.value.target = null
+    return
+  }
+  actionMenu.value = {
+    visible: true,
+    target: item
+  }
+}
+
+function closeActionMenu() {
+  if (actionMenu.value.visible) {
+    actionMenu.value.visible = false
+    actionMenu.value.target = null
+  }
+}
+
+async function handleClearConversation(item) {
+  closeActionMenu()
+  await clearConversation(item)
+}
+
 async function initFromRoute() {
   const targetId = route.query.targetId ? Number(route.query.targetId) : null
   const targetName = route.query.targetName
@@ -246,6 +294,13 @@ onMounted(async () => {
   await loadConversations()
   await loadNotifications()
   await initFromRoute()
+  document.addEventListener('click', closeActionMenu)
+  document.addEventListener('scroll', closeActionMenu, true)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeActionMenu)
+  document.removeEventListener('scroll', closeActionMenu, true)
 })
 </script>
 
@@ -307,19 +362,97 @@ onMounted(async () => {
 
 .list {
   border-right: 1px solid var(--border-color);
+  position: relative;
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 100;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  border-radius: 8px;
+  padding: 6px;
+  min-width: 140px;
+}
+
+.context-menu .menu-item {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  border-radius: 6px;
+}
+
+.context-menu .menu-item:hover {
+  background: var(--bg-gray);
 }
 
 .list-item {
   display: flex;
+  align-items: center;
   gap: 10px;
   padding: 10px;
   border-radius: 8px;
   cursor: pointer;
+  position: relative;
 }
 
 .list-item.active,
 .list-item:hover {
   background: rgba(251,114,153,.1);
+}
+
+.actions {
+  margin-left: auto;
+  position: relative;
+}
+
+.more-btn {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  color: #9aa0a6;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.more-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.action-menu {
+  position: absolute;
+  right: 0;
+  top: 28px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  min-width: 140px;
+  z-index: 5;
+  padding: 6px 0;
+}
+
+.action-menu .menu-item {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.action-menu .menu-item:hover {
+  background: var(--bg-gray);
 }
 
 .avatar {

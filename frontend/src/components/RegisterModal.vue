@@ -1,5 +1,11 @@
 <template>
   <div class="modal-overlay" @click.self="close">
+    <transition name="bili-toast">
+      <div v-if="toast.show" class="bili-toast" :class="toast.type">
+        <span class="toast-icon">✓</span>
+        <span class="toast-text">{{ toast.message }}</span>
+      </div>
+    </transition>
     <div class="modal">
       <div class="modal-header">
         <h2>注册</h2>
@@ -34,6 +40,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 const error = ref('')
+const toast = reactive({ show: false, message: '', type: 'success', timer: null })
 const form = reactive({ username: '', password: '' })
 
 watch(() => props.modelValue, (v) => {
@@ -41,6 +48,7 @@ watch(() => props.modelValue, (v) => {
     error.value = ''
     form.username = ''
     form.password = ''
+    hideToast()
   }
 })
 
@@ -56,14 +64,34 @@ function switchToLogin() {
   router.push({ path: router.currentRoute.value.path, query: { ...router.currentRoute.value.query, login: '1' } })
 }
 
+function showToast(message, type = 'success') {
+  toast.message = message
+  toast.type = type
+  toast.show = true
+  if (toast.timer) clearTimeout(toast.timer)
+  toast.timer = setTimeout(() => {
+    toast.show = false
+    toast.timer = null
+  }, 1600)
+}
+
+function hideToast() {
+  if (toast.timer) clearTimeout(toast.timer)
+  toast.show = false
+  toast.timer = null
+}
+
 async function handleSubmit() {
   error.value = ''
   loading.value = true
   try {
     await userStore.register(form)
+    showToast('注册成功，请登录', 'success')
     close()
-    await userStore.login({ username: form.username, password: form.password })
     emit('update:modelValue', false)
+    setTimeout(() => {
+      router.push({ path: router.currentRoute.value.path, query: { ...router.currentRoute.value.query, login: '1' } })
+    }, 500)
   } catch (e) {
     error.value = e.message || '注册失败'
   } finally {
@@ -81,6 +109,56 @@ async function handleSubmit() {
   align-items: center;
   justify-content: center;
   background: rgba(0,0,0,.5);
+}
+
+.bili-toast {
+  position: fixed;
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #18191c;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  border: 1px solid rgba(0,0,0,.06);
+  z-index: 1200;
+}
+
+.bili-toast.success {
+  border-color: rgba(251,114,153,.35);
+}
+
+.toast-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(251,114,153,.15);
+  color: var(--bili-pink-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bili-toast .toast-text {
+  font-weight: 500;
+}
+
+.bili-toast-enter-active,
+.bili-toast-leave-active {
+  transition: all .2s ease;
+}
+
+.bili-toast-enter-from,
+.bili-toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 
 .modal {

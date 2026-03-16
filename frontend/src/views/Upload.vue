@@ -74,6 +74,7 @@ async function submit() {
     fd.append('title', form.title.trim())
     if (form.description.trim()) fd.append('description', form.description.trim())
     const res = await uploadVideo(fd)
+    alert('投稿成功')
     router.push(`/video/${res.id}`)
   } catch (e) {
     error.value = e.message || '上传失败'

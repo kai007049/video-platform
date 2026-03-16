@@ -47,6 +47,28 @@ public class MinioUtils {
         return uploadAvatarObject(file);
     }
 
+    public String uploadDefaultAvatar(MultipartFile file) throws Exception {
+        ensureBucketExists(bucketAvatar);
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".png";
+        String baseName = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(0, originalFilename.lastIndexOf("."))
+                : UUID.randomUUID().toString();
+        String objectName = "default/" + baseName + ext;
+
+        try (InputStream is = file.getInputStream()) {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketAvatar)
+                    .object(objectName)
+                    .stream(is, file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
+        }
+
+        return objectName;
+    }
+
     /**
      * 上传封面文件，返回对象名（objectName），不返回可访问URL
      */
@@ -93,7 +115,7 @@ public class MinioUtils {
         String originalFilename = file.getOriginalFilename();
         String ext = originalFilename != null && originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
-        String objectName = UUID.randomUUID() + ext;
+        String objectName = "user/" + UUID.randomUUID() + ext;
 
         try (InputStream is = file.getInputStream()) {
             minioClient.putObject(PutObjectArgs.builder()
@@ -170,7 +192,7 @@ public class MinioUtils {
     public InputStream getAvatarStreamByObjectName(String objectName) throws Exception {
         String[] bucketAndObject = parseBucketAndObject(objectName);
         if (bucketAndObject == null) {
-            if (objectName == null || !objectName.matches("^[a-zA-Z0-9._-]+$")) {
+            if (!isSafeAvatarObject(objectName)) {
                 throw new IllegalArgumentException("无效的对象名: " + objectName);
             }
             return minioClient.getObject(GetObjectArgs.builder()
@@ -181,6 +203,9 @@ public class MinioUtils {
         if (!bucketAvatar.equals(bucketAndObject[0])) {
             throw new IllegalArgumentException("无效的对象桶: " + bucketAndObject[0]);
         }
+        if (!isSafeAvatarObject(bucketAndObject[1])) {
+            throw new IllegalArgumentException("无效的对象名: " + bucketAndObject[1]);
+        }
         return minioClient.getObject(GetObjectArgs.builder()
                 .bucket(bucketAndObject[0])
                 .object(bucketAndObject[1])
@@ -190,6 +215,10 @@ public class MinioUtils {
     /** 从对象URL解析 bucket 和 object，格式: http(s)://host:9000/bucket/object/path */
     private String[] parseBucketAndObject(String objectUrl) {
         if (objectUrl == null || objectUrl.isBlank()) {
+            return null;
+        }
+        // 只解析完整 URL，避免把 "default/xxx" 这种对象名误判为 URL
+        if (!(objectUrl.startsWith("http://") || objectUrl.startsWith("https://"))) {
             return null;
         }
         try {
@@ -249,6 +278,14 @@ public class MinioUtils {
             return bucketAndObject[1];
         }
         return value;
+    }
+
+    private boolean isSafeAvatarObject(String objectName) {
+        if (objectName == null || objectName.isBlank()) return false;
+        if (!(objectName.startsWith("default/") || objectName.startsWith("user/"))) return false;
+        if (objectName.contains("..") || objectName.contains("\\") || objectName.startsWith("/")) return false;
+        if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
+        return true;
     }
 
     private void ensureBucketExists(String bucket) {

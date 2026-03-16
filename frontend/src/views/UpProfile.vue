@@ -19,14 +19,19 @@
           <span>粉丝 {{ formatCount(profile.fanCount) }}</span>
           <span>关注 {{ formatCount(profile.followingCount) }}</span>
         </div>
-        <button
+        <div
           v-if="userStore.isLoggedIn && profile.id !== userStore.userInfo?.id"
-          class="btn-follow"
-          :class="{ followed: profile.followed }"
-          @click="toggleFollow"
+          class="action-group"
         >
-          {{ profile.followed ? '已关注' : '+ 关注' }}
-        </button>
+          <button
+            class="btn-follow"
+            :class="{ followed: profile.followed }"
+            @click="toggleFollow"
+          >
+            {{ profile.followed ? '已关注' : '+ 关注' }}
+          </button>
+          <button class="btn-message" @click="goMessage">发消息</button>
+        </div>
       </div>
     </div>
     <div class="video-section">
@@ -144,6 +149,7 @@ async function onAvatarChange(event) {
       userStore.userInfo.avatar = objectName
       sessionStorage.setItem('userInfo', JSON.stringify(userStore.userInfo))
     }
+    alert('头像更新成功')
   } catch (e) {
     console.error(e)
     alert('头像上传失败')
@@ -162,6 +168,17 @@ function onAvatarError(event) {
 
 function goVideo(id) {
   router.push(`/video/${id}`)
+}
+
+function goMessage() {
+  if (!profile.value?.id) return
+  router.push({
+    path: '/message',
+    query: {
+      targetId: profile.value.id,
+      targetName: profile.value.username || '用户'
+    }
+  })
 }
 
 function loadMore() {
@@ -257,6 +274,12 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
+.action-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .btn-follow {
   padding: 8px 24px;
   font-size: 14px;
@@ -270,6 +293,20 @@ onMounted(() => {
 .btn-follow.followed {
   background: var(--bg-gray);
   color: var(--text-secondary);
+}
+
+.btn-message {
+  padding: 8px 20px;
+  font-size: 14px;
+  color: var(--bili-pink);
+  background: #fff;
+  border: 1px solid var(--bili-pink);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-message:hover {
+  background: rgba(251,114,153,.08);
 }
 
 .video-section h3 {

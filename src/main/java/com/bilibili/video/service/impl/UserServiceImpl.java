@@ -38,6 +38,15 @@ public class UserServiceImpl implements UserService {
     private final FollowService followService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtUtils jwtUtils;
+    private static final String[] DEFAULT_AVATARS = {
+            "default/微信图片_20260316115333.jpg",
+            "default/微信图片_20260316115347.jpg",
+            "default/微信图片_20260316115405.jpg",
+            "default/微信图片_20260316115406.jpg",
+            "default/微信图片_202603161154061.jpg",
+            "default/微信图片_202603161154062.jpg"
+    };
+
     private final CaptchaService captchaService;
     private final com.bilibili.video.utils.MinioUtils minioUtils;
 
@@ -51,6 +60,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setPassword(MyBCr.encode(dto.getPassword())); // 用自己封装的加密
+        user.setAvatar(randomDefaultAvatar());
         userMapper.insert(user);
     }
 
@@ -146,6 +156,11 @@ public class UserServiceImpl implements UserService {
         }
         return userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .eq(User::getUsername, trimmed));
+    }
+
+    private String randomDefaultAvatar() {
+        int idx = java.util.concurrent.ThreadLocalRandom.current().nextInt(DEFAULT_AVATARS.length);
+        return DEFAULT_AVATARS[idx];
     }
 
     private UserInfoVO toUserInfoVO(User user) {

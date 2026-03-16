@@ -8,9 +8,17 @@
         <nav class="top-nav">
           <router-link class="top-nav-item" to="/">直播</router-link>
           <router-link class="top-nav-item" :class="{ active: $route.path === '/' }" to="/">推荐</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/message' }" to="/message">热门</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/creator' }" to="/creator">追番</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/upload' }" to="/upload">影视</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/message' }" to="/message">消息</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/creator' }" to="/creator">创作者中心</router-link>
+          <router-link class="top-nav-item" :class="{ active: $route.path === '/upload' }" to="/upload">投稿</router-link>
+          <router-link
+            v-if="userStore.userInfo?.isAdmin"
+            class="top-nav-item admin-link"
+            :class="{ active: $route.path === '/admin' }"
+            to="/admin"
+          >
+            管理面板
+          </router-link>
         </nav>
       </div>
 
@@ -21,8 +29,12 @@
         </div>
         <template v-if="userStore.isLoggedIn">
           <div class="user-area" @click="showUserMenu = !showUserMenu">
-            <img :src="userStore.userInfo?.avatar || defaultAvatar" class="avatar" alt="avatar" />
+            <img :src="resolveAvatar(userStore.userInfo?.avatar)" class="avatar" alt="avatar" />
             <div v-if="showUserMenu" class="user-menu" @click.stop>
+              <label class="menu-item avatar-upload" :class="{ disabled: isUploadingAvatar }">
+                <input type="file" accept="image/*" @change="onAvatarChange" :disabled="isUploadingAvatar" />
+                {{ isUploadingAvatar ? '上传中...' : '修改头像' }}
+              </label>
               <div class="menu-item" @click="goCreator">个人中心</div>
               <div class="menu-item" @click="handleLogout">退出登录</div>
             </div>
@@ -64,13 +76,52 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { updateAvatar } from '../api/user'
 
 const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
 const showUserMenu = ref(false)
 const keyword = ref('')
-const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
+const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
+const isUploadingAvatar = ref(false)
+const maxAvatarSize = 2 * 1024 * 1024
+
+function resolveAvatar(avatar) {
+  if (!avatar) return avatarPlaceholder
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
+async function onAvatarChange(event) {
+  const file = event.target.files && event.target.files[0]
+  event.target.value = ''
+  if (!file || isUploadingAvatar.value) return
+  if (!file.type.startsWith('image/')) {
+    alert('请选择图片文件')
+    return
+  }
+  if (file.size > maxAvatarSize) {
+    alert('头像不能超过 2MB')
+    return
+  }
+  try {
+    isUploadingAvatar.value = true
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const objectName = await updateAvatar(formData)
+    if (userStore.userInfo) {
+      userStore.userInfo.avatar = objectName
+      sessionStorage.setItem('userInfo', JSON.stringify(userStore.userInfo))
+    }
+    alert('头像更新成功')
+  } catch (e) {
+    console.error(e)
+    alert('头像上传失败')
+  } finally {
+    isUploadingAvatar.value = false
+  }
+}
 
 onMounted(() => {
   if (userStore.isLoggedIn && !userStore.userInfo) {
@@ -170,6 +221,20 @@ function goSearch() {
   background: var(--bili-pink);
 }
 
+.admin-link {
+  color: #e53935;
+  font-weight: 600;
+}
+
+.admin-link:hover,
+.admin-link.active {
+  color: #c62828;
+}
+
+.admin-link.active::after {
+  background: #c62828;
+}
+
 .nav-right {
   display: flex;
   align-items: center;
@@ -258,6 +323,15 @@ function goSearch() {
 
 .menu-item:hover {
   background: var(--bg-gray);
+}
+
+.avatar-upload input {
+  display: none;
+}
+
+.avatar-upload.disabled {
+  color: var(--text-secondary);
+  cursor: not-allowed;
 }
 
 .main {

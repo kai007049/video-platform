@@ -60,4 +60,12 @@ public class MessageController {
         messageService.revokeMessage(userId, id);
         return Result.success();
     }
+
+    @PostMapping("/clear")
+    @Operation(summary = "清空会话")
+    public Result<Void> clear(@RequestParam Long targetId, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        messageService.clearConversation(userId, targetId);
+        return Result.success();
+    }
 }
