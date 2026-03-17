@@ -4,251 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="增加管理员管理面板、新注册用户默认头像、视频弹幕等">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/RedisConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/admin.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/admin.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/message.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/message.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/AdminPage.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/AdminPage.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Layout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Layout.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Upload.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/MqTopics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/MqTopics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/RedisConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/WebMvcConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/config/WebMvcConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FavoriteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FavoriteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageCenterController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageCenterController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Message.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/DanmuConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/DanmuConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/MessageNotifyConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/MessageNotifyConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/NotifyConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/NotifyConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/SearchSyncConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/SearchSyncConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoDeleteConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoDeleteConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MQService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MQService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MessageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MessageService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/CommentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MessageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MessageServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoCacheServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoCacheServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/JwtInterceptor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage.json/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/.usage.json/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/minio_data/.minio.sys/tmp/f80cb499-f881-4963-b856-6a5fe834eb88" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/VideoPlatformApplication.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/Constants.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/MqTopics.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/Result.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/common/ResultCode.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/CacheExecutorConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/CaffeineConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/FfmpegConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/MinioConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/RedisConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/SwaggerConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/WebMvcConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/config/WebSocketConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/AdminController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/CaptchaController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/CommentController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/DanmuController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FavoriteController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FileController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FollowController$FollowCountVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/FollowController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/LikeController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/MessageCenterController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/MessageController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/NotificationController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/UserController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/controller/VideoController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Category.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Comment.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Danmu.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Favorite.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Follow.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Message.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Notification.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/User.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/Video.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/VideoCategory.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/VideoLike.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/entity/WatchHistory.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/exception/BizException.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/exception/GlobalExceptionHandler.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/CommentMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/DanmuMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/FavoriteMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/FollowMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/MessageMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/NotificationMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/UserMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/VideoLikeMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/VideoMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mapper/WatchHistoryMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/AccountLoginDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CaptchaLoginDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CaptchaVerifyDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/CommentDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/DanmuDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/RevokeMessageDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/SendMessageDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/UserRegisterDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/dto/VideoUploadDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/DanmuMessage.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/MessageNotifyMessage.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/NotifyMessage.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/SearchSyncMessage.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/VideoDeleteMessage.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/mq/VideoProcessMessage.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CaptchaVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CommentVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/CreatorStatsVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/DanmuVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/FollowUserVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/LikeVo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/LoginVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageConversationVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageSummaryVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/MessageVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/NotificationVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/UpProfileVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/UserInfoVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/model/vo/VideoVO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/DanmuConsumer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/MessageNotifyConsumer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/NotifyConsumer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/SearchSyncConsumer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/VideoDeleteConsumer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/mq/VideoProcessConsumer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/CaptchaService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/CommentService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/DanmuService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/FavoriteService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/FollowService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/LikeService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MQService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MessageCenterService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/MessageService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/NotificationService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/SearchService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/UserService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/VideoCacheService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/VideoService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/WatchHistoryService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/CaptchaServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/CommentServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/DanmuServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/FavoriteServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/FollowServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/LikeServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MessageCenterServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MessageServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/NotificationServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/SearchServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/UserServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/VideoCacheServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/VideoServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/WatchHistoryServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/task/PlayCountSyncTask.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/JwtInterceptor.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/JwtUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/MinioUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/MyBCr.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/utils/VideoCoverExtractor.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/websocket/DanmuWebSocketHandler.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/ws/MessageWebSocketServer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/db/migration.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.bloomcycle.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage-cache.bin.bkp/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage-cache.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/.usage.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.metadata.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.usage-cache.bin.bkp/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/avatar/.usage-cache.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.metadata.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin.bkp/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/30db6a73-0a38-40dd-81ed-a4d05893c79e/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/cover/.usage-cache.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.metadata.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin.bkp/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/buckets/video/.usage-cache.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/config/config.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/config/iam/format.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/config/iam/sts/OHX0G5C2KEVNZLM9S2YB/identity.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/config/iam/sts/OWJ2R9K7PXFU01NKCKYC/identity.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/config/iam/sts/TA69FGUCLFB961RSKKEY/identity.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/format.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/pool.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/.minio.sys/tmp/f80cb499-f881-4963-b856-6a5fe834eb88" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/1f1e3c13-068f-4234-9a1e-1cdb9656ceda.jpg/625ee20e-7cfd-4924-899d-4cfe36363607/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/1f1e3c13-068f-4234-9a1e-1cdb9656ceda.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/4def3b0a-86a0-4103-8658-3f20b378bfdb.png/e5b887a6-9363-4628-9492-107e45125e68/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/4def3b0a-86a0-4103-8658-3f20b378bfdb.png/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/75db5b7c-348f-47c0-81e8-0a2e5120e388.png/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/86190fc7-4553-431f-9563-056d20219759.jpg/652e87fa-0907-49d6-a2ba-3d317afa87bf/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/86190fc7-4553-431f-9563-056d20219759.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/avatar/dca5d079-3230-4641-9c01-67033e0235e0.png/2470aa76-40eb-4368-a790-42b0b80f4f0e/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/avatar/dca5d079-3230-4641-9c01-67033e0235e0.png/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/c3962b06-3199-4513-9936-2ffeb2676d56.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/d5364524-ec5d-477e-90b2-b32407b577db.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/default/微信图片_20260316115333.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/default/微信图片_20260316115347.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/default/微信图片_20260316115405.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/default/微信图片_20260316115406.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/default/微信图片_202603161154061.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/avatar/default/微信图片_202603161154062.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/19b49f6d-13ee-4ecf-ad8f-dc2cd6805061.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/1a244af6-510d-42e3-9e21-833a3a410393.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/b551f747-1355-477c-97bf-c3c67fe8ab4a.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/cover/cb27bcdc-61a2-4a68-80ba-840b835c75ec.jpg/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/10910c97-7abb-4579-8122-a00e81dd1b9d.mp4/36691b8c-3c2f-49ae-92a5-f9c61fba29b6/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/10910c97-7abb-4579-8122-a00e81dd1b9d.mp4/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/45147abc-fe32-4530-8f6a-5afca5cd50cd.mp4/21c1aa6a-cf71-4166-b2d6-a609da06cc9c/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/45147abc-fe32-4530-8f6a-5afca5cd50cd.mp4/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/4b396c58-c0cd-4b07-ac33-6ba3027d3090.mp4/5a918fb3-09ba-4cfe-9f66-f688c00dfdfb/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/4b396c58-c0cd-4b07-ac33-6ba3027d3090.mp4/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/86ca9c10-e806-414e-a813-d71553f5a044.mp4/e202cf30-7caf-4263-b04d-05114040fa4a/part.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/minio_data/video/video/86ca9c10-e806-414e-a813-d71553f5a044.mp4/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/VideoLikeMapper.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/VideoMapper.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/schema.sql" beforeDir="false" />
+    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="缓存、头像、消息队列完善">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -316,43 +73,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Docker.docker.elasticsearch: Compose 部署.executor": "Run",
-    "Docker.docker.kibana: Compose 部署.executor": "Run",
-    "Docker.docker.minio: Compose 部署.executor": "Run",
-    "Docker.docker.mysql: Compose 部署.executor": "Run",
-    "Docker.docker.redis: Compose 部署.executor": "Run",
-    "Docker.docker: Compose 部署.executor": "Run",
-    "Maven.video-platform [clean].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.VideoPlatformApplication.executor": "Run",
-    "git-widget-placeholder": "lx",
-    "last_opened_file_path": "E:/Java-Project/Bilibili/Video-Platform",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "项目",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.23665893",
-    "settings.editor.selected.configurable": "MavenSettings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Docker.docker.elasticsearch: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker.kibana: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker.minio: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker.mysql: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker.redis: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.docker: Compose 部署.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.video-platform [clean].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.VideoPlatformApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;lx&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Java-Project/Bilibili/Video-Platform&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.23665893&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -477,6 +234,7 @@
       <workItem from="1773391515669" duration="343000" />
       <workItem from="1773391865982" duration="3587000" />
       <workItem from="1773747132792" duration="1872000" />
+      <workItem from="1773756986334" duration="119000" />
     </task>
     <task id="LOCAL-00001" summary="增加管理员管理面板、新注册用户默认头像、视频弹幕等">
       <option name="closed" value="true" />
@@ -494,7 +252,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773646279797</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="缓存、头像、消息队列完善">
+      <option name="closed" value="true" />
+      <created>1773757027994</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1773757027994</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -513,7 +279,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="删除垃圾文件提交" />
-    <option name="LAST_COMMIT_MESSAGE" value="删除垃圾文件提交" />
+    <MESSAGE value="缓存、头像、消息队列完善" />
+    <option name="LAST_COMMIT_MESSAGE" value="缓存、头像、消息队列完善" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
