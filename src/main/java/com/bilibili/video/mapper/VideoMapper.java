@@ -16,4 +16,7 @@ public interface VideoMapper extends BaseMapper<Video> {
 
     @Update("update video set save_count = save_count + #{count} where id = #{videoId}")
     int incrementSaveCount(@Param("videoId") Long videoId,@Param("count") Long count);
+
+    @Update("update video set comment_count = comment_count + #{count} where id = #{videoId}")
+    int incrementCommentCount(@Param("videoId") Long videoId, @Param("count") Long count);
 }

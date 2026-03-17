@@ -3,6 +3,7 @@ package com.bilibili.video.controller;
 import com.bilibili.video.common.Result;
 import com.bilibili.video.service.FollowService;
 import com.bilibili.video.model.vo.FollowUserVO;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,7 @@ public class FollowController {
     @PostMapping("/{userId}")
     @Operation(summary = "关注")
     public Result<Void> follow(@PathVariable Long userId, HttpServletRequest request) {
-        Long followerId = (Long) request.getAttribute("userId");
+        Long followerId = UserContext.get();
         followService.follow(followerId, userId);
         return Result.success();
     }
@@ -28,7 +29,7 @@ public class FollowController {
     @DeleteMapping("/{userId}")
     @Operation(summary = "取关")
     public Result<Void> unfollow(@PathVariable Long userId, HttpServletRequest request) {
-        Long followerId = (Long) request.getAttribute("userId");
+        Long followerId = UserContext.get();
         followService.unfollow(followerId, userId);
         return Result.success();
     }
@@ -36,7 +37,7 @@ public class FollowController {
     @GetMapping("/check/{userId}")
     @Operation(summary = "是否已关注")
     public Result<Boolean> isFollowing(@PathVariable Long userId, HttpServletRequest request) {
-        Long followerId = getUserIdNullable(request);
+        Long followerId = UserContext.get();
         return Result.success(followerId != null && followService.isFollowing(followerId, userId));
     }
 
@@ -51,20 +52,15 @@ public class FollowController {
     @GetMapping("/following/{userId}")
     @Operation(summary = "关注列表")
     public Result<java.util.List<FollowUserVO>> following(@PathVariable Long userId, HttpServletRequest request) {
-        Long currentUserId = getUserIdNullable(request);
+        Long currentUserId = UserContext.get();
         return Result.success(followService.getFollowingList(userId, currentUserId));
     }
 
     @GetMapping("/fans/{userId}")
     @Operation(summary = "粉丝列表")
     public Result<java.util.List<FollowUserVO>> fans(@PathVariable Long userId, HttpServletRequest request) {
-        Long currentUserId = getUserIdNullable(request);
+        Long currentUserId = UserContext.get();
         return Result.success(followService.getFanList(userId, currentUserId));
-    }
-
-    private Long getUserIdNullable(HttpServletRequest request) {
-        Object attr = request.getAttribute("userId");
-        return attr != null ? (Long) attr : null;
     }
 
     public record FollowCountVO(long followingCount, long fanCount) {}

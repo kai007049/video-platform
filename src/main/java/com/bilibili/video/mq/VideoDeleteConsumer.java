@@ -23,8 +23,10 @@ public class VideoDeleteConsumer implements RocketMQListener<VideoDeleteMessage>
     public void onMessage(VideoDeleteMessage message) {
         log.info("[MQ] 删除视频资源: {}", message);
         try {
+            // 删除对象存储中的视频与封面资源
             minioUtils.deleteVideoByUrl(message.getVideoUrl());
             minioUtils.deleteCoverByObjectName(message.getCoverObject());
+            // 清理缓存，避免前端继续读到已删除的数据
             videoCacheService.evictVideoCache(message.getVideoId());
         } catch (Exception e) {
             log.error("[MQ] 删除资源失败: {}", message, e);

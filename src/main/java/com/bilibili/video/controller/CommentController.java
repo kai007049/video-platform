@@ -4,6 +4,7 @@ import com.bilibili.video.common.Result;
 import com.bilibili.video.model.dto.CommentDTO;
 import com.bilibili.video.model.vo.CommentVO;
 import com.bilibili.video.service.CommentService;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +34,7 @@ public class CommentController {
     public Result<CommentVO> add(
             @Valid @RequestBody CommentDTO dto,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(commentService.add(dto, userId));
     }
 

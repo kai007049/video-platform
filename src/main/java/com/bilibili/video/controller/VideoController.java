@@ -8,6 +8,7 @@ import com.bilibili.video.exception.BizException;
 import com.bilibili.video.service.VideoService;
 import com.bilibili.video.service.WatchHistoryService;
 import com.bilibili.video.utils.MinioUtils;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,11 +48,13 @@ public class VideoController {
             @Parameter(description = "封面文件") @RequestParam(value = "cover", required = false) MultipartFile coverFile,
             @Parameter(description = "视频标题", required = true) @RequestParam("title") String title,
             @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
+            @Parameter(description = "分类ID", required = true) @RequestParam("categoryId") Long categoryId,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         VideoUploadDTO dto = new VideoUploadDTO();
         dto.setTitle(title);
         dto.setDescription(description);
+        dto.setCategoryId(categoryId);
         return Result.success(videoService.upload(videoFile, coverFile, dto, userId));
     }
 
@@ -64,7 +67,7 @@ public class VideoController {
             @Parameter(description = "页码，默认1") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页大小，默认10") @RequestParam(defaultValue = "10") int size,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = getUserIdNullable(request);
+        Long userId = UserContext.get();
         return Result.success(videoService.list(page, size, userId));
     }
 
@@ -77,7 +80,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(videoService.listCreatorVideos(userId, page, size));
     }
 
@@ -90,7 +93,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(videoService.listLikedVideos(userId, page, size));
     }
 
@@ -103,7 +106,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(videoService.listFavoriteVideos(userId, page, size));
     }
 
@@ -116,7 +119,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(videoService.listHistoryVideos(userId, page, size));
     }
 
@@ -129,7 +132,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = getUserIdNullable(request);
+        Long userId = UserContext.get();
         return Result.success(videoService.listRecommended(page, size, userId));
     }
 
@@ -139,7 +142,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = getUserIdNullable(request);
+        Long userId = UserContext.get();
         return Result.success(videoService.listHot(page, size, userId));
     }
 
@@ -153,7 +156,7 @@ public class VideoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpServletRequest request) {
-        Long userId = getUserIdNullable(request);
+        Long userId = UserContext.get();
         return Result.success(videoService.listByAuthor(authorId, page, size, userId));
     }
 
@@ -165,7 +168,7 @@ public class VideoController {
     public Result<VideoVO> getById(
             @Parameter(description = "视频ID", required = true) @PathVariable Long id,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = getUserIdNullable(request);
+        Long userId = UserContext.get();
         return Result.success(videoService.getById(id, userId));
     }
 
@@ -204,7 +207,7 @@ public class VideoController {
             @PathVariable Long id,
             @RequestParam int seconds,
             HttpServletRequest request) {
-        Long userId = getUserIdNullable(request);
+        Long userId = UserContext.get();
         if (userId != null) {
             watchHistoryService.saveProgress(userId, id, seconds);
         }
@@ -230,7 +233,7 @@ public class VideoController {
     public Result<Void> deleteVideo(
             @PathVariable Long id,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         videoService.deleteVideo(id, userId);
         return Result.success();
     }
@@ -248,8 +251,4 @@ public class VideoController {
         return "video/mp4";
     }
 
-    private Long getUserIdNullable(HttpServletRequest request) {
-        Object attr = request.getAttribute("userId");
-        return attr != null ? (Long) attr : null;
-    }
 }

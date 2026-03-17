@@ -31,9 +31,11 @@ public class VideoProcessConsumer implements RocketMQListener<VideoProcessMessag
             return;
         }
         try {
+            // 从视频资源中解析时长
             Integer durationSeconds = videoCoverExtractor.extractDurationSeconds(video.getVideoUrl());
             log.info("[MQ] 获取视频时长: {}", durationSeconds);
             if (durationSeconds != null && durationSeconds > 0) {
+                // 更新时长并清理缓存（双删确保一致性）
                 video.setDurationSeconds(durationSeconds);
                 videoMapper.updateById(video);
                 videoCacheService.evictVideoCache(video.getId());

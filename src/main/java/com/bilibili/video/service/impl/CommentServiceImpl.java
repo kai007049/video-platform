@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.bilibili.video.model.dto.CommentDTO;
 import com.bilibili.video.model.vo.CommentVO;
 import com.bilibili.video.common.Constants;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.entity.Comment;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.exception.BizException;
@@ -49,6 +50,13 @@ public class CommentServiceImpl implements CommentService {
         comment.setParentId(dto.getParentId());
         commentMapper.insert(comment);
 
+        String statsKey = RedisConstants.VIDEO_STATS_KEY_PREFIX + dto.getVideoId();
+        redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_COMMENT, 1);
+        redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
+
+        String commentCacheKey = RedisConstants.COMMENT_LIST_KEY_PREFIX + dto.getVideoId();
+        redisTemplate.delete(commentCacheKey);
+
         mqService.sendNotify(new NotifyMessage("comment", userId, dto.getVideoId(), comment.getContent()));
         mqService.sendSearchSync(new SearchSyncMessage("comment", comment.getId(), "create"));
         redisTemplate.opsForZSet().incrementScore(
@@ -66,12 +74,21 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentVO> listByVideoId(Long videoId) {
+        String cacheKey = RedisConstants.COMMENT_LIST_KEY_PREFIX + videoId;
+        Object cached = redisTemplate.opsForValue().get(cacheKey);
+        if (cached instanceof List<?>) {
+            @SuppressWarnings("unchecked")
+            List<CommentVO> cachedList = (List<CommentVO>) cached;
+            return cachedList;
+        }
+
         List<Comment> comments = commentMapper.selectList(
                 new LambdaQueryWrapper<Comment>()
                         .eq(Comment::getVideoId, videoId)
                         .orderByAsc(Comment::getCreateTime));
 
         if (comments.isEmpty()) {
+            redisTemplate.opsForValue().set(cacheKey, new ArrayList<>(), RedisConstants.COMMENT_LIST_NULL_TTL);
             return new ArrayList<>();
         }
 
@@ -83,10 +100,13 @@ public class CommentServiceImpl implements CommentService {
                 .filter(c -> c.getParentId() != null)
                 .collect(Collectors.groupingBy(Comment::getParentId));
 
-        return comments.stream()
+        List<CommentVO> result = comments.stream()
                 .filter(c -> c.getParentId() == null)
                 .map(c -> buildCommentVO(c, userMap, parentMap))
                 .collect(Collectors.toList());
+
+        redisTemplate.opsForValue().set(cacheKey, result, RedisConstants.COMMENT_LIST_TTL);
+        return result;
     }
 
     private CommentVO buildCommentVO(Comment comment, Map<Long, User> userMap, Map<Long, List<Comment>> parentMap) {

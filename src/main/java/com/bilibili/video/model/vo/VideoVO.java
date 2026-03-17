@@ -53,6 +53,8 @@ public class VideoVO {
     private Boolean favorited;
     /** 上次观看进度(秒)，用于继续播放 */
     private Integer lastWatchSeconds;
+    @Schema(description = "分类ID")
+    private Long categoryId;
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 }

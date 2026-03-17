@@ -2,6 +2,7 @@ package com.bilibili.video.controller;
 
 import com.bilibili.video.common.Result;
 import com.bilibili.video.service.LikeService;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,7 +32,7 @@ public class LikeController {
     public Result<Void> like(
             @Parameter(description = "视频ID", required = true) @PathVariable Long videoId,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         likeService.like(videoId, userId);
         return Result.success();
     }
@@ -44,7 +45,7 @@ public class LikeController {
     public Result<Void> unlike(
             @Parameter(description = "视频ID", required = true) @PathVariable Long videoId,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         likeService.unlike(videoId, userId);
         return Result.success();
     }
@@ -57,7 +58,7 @@ public class LikeController {
     public Result<Map<String, Boolean>> isLiked(
             @Parameter(description = "视频ID", required = true) @PathVariable Long videoId,
             @Parameter(hidden = true) HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         boolean liked = likeService.isLiked(videoId, userId);
         Map<String, Boolean> map = new HashMap<>();
         map.put("liked", liked);

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.bilibili.video.common.Result;
 import com.bilibili.video.model.vo.NotificationVO;
 import com.bilibili.video.service.NotificationService;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ public class NotificationController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(notificationService.listNotifications(userId, page, size));
     }
 
@@ -33,7 +34,7 @@ public class NotificationController {
     public Result<Void> markRead(
             @RequestParam Long id,
             HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         notificationService.markRead(userId, id);
         return Result.success();
     }

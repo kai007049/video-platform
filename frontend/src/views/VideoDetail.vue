@@ -335,6 +335,7 @@ function resolveCover(item) {
 function resolveAvatar(avatar) {
   if (!avatar) return avatarPlaceholder
   if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  if (avatar.startsWith('/api/file/avatar') || avatar.startsWith('/file/avatar')) return avatar
   return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
 }
 

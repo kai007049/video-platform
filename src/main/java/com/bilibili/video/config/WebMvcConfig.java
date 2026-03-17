@@ -1,6 +1,6 @@
 package com.bilibili.video.config;
 
-import com.bilibili.video.utils.JwtInterceptor;
+import com.bilibili.video.utils.AuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -12,10 +12,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final JwtInterceptor jwtInterceptor;
+    private final AuthInterceptor authInterceptor;
 
-    public WebMvcConfig(JwtInterceptor jwtInterceptor) {
-        this.jwtInterceptor = jwtInterceptor;
+    public WebMvcConfig(AuthInterceptor authInterceptor) {
+        this.authInterceptor = authInterceptor;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtInterceptor)
+        registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/user/register",

@@ -20,24 +20,31 @@ services:
     ports:
       - "6379:6379"
 
-#  elasticsearch:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-#    container_name: video_es
-#    environment:
-#      - discovery.type=single-node
-#      - xpack.security.enabled=false
-#    ports:
-#      - "9200:9200"
-#    volumes:
-#      - ./es_data:/usr/share/elasticsearch/data
-#
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:8.13.4
-#    container_name: video_kibana
-#    depends_on:
-#      - elasticsearch
-#    ports:
-#      - "5601:5601"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: video_es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.ml.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./es_data:/usr/share/elasticsearch/data
+    command: >
+      bash -c "if ! /usr/share/elasticsearch/bin/elasticsearch-plugin list | grep -q analysis-ik; then
+      /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch analysis-ik;
+      fi;
+      /usr/local/bin/docker-entrypoint.sh"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: video_kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
 
   minio:
     image: minio/minio
@@ -79,4 +86,4 @@ services:
     environment:
       - NAMESRV_ADDR=rocketmq-nameserver:9876
     ports:
-      - "18080:18080"
+      - "8082:8082"

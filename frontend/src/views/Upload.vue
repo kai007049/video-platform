@@ -22,6 +22,20 @@
           />
         </div>
         <div class="field">
+          <label>视频分类 <span class="required">*</span></label>
+          <div class="category-select">
+            <select v-model.number="form.parentCategoryId" @change="onParentChange">
+              <option value="">请选择一级分类</option>
+              <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+            <select v-model.number="form.categoryId" :disabled="!childCategories.length">
+              <option value="">请选择二级分类</option>
+              <option v-for="c in childCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <p v-if="categoryError" class="hint">{{ categoryError }}</p>
+        </div>
+        <div class="field">
           <label>标题 <span class="required">*</span></label>
           <input v-model="form.title" type="text" placeholder="请输入视频标题" required />
         </div>
@@ -39,18 +53,31 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { uploadVideo } from '../api/video'
+import { getCategoryTree } from '../api/category'
 
 const router = useRouter()
 const videoInput = ref(null)
 const coverInput = ref(null)
 const loading = ref(false)
 const error = ref('')
+const categoryError = ref('')
 const videoFile = ref(null)
 const coverFile = ref(null)
-const form = reactive({ title: '', description: '' })
+const categories = ref([])
+const form = reactive({
+  title: '',
+  description: '',
+  parentCategoryId: '',
+  categoryId: ''
+})
+
+const childCategories = computed(() => {
+  const parent = categories.value.find(c => c.id === form.parentCategoryId)
+  return parent?.children || []
+})
 
 function onVideoChange(e) {
   videoFile.value = e.target.files?.[0] || null
@@ -60,12 +87,29 @@ function onCoverChange(e) {
   coverFile.value = e.target.files?.[0] || null
 }
 
+function onParentChange() {
+  form.categoryId = ''
+}
+
+async function loadCategories() {
+  try {
+    categories.value = await getCategoryTree()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 async function submit() {
   if (!videoFile.value || !form.title.trim()) {
     error.value = '请选择视频并填写标题'
     return
   }
+  if (!form.categoryId) {
+    categoryError.value = '请选择视频分类'
+    return
+  }
   error.value = ''
+  categoryError.value = ''
   loading.value = true
   try {
     const fd = new FormData()
@@ -73,6 +117,7 @@ async function submit() {
     if (coverFile.value) fd.append('cover', coverFile.value)
     fd.append('title', form.title.trim())
     if (form.description.trim()) fd.append('description', form.description.trim())
+    fd.append('categoryId', String(form.categoryId))
     const res = await uploadVideo(fd)
     alert('投稿成功')
     router.push(`/video/${res.id}`)
@@ -82,6 +127,10 @@ async function submit() {
     loading.value = false
   }
 }
+
+onMounted(() => {
+  loadCategories()
+})
 </script>
 
 <style scoped>

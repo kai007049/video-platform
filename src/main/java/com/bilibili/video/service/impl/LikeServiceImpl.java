@@ -3,6 +3,7 @@ package com.bilibili.video.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.bilibili.video.entity.VideoLike;
 import com.bilibili.video.common.Constants;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.exception.BizException;
 import com.bilibili.video.mapper.VideoLikeMapper;
 import com.bilibili.video.mapper.VideoMapper;
@@ -23,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class LikeServiceImpl implements LikeService {
 
-    private static final String LIKE_KEY = "video:like:";
-    private static final long LIKE_EXPIRE_DAYS = 7;
+    private static final String LIKE_KEY = RedisConstants.VIDEO_LIKE_KEY_PREFIX;
+    private static final long LIKE_EXPIRE_DAYS = RedisConstants.VIDEO_LIKE_EXPIRE_DAYS;
 
     private final VideoLikeMapper videoLikeMapper;
     private final VideoMapper videoMapper;
@@ -48,7 +49,11 @@ public class LikeServiceImpl implements LikeService {
         like.setVideoId(videoId);
         like.setUserId(userId);
         videoLikeMapper.insert(like);
-        videoLikeMapper.incrementLikeCount(videoId, 1);
+
+
+        String statsKey = RedisConstants.VIDEO_STATS_KEY_PREFIX + videoId;
+        redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_LIKE, 1);
+        redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
 
         mqService.sendNotify(new NotifyMessage("like", userId, videoId, "点赞视频"));
         mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
@@ -70,7 +75,9 @@ public class LikeServiceImpl implements LikeService {
                 .eq(VideoLike::getVideoId, videoId)
                 .eq(VideoLike::getUserId, userId));
         if (deleted > 0) {
-            videoLikeMapper.incrementLikeCount(videoId, -1);
+            String statsKey = RedisConstants.VIDEO_STATS_KEY_PREFIX + videoId;
+            redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_LIKE, -1);
+            redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
         }
 
         String key = LIKE_KEY + videoId + ":" + userId;

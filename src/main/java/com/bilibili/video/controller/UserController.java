@@ -8,12 +8,13 @@ import com.bilibili.video.model.vo.LoginVO;
 import com.bilibili.video.model.vo.UpProfileVO;
 import com.bilibili.video.model.vo.UserInfoVO;
 import com.bilibili.video.service.UserService;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户控制器
@@ -50,8 +51,8 @@ public class UserController {
      */
     @GetMapping("/info")
     @Operation(summary = "获取用户信息")
-    public Result<UserInfoVO> info(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<UserInfoVO> info() {
+        Long userId = UserContext.get();
         return Result.success(userService.getUserInfo(userId));
     }
 
@@ -60,9 +61,8 @@ public class UserController {
      */
     @GetMapping("/profile/{id}")
     @Operation(summary = "UP主主页")
-    public Result<UpProfileVO> profile(@PathVariable Long id, HttpServletRequest request) {
-        Object attr = request.getAttribute("userId");
-        Long currentUserId = attr != null ? (Long) attr : null;
+    public Result<UpProfileVO> profile(@PathVariable Long id) {
+        Long currentUserId = UserContext.get();
         return Result.success(userService.getUpProfile(id, currentUserId));
     }
 
@@ -71,16 +71,15 @@ public class UserController {
      */
     @GetMapping("/creator/stats")
     @Operation(summary = "创作者数据")
-    public Result<CreatorStatsVO> creatorStats(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<CreatorStatsVO> creatorStats() {
+        Long userId = UserContext.get();
         return Result.success(userService.getCreatorStats(userId));
     }
 
     @PostMapping("/avatar")
     @Operation(summary = "更新头像")
-    public Result<String> updateAvatar(@RequestParam("avatar") org.springframework.web.multipart.MultipartFile avatar,
-                                       HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<String> updateAvatar(@RequestParam("avatar") MultipartFile avatar) {
+        Long userId = UserContext.get();
         return Result.success(userService.updateAvatar(userId, avatar));
     }
 }

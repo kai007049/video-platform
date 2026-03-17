@@ -22,6 +22,7 @@ import com.bilibili.video.mapper.WatchHistoryMapper;
 import com.bilibili.video.service.FavoriteService;
 import com.bilibili.video.service.LikeService;
 import com.bilibili.video.common.Constants;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.service.MQService;
 import com.bilibili.video.service.VideoCacheService;
 import com.bilibili.video.service.VideoService;
@@ -46,9 +47,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class VideoServiceImpl implements VideoService {
 
-    private static final String PLAY_COUNT_KEY = "video:play_count:";
+    private static final String PLAY_COUNT_KEY = RedisConstants.VIDEO_STATS_KEY_PREFIX;
     private static final String HOT_RANK_KEY = "video:hot:rank";
-    private static final long PLAY_COUNT_EXPIRE = 7;
+    private static final long PLAY_COUNT_EXPIRE = RedisConstants.VIDEO_STATS_EXPIRE_DAYS;
     private static final TimeUnit PLAY_COUNT_EXPIRE_UNIT = TimeUnit.DAYS;
 
     private final VideoMapper videoMapper;
@@ -80,15 +81,18 @@ public class VideoServiceImpl implements VideoService {
         if (videoFile == null || videoFile.isEmpty()) {
             throw new BizException(400, "视频文件不能为空");
         }
+        if (dto.getCategoryId() == null || dto.getCategoryId() <= 0) {
+            throw new BizException(400, "请选择视频分类");
+        }
 
         String videoUrl;
         String coverUrl = null;
         try {
+            // 上传视频
             videoUrl = minioUtils.uploadVideo(videoFile);
-            if (coverFile != null && !coverFile.isEmpty()) {
+            if (coverFile != null && !coverFile.isEmpty()) {// 有设置封面时
+                // 上传封面
                 coverUrl = minioUtils.uploadCover(coverFile);
-            } else {
-                coverUrl = videoCoverExtractor.extractAndUploadCover(videoUrl);
             }
         } catch (Exception e) {
             throw new BizException(500, "文件上传失败: " + e.getMessage());
@@ -103,18 +107,14 @@ public class VideoServiceImpl implements VideoService {
         video.setPlayCount(0L);
         video.setLikeCount(0L);
         video.setSaveCount(0L);
-        Integer durationSeconds = null;
-        try {
-            durationSeconds = videoCoverExtractor.extractDurationSeconds(videoUrl);
-        } catch (Exception e) {
-            log.warn("获取视频时长失败: videoUrl={}", videoUrl, e);
-        }
-        video.setDurationSeconds(durationSeconds != null ? durationSeconds : 0);
+        video.setDurationSeconds(0);
         video.setIsRecommended(false);
+        video.setCategoryId(dto.getCategoryId());
         videoMapper.insert(video);
 
         mqService.sendVideoProcess(new com.bilibili.video.model.mq.VideoProcessMessage(video.getId(), authorId));
         mqService.sendSearchSync(new com.bilibili.video.model.mq.SearchSyncMessage("video", video.getId(), "create"));
+        mqService.sendVideoCoverProcess(new com.bilibili.video.model.mq.VideoProcessMessage(video.getId(), authorId));
         incrHotScore(video.getId(), Constants.HOT_WEIGHT_PLAY);
 
         return toVideoVO(video, authorId, likeService.isLiked(video.getId(), authorId), null);
@@ -163,25 +163,65 @@ public class VideoServiceImpl implements VideoService {
         return result.convert(v -> toVideoVO(v, currentUserId, null, null));
     }
 
+    /**
+     * 获取视频详情
+     * @param videoId
+     * @param userId
+     * @return
+     */
     @Override
     public VideoVO getById(Long videoId, Long userId) {
         VideoVO vo = getVideoById(videoId);
         if (vo != null && userId != null) {
-            vo.setLiked(likeService.isLiked(videoId, userId));
-            vo.setFavorited(favoriteService.isFavorited(userId, videoId));
-            Integer lastWatch = watchHistoryService.getLastWatchSeconds(userId, videoId);
+            String likeKey = RedisConstants.VIDEO_LIKE_KEY_PREFIX + videoId + ":" + userId;
+            String favKey = RedisConstants.VIDEO_FAVORITE_KEY_PREFIX + videoId + ":" + userId;
+            String watchKey = RedisConstants.VIDEO_WATCH_PROGRESS_KEY_PREFIX + userId;
+
+            Object likeCached = redisTemplate.opsForValue().get(likeKey);
+            Object favCached = redisTemplate.opsForValue().get(favKey);
+            Object watchCached = redisTemplate.opsForHash().get(watchKey, String.valueOf(videoId));
+
+            Boolean liked = likeCached != null ? true : null;
+            Boolean favorited = favCached != null ? true : null;
+            Integer lastWatch = null;
+            if (watchCached != null) {
+                if (watchCached instanceof Number) {
+                    lastWatch = ((Number) watchCached).intValue();
+                } else {
+                    try {
+                        lastWatch = Integer.parseInt(watchCached.toString());
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+
+            if (liked == null) {
+                liked = likeService.isLiked(videoId, userId);
+            }
+            if (favorited == null) {
+                favorited = favoriteService.isFavorited(userId, videoId);
+            }
+            if (lastWatch == null) {
+                lastWatch = watchHistoryService.getLastWatchSeconds(userId, videoId);
+            }
+
+            vo.setLiked(liked);
+            vo.setFavorited(favorited);
             if (lastWatch != null) vo.setLastWatchSeconds(lastWatch);
         }
         return vo;
     }
 
+
     @Override
     public VideoVO getVideoById(Long id) {
-        Video video = videoMapper.selectById(id);
-        if (video == null) {
-            throw new BizException(404, "视频不存在");
-        }
-        return toVideoVO(video, null, null, null);
+        return videoCacheService.getVideoWithLoader(id, () -> {
+            Video video = videoMapper.selectById(id);
+            if (video == null) {
+                throw new BizException(404, "视频不存在");
+            }
+            return toVideoVO(video, null, null, null);
+        });
     }
 
     /**
@@ -193,6 +233,7 @@ public class VideoServiceImpl implements VideoService {
         videoCacheService.evictVideoCache(video.getId());
         videoMapper.updateById(video);
         videoCacheService.doubleDeleteVideoCache(video.getId());
+        mqService.sendSearchSync(new com.bilibili.video.model.mq.SearchSyncMessage("video", video.getId(), "update"));
     }
 
     /**
@@ -202,7 +243,7 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public void recordPlayCount(Long videoId) {
         String key = PLAY_COUNT_KEY + videoId;
-        redisTemplate.opsForHash().increment(key, "count", 1);
+        redisTemplate.opsForHash().increment(key, RedisConstants.VIDEO_STAT_PLAY, 1);
         redisTemplate.expire(key, PLAY_COUNT_EXPIRE, PLAY_COUNT_EXPIRE_UNIT);
         incrHotScore(videoId, Constants.HOT_WEIGHT_PLAY);
     }
@@ -351,6 +392,14 @@ public class VideoServiceImpl implements VideoService {
     }
 
 
+    /**
+     * 转换为 VideoVO
+     * @param video  数据
+     * @param userId 用户ID
+     * @param liked 是否点赞
+     * @param lastWatchSeconds 观看进度
+     * @return
+     */
     private VideoVO toVideoVO(Video video, Long userId, Boolean liked, Integer lastWatchSeconds) {
         if (liked == null && userId != null) {
             liked = likeService.isLiked(video.getId(), userId);
@@ -360,6 +409,15 @@ public class VideoServiceImpl implements VideoService {
         return toVideoVO(video, null, liked, favorited, lastWatch);
     }
 
+    /**
+     * 转换为 VideoVO
+     * @param video  数据
+     * @param authorId 作者ID
+     * @param liked 是否点赞
+     * @param favorited 是否收藏
+     * @param lastWatchSeconds 观看进度
+     * @return
+     */
     private VideoVO toVideoVO(Video video, Long authorId, Boolean liked, Boolean favorited, Integer lastWatchSeconds) {
         VideoVO vo = new VideoVO();
         BeanUtils.copyProperties(video, vo);
@@ -380,13 +438,14 @@ public class VideoServiceImpl implements VideoService {
             vo.setAuthorAvatar(author.getAvatar());
         }
 
-        Long playCount = video.getPlayCount();
-        String key = PLAY_COUNT_KEY + video.getId();
-        Object redisCount = redisTemplate.opsForHash().get(key, "count");
-        if (redisCount != null) {
-            playCount = playCount + ((Number) redisCount).longValue();
-        }
+        String statsKey = PLAY_COUNT_KEY + video.getId();
+        Long playCount = resolveStat(video.getPlayCount(), statsKey, RedisConstants.VIDEO_STAT_PLAY);
+        Long likeCount = resolveStat(video.getLikeCount(), statsKey, RedisConstants.VIDEO_STAT_LIKE);
+        Long saveCount = resolveStat(video.getSaveCount(), statsKey, RedisConstants.VIDEO_STAT_SAVE);
+
         vo.setPlayCount(playCount);
+        vo.setLikeCount(likeCount);
+        vo.setSaveCount(saveCount);
 
         return vo;
     }
@@ -410,9 +469,30 @@ public class VideoServiceImpl implements VideoService {
         return result;
     }
 
+    /**
+     * 更新视频热度
+     * @param videoId
+     * @param delta
+     */
     private void incrHotScore(Long videoId, double delta) {
         String key = Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h";
         redisTemplate.opsForZSet().incrementScore(key, videoId.toString(), delta);
         redisTemplate.expire(key, Constants.HOT_WINDOW_HOURS, TimeUnit.HOURS);
+    }
+
+    /**
+     * 解析统计数据
+     * @param base
+     * @param statsKey
+     * @param field
+     * @return
+     */
+    private Long resolveStat(Long base, String statsKey, String field) {
+        Long value = base == null ? 0L : base;
+        Object deltaObj = redisTemplate.opsForHash().get(statsKey, field);
+        if (deltaObj != null) {
+            value = value + ((Number) deltaObj).longValue();
+        }
+        return value;
     }
 }

@@ -3,6 +3,7 @@ package com.bilibili.video.controller;
 import com.bilibili.video.common.Result;
 import com.bilibili.video.model.vo.MessageSummaryVO;
 import com.bilibili.video.service.MessageCenterService;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ public class MessageCenterController {
     @GetMapping("/summary")
     @Operation(summary = "消息中心汇总")
     public Result<MessageSummaryVO> summary(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         return Result.success(messageCenterService.summary(userId));
     }
 }

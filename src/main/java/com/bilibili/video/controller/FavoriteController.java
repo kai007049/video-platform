@@ -2,6 +2,7 @@ package com.bilibili.video.controller;
 
 import com.bilibili.video.common.Result;
 import com.bilibili.video.service.FavoriteService;
+import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +20,7 @@ public class FavoriteController {
     @PostMapping("/{videoId}")
     @Operation(summary = "收藏")
     public Result<Void> add(@PathVariable Long videoId, HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         favoriteService.add(userId, videoId);
         return Result.success();
     }
@@ -27,7 +28,7 @@ public class FavoriteController {
     @DeleteMapping("/{videoId}")
     @Operation(summary = "取消收藏")
     public Result<Void> remove(@PathVariable Long videoId, HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = UserContext.get();
         favoriteService.remove(userId, videoId);
         return Result.success();
     }

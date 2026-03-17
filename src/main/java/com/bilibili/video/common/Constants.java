@@ -10,10 +10,16 @@ public class Constants {
     public static final String CAPTCHA_PREFIX = "login:captcha:";
     public static final long CAPTCHA_EXPIRE_SECONDS = 300;
 
+    /** 视频热度排行缓存 key 前缀 */
     public static final String HOT_RANK_PREFIX = "video:hot:";
+    /** 热度排行窗口时长（小时） */
     public static final int HOT_WINDOW_HOURS = 24;
+    /** 播放量热度排行权重 */
     public static final double HOT_WEIGHT_PLAY = 1.0;
+    /** 点赞数热度排行权重 */
     public static final double HOT_WEIGHT_LIKE = 5.0;
+    /** 评论数热度排行权重 */
     public static final double HOT_WEIGHT_COMMENT = 8.0;
+    /** 收藏数热度排行权重 */
     public static final double HOT_WEIGHT_FAVORITE = 6.0;
 }

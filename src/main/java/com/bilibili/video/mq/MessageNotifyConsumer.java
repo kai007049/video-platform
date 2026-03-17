@@ -20,9 +20,14 @@ public class MessageNotifyConsumer implements RocketMQListener<MessageNotifyMess
     @Override
     public void onMessage(MessageNotifyMessage message) {
         log.info("[MQ] message notify: {}", message);
+        // 推送到 WebSocket，通知在线用户
         messageWebSocketServer.push(message.getReceiverId(), toJson(message));
     }
 
+    /**
+     * 简单拼接 JSON 字符串，便于前端解析
+     * 注意：这里未做转义处理，若 content 含引号可改为 JSON 序列化工具
+     */
     private String toJson(MessageNotifyMessage message) {
         return String.format("{\"type\":\"%s\",\"content\":\"%s\",\"refId\":%d}",
                 message.getType(),

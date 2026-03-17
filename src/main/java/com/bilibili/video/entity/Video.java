@@ -51,6 +51,9 @@ public class Video {
     @Schema(description = "是否推荐")
     private Boolean isRecommended;
 
+    @Schema(description = "分类ID")
+    private Long categoryId;
+
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 }

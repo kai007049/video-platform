@@ -25,6 +25,8 @@ spring:
           max-idle: 8
           min-idle: 0
 
+  elasticsearch:
+    uris: http://localhost:9200
 
   servlet:
     multipart:
@@ -72,9 +74,15 @@ play-count:
 
 logging:
   level:
+    root: warn
     com.bilibili.video: INFO
     org.springframework.web: INFO
+
 
 # ffmpeg下载路径
 ffmpeg:
   path: "D:/app包/ffmpeg/ffmpeg-8.0.1-full_build/ffmpeg-8.0.1-full_build/bin/ffmpeg.exe"
+
+video:
+  search:
+    enabled: true

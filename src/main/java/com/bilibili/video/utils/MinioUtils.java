@@ -137,7 +137,7 @@ public class MinioUtils {
         String originalFilename = file.getOriginalFilename();
         String ext = originalFilename != null && originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
-        String objectName = UUID.randomUUID() + ext;
+        String objectName = "user/" + UUID.randomUUID() + ext;
 
         try (InputStream is = file.getInputStream()) {
             minioClient.putObject(PutObjectArgs.builder()
@@ -190,25 +190,13 @@ public class MinioUtils {
 
     /** 仅允许 avatar 桶对象名，防止任意文件读取 */
     public InputStream getAvatarStreamByObjectName(String objectName) throws Exception {
-        String[] bucketAndObject = parseBucketAndObject(objectName);
-        if (bucketAndObject == null) {
-            if (!isSafeAvatarObject(objectName)) {
-                throw new IllegalArgumentException("无效的对象名: " + objectName);
-            }
-            return minioClient.getObject(GetObjectArgs.builder()
-                    .bucket(bucketAvatar)
-                    .object(objectName)
-                    .build());
-        }
-        if (!bucketAvatar.equals(bucketAndObject[0])) {
-            throw new IllegalArgumentException("无效的对象桶: " + bucketAndObject[0]);
-        }
-        if (!isSafeAvatarObject(bucketAndObject[1])) {
-            throw new IllegalArgumentException("无效的对象名: " + bucketAndObject[1]);
+        String object = normalizeAvatarObject(objectName);
+        if (object == null || !isSafeAvatarObject(object)) {
+            throw new IllegalArgumentException("无效的对象名: " + objectName);
         }
         return minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucketAndObject[0])
-                .object(bucketAndObject[1])
+                .bucket(bucketAvatar)
+                .object(object)
                 .build());
     }
 
@@ -286,6 +274,18 @@ public class MinioUtils {
         if (objectName.contains("..") || objectName.contains("\\") || objectName.startsWith("/")) return false;
         if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
         return true;
+    }
+
+    /** 兼容 avatarUrl（完整URL）和 objectName 两种格式 */
+    private String normalizeAvatarObject(String value) {
+        if (value == null || value.isBlank()) return null;
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            String[] bucketAndObject = parseBucketAndObject(value);
+            if (bucketAndObject == null) return null;
+            if (!bucketAvatar.equals(bucketAndObject[0])) return null;
+            return bucketAndObject[1];
+        }
+        return value;
     }
 
     private void ensureBucketExists(String bucket) {

@@ -15,6 +15,7 @@ public class NotifyConsumer implements RocketMQListener<NotifyMessage> {
     @Override
     public void onMessage(NotifyMessage message) {
         log.info("[MQ] 通知事件: {}", message);
-        // TODO: 在此异步发送站内信/推送等逻辑
+        // TODO: 在此异步发送站内信/推送/邮件等逻辑
+        // 可根据 message.type 决定通知渠道与模板
     }
 }
