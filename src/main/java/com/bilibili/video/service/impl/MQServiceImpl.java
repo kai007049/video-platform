@@ -8,14 +8,27 @@ import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.model.mq.VideoDeleteMessage;
 import com.bilibili.video.model.mq.VideoProcessMessage;
 import com.bilibili.video.service.MQService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MQServiceImpl implements MQService {
+
+    @PostConstruct
+    public void logRocketMQTemplateStatus() {
+        RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
+        if (template == null) {
+            log.warn("[MQ] RocketMQTemplate 未注入，消息将被跳过。请检查 RocketMQ Starter 及配置。");
+        } else {
+            log.info("[MQ] RocketMQTemplate 已注入，MQ 功能可用。");
+        }
+    }
 
     /**
      * RocketMQTemplate 可能在某些环境下未配置/未启用，因此用 ObjectProvider 进行懒获取。

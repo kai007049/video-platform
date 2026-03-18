@@ -31,8 +31,8 @@ public class VideoDocument {
     @Field(type = FieldType.Keyword)
     private String category;
 
-    @Field(type = FieldType.Date, format = DateFormat.date_time)
-    private LocalDateTime createTime;
+    @Field(type = FieldType.Date, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private String createTime;
 
     @Field(type = FieldType.Long)
     private Long views;

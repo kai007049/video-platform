@@ -6,6 +6,52 @@
   <component name="ChangeListManager">
     <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="缓存、头像、消息队列完善">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Layout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Layout.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Upload.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/MqTopics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/MqTopics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/RedisConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/RedisConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FavoriteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FavoriteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageCenterController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageCenterController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/SearchSyncConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/SearchSyncConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/VideoDocument.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/VideoDocument.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/impl/VideoSearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/impl/VideoSearchServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MQService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MQService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/db/migration.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/db/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/VideoDocument.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/VideoDocument.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/impl/VideoSearchServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/impl/VideoSearchServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/db/migration.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/schema.sql" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,6 +161,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Java-Project\Bilibili\Video-Platform\src\main\resources\db" />
       <recent name="E:\Java-Project\Bilibili\Video-Platform\bachend" />
       <recent name="E:\Java-Project\Bilibili\Video-Platform" />
     </key>
@@ -147,19 +194,6 @@
     <configuration name="docker: Compose 部署" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
       <deployment type="docker-compose.yml">
         <settings>
-          <option name="sourceFilePath" value="src/main/resources/docker/docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
-    <configuration name="docker.elasticsearch: Compose 部署" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="services">
-            <list>
-              <option value="elasticsearch" />
-            </list>
-          </option>
           <option name="sourceFilePath" value="src/main/resources/docker/docker-compose.yml" />
         </settings>
       </deployment>
@@ -206,9 +240,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.docker.elasticsearch: Compose 部署" />
-        <item itemvalue="Docker.docker.redis: Compose 部署" />
         <item itemvalue="Docker.docker: Compose 部署" />
+        <item itemvalue="Docker.docker.redis: Compose 部署" />
         <item itemvalue="Docker.docker.minio: Compose 部署" />
         <item itemvalue="Docker.docker.kibana: Compose 部署" />
       </list>

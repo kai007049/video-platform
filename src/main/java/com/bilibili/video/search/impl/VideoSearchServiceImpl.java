@@ -44,7 +44,9 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         }
         doc.setCategory(categoryName);
 
-        doc.setCreateTime(video.getCreateTime());
+        if (video.getCreateTime() != null) {
+            doc.setCreateTime(video.getCreateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+        }
         doc.setViews(video.getPlayCount() == null ? 0L : video.getPlayCount());
         doc.setLikes(video.getLikeCount() == null ? 0L : video.getLikeCount());
 
@@ -54,6 +56,10 @@ public class VideoSearchServiceImpl implements VideoSearchService {
     @Override
     public void delete(Long videoId) {
         if (videoId == null) return;
-        repository.deleteById(videoId);
+        try {
+            repository.deleteById(videoId);
+        } catch (Exception e) {
+            log.warn("[Search] 删除索引失败: videoId={}", videoId, e);
+        }
     }
 }
