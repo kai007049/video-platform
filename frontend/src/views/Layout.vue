@@ -1,42 +1,46 @@
 <template>
-  <div class="layout">
+  <div class="layout" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
+    <!-- 顶部导航栏 -->
     <header class="header">
       <div class="header-left">
+        <button class="menu-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
+          <span></span><span></span><span></span>
+        </button>
         <router-link to="/" class="logo">
           <span class="logo-text">bilibili</span>
         </router-link>
-        <nav class="top-nav">
-          <router-link class="top-nav-item" to="/">直播</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/' }" to="/">推荐</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/message' }" to="/message">消息</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/creator' }" to="/creator">创作者中心</router-link>
-          <router-link class="top-nav-item" :class="{ active: $route.path === '/upload' }" to="/upload">投稿</router-link>
-          <router-link
-            v-if="userStore.userInfo?.isAdmin"
-            class="top-nav-item admin-link"
-            :class="{ active: $route.path === '/admin' }"
-            to="/admin"
-          >
-            管理面板
-          </router-link>
-        </nav>
       </div>
 
-      <div class="nav-right">
+      <div class="header-center">
+      </div>
+
+      <div class="header-right">
         <div class="search-bar">
-          <input v-model="keyword" type="text" placeholder="搜索你感兴趣的视频" @keyup.enter="goSearch" />
-          <button class="search-btn" @click="goSearch">⌕</button>
+          <input
+            v-model="keyword"
+            type="text"
+            placeholder="搜索视频、用户"
+            @keyup.enter="goSearch"
+          />
+          <button class="search-btn" @click="goSearch">
+            <span class="search-icon">🔍</span>
+          </button>
         </div>
         <template v-if="userStore.isLoggedIn">
+          <router-link to="/upload" class="upload-btn">+ 投稿</router-link>
           <div class="user-area" @click="showUserMenu = !showUserMenu">
             <img :src="resolveAvatar(userStore.userInfo?.avatar)" class="avatar" alt="avatar" />
+            <span class="username">{{ userStore.userInfo?.username || '用户' }}</span>
             <div v-if="showUserMenu" class="user-menu" @click.stop>
               <label class="menu-item avatar-upload" :class="{ disabled: isUploadingAvatar }">
                 <input type="file" accept="image/*" @change="onAvatarChange" :disabled="isUploadingAvatar" />
                 {{ isUploadingAvatar ? '上传中...' : '修改头像' }}
               </label>
               <div class="menu-item" @click="goCreator">个人中心</div>
-              <div class="menu-item" @click="handleLogout">退出登录</div>
+              <router-link class="menu-item" to="/message" @click="showUserMenu = false">消息中心</router-link>
+              <router-link v-if="userStore.userInfo?.isAdmin" class="menu-item admin" to="/admin" @click="showUserMenu = false">管理面板</router-link>
+              <div class="menu-divider"></div>
+              <div class="menu-item logout" @click="handleLogout">退出登录</div>
             </div>
           </div>
         </template>
@@ -47,28 +51,61 @@
       </div>
     </header>
 
-    <aside class="side-nav">
-      <router-link class="side-item" :class="{ active: $route.path === '/' }" to="/">
-        <span class="side-icon">🏠</span>
-        <span class="side-label">首页</span>
-      </router-link>
-      <router-link class="side-item" to="/">
-        <span class="side-icon">▶</span>
-        <span class="side-label">精选</span>
-      </router-link>
-      <router-link class="side-item" :class="{ active: $route.path === '/message' }" to="/message">
-        <span class="side-icon">✦</span>
-        <span class="side-label">动态</span>
-      </router-link>
-      <router-link class="side-item" :class="{ active: $route.path === '/creator' }" to="/creator">
-        <span class="side-icon">👤</span>
-        <span class="side-label">我的</span>
-      </router-link>
+    <!-- 左侧侧边栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-inner">
+        <router-link class="side-item" :class="{ active: $route.path === '/' }" to="/" title="首页">
+          <span class="side-icon">🏠</span>
+          <span class="side-label">首页</span>
+        </router-link>
+        <router-link class="side-item" :class="{ active: $route.path === '/message' }" to="/message" title="消息">
+          <span class="side-icon">💬</span>
+          <span class="side-label">消息</span>
+        </router-link>
+        <router-link class="side-item" :class="{ active: $route.path === '/upload' }" to="/upload" title="投稿">
+          <span class="side-icon">📤</span>
+          <span class="side-label">投稿</span>
+        </router-link>
+
+        <div class="side-divider"></div>
+        <div class="side-section-title">分类</div>
+
+        <router-link class="side-item" to="/?tab=recommend" title="推荐">
+          <span class="side-icon">⭐</span>
+          <span class="side-label">推荐</span>
+        </router-link>
+        <router-link class="side-item" to="/?tab=hot" title="热门">
+          <span class="side-icon">🔥</span>
+          <span class="side-label">热门</span>
+        </router-link>
+        <router-link class="side-item" to="/?tab=latest" title="最新">
+          <span class="side-icon">🕐</span>
+          <span class="side-label">最新</span>
+        </router-link>
+
+        <template v-if="userStore.userInfo?.isAdmin">
+          <div class="side-divider"></div>
+          <router-link class="side-item admin-item" :class="{ active: $route.path === '/admin' }" to="/admin" title="管理">
+            <span class="side-icon">⚙️</span>
+            <span class="side-label">管理</span>
+          </router-link>
+        </template>
+
+        <div class="side-bottom">
+          <router-link class="side-item" :class="{ active: $route.path === '/creator' }" to="/creator" title="我的">
+            <span class="side-icon">👤</span>
+            <span class="side-label">我的</span>
+          </router-link>
+        </div>
+      </div>
     </aside>
 
     <main class="main">
       <router-view />
     </main>
+
+    <LoginModal v-if="showLogin" @close="showLogin = false" />
+    <RegisterModal v-if="showRegister" @close="showRegister = false" />
   </div>
 </template>
 
@@ -77,12 +114,17 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { updateAvatar } from '../api/user'
+import LoginModal from '../components/LoginModal.vue'
+import RegisterModal from '../components/RegisterModal.vue'
 
 const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
 const showUserMenu = ref(false)
+const showLogin = ref(false)
+const showRegister = ref(false)
 const keyword = ref('')
+const sidebarCollapsed = ref(false)
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 const isUploadingAvatar = ref(false)
 const maxAvatarSize = 2 * 1024 * 1024
@@ -98,14 +140,8 @@ async function onAvatarChange(event) {
   const file = event.target.files && event.target.files[0]
   event.target.value = ''
   if (!file || isUploadingAvatar.value) return
-  if (!file.type.startsWith('image/')) {
-    alert('请选择图片文件')
-    return
-  }
-  if (file.size > maxAvatarSize) {
-    alert('头像不能超过 2MB')
-    return
-  }
+  if (!file.type.startsWith('image/')) { alert('请选择图片文件'); return }
+  if (file.size > maxAvatarSize) { alert('头像不能超过 2MB'); return }
   try {
     isUploadingAvatar.value = true
     const formData = new FormData()
@@ -125,18 +161,11 @@ async function onAvatarChange(event) {
 }
 
 onMounted(() => {
-  if (userStore.isLoggedIn && !userStore.userInfo) {
-    userStore.fetchUserInfo()
-  }
+  if (userStore.isLoggedIn && !userStore.userInfo) userStore.fetchUserInfo()
 })
 
-function openLogin() {
-  router.push({ path: route.path, query: { ...route.query, login: '1' } })
-}
-
-function openRegister() {
-  router.push({ path: route.path, query: { ...route.query, register: '1' } })
-}
+function openLogin() { showLogin.value = true }
+function openRegister() { showRegister.value = true }
 
 function goCreator() {
   router.push('/creator')
@@ -152,250 +181,362 @@ function handleLogout() {
 function goSearch() {
   const value = keyword.value.trim()
   if (!value) return
-  router.push({ path: '/', query: { ...route.query, keyword: value, tab: 'search' } })
+  router.push({ path: '/', query: { keyword: value, tab: 'search' } })
 }
 </script>
 
 <style scoped>
 .layout {
   min-height: 100vh;
-  background: var(--bg-page);
+  background: #f4f5f7;
 }
 
+/* ===== 顶部导航 ===== */
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 72px;
-  padding: 0 24px 0 28px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-color);
+  height: 60px;
+  padding: 0 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  gap: 16px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.logo {
-  color: var(--bili-pink);
+.menu-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.menu-toggle:hover {
+  background: #f4f5f7;
+}
+
+.menu-toggle span {
+  display: block;
+  height: 2px;
+  background: #61666d;
+  border-radius: 2px;
+  transition: all 0.2s;
 }
 
 .logo-text {
-  font-size: 42px;
-  line-height: 1;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fb7299;
   letter-spacing: -1px;
+  font-style: italic;
 }
 
-.top-nav {
+.header-center {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: 26px;
-}
-
-.top-nav-item {
-  position: relative;
-  padding: 6px 0;
-  font-size: 14px;
-  color: var(--text-primary);
-  transition: color 0.2s;
-}
-
-.top-nav-item:hover,
-.top-nav-item.active {
-  color: var(--bili-pink);
-}
-
-.top-nav-item.active::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -17px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--bili-pink);
-}
-
-.admin-link {
-  color: #e53935;
-  font-weight: 600;
-}
-
-.admin-link:hover,
-.admin-link.active {
-  color: #c62828;
-}
-
-.admin-link.active::after {
-  background: #c62828;
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  justify-content: center;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  width: 430px;
-  height: 42px;
+  width: 400px;
+  height: 36px;
   background: #f1f2f3;
-  border-radius: 8px;
-  padding: 0 10px 0 14px;
+  border-radius: 18px;
+  padding: 0 6px 0 16px;
+  transition: box-shadow 0.2s;
+}
+
+.search-bar:focus-within {
+  box-shadow: 0 0 0 2px rgba(251,114,153,.3);
+  background: #fff;
 }
 
 .search-bar input {
   flex: 1;
   border: none;
   background: transparent;
-  color: #61666d;
+  color: #18191c;
   font-size: 14px;
   outline: none;
 }
 
-.search-btn {
-  background: transparent;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  font-size: 18px;
-  color: #61666d;
+.search-bar input::placeholder {
+  color: #9499a0;
 }
 
-.btn-login,
-.btn-register {
-  padding: 7px 14px;
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 30px;
+  background: transparent;
+  color: #61666d;
+  border: none;
+  border-radius: 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.search-btn:hover {
+  color: #fb7299;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: 1px solid #e3e5e7;
+  border-radius: 6px;
   font-size: 13px;
-  border-radius: 7px;
+  color: #61666d;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.upload-btn:hover {
+  border-color: #fb7299;
+  color: #fb7299;
 }
 
 .btn-login {
-  color: #18191c;
+  padding: 6px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #e3e5e7;
   background: #fff;
-  border: 1px solid var(--border-color);
+  color: #18191c;
+  cursor: pointer;
 }
 
 .btn-register {
+  padding: 6px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background: #fb7299;
   color: #fff;
-  background: var(--bili-pink);
+  cursor: pointer;
 }
+
+.btn-register:hover { background: #fc87ad; }
 
 .user-area {
   position: relative;
   display: flex;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
 }
 
+.user-area:hover { background: #f4f5f7; }
+
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid #e3e5e7;
+}
+
+.username {
+  font-size: 13px;
+  color: #18191c;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
-  margin-top: 8px;
-  padding: 8px 0;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
+  padding: 6px 0;
+  background: #fff;
+  border: 1px solid #e3e5e7;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
   min-width: 120px;
+  z-index: 200;
 }
 
 .menu-item {
-  padding: 10px 16px;
+  display: block;
+  padding: 8px 16px;
   font-size: 14px;
-  color: var(--text-primary);
+  color: #18191c;
   cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
 }
 
-.menu-item:hover {
-  background: var(--bg-gray);
+.menu-item:hover { background: #f4f5f7; }
+.menu-item.admin { color: #e53935; }
+.menu-item.logout { color: #fb7299; }
+
+.menu-divider {
+  height: 1px;
+  background: #e3e5e7;
+  margin: 4px 0;
 }
 
-.avatar-upload input {
-  display: none;
-}
+.avatar-upload input { display: none; }
+.avatar-upload.disabled { color: #9499a0; cursor: not-allowed; }
 
-.avatar-upload.disabled {
-  color: var(--text-secondary);
-  cursor: not-allowed;
-}
-
-.main {
-  margin-left: 86px;
-  padding: 20px 20px 28px;
-}
-
-.side-nav {
+/* ===== 侧边栏 ===== */
+.sidebar {
   position: fixed;
-  top: 86px;
-  left: 10px;
-  width: 64px;
-  z-index: 30;
-  border-radius: 16px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  padding: 10px 0;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  width: 180px;
+  background: #fff;
+  border-right: 1px solid #e3e5e7;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 50;
+  transition: width 0.25s ease;
+}
+
+.layout.sidebar-collapsed .sidebar {
+  width: 60px;
+}
+
+.sidebar-inner {
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 60px);
+}
+
+.side-bottom {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #e3e5e7;
 }
 
 .side-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 10px 0;
+  gap: 12px;
+  padding: 10px 16px;
   color: #61666d;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.side-item:hover {
+  background: #fff0f4;
+  color: #fb7299;
 }
 
 .side-item.active {
-  color: var(--bili-pink);
+  background: #fff0f4;
+  color: #fb7299;
+  font-weight: 600;
 }
+
+.side-item.admin-item { color: #e53935; }
+.side-item.admin-item:hover,
+.side-item.admin-item.active { background: #fff5f5; color: #c62828; }
 
 .side-icon {
   font-size: 16px;
-  line-height: 1;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
 }
 
 .side-label {
-  font-size: 12px;
+  transition: opacity 0.2s;
 }
 
-@media (max-width: 1280px) {
-  .search-bar {
-    width: 320px;
-  }
+.layout.sidebar-collapsed .side-label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.layout.sidebar-collapsed .side-section-title {
+  opacity: 0;
+}
+
+.side-divider {
+  height: 1px;
+  background: #e3e5e7;
+  margin: 8px 12px;
+}
+
+.side-section-title {
+  padding: 6px 16px;
+  font-size: 12px;
+  color: #9499a0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+}
+
+/* ===== 主内容区 ===== */
+.main {
+  margin-top: 60px;
+  margin-left: 180px;
+  padding: 20px;
+  min-height: calc(100vh - 60px);
+  transition: margin-left 0.25s ease;
+}
+
+.layout.sidebar-collapsed .main {
+  margin-left: 60px;
 }
 
 @media (max-width: 1024px) {
-  .top-nav {
-    display: none;
-  }
+  .sidebar { width: 60px; }
+  .side-label { opacity: 0; pointer-events: none; }
+  .side-section-title { opacity: 0; }
+  .main { margin-left: 60px; }
+  .search-bar { width: 300px; }
+}
 
-  .side-nav {
-    display: none;
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .search-bar {
-    width: 260px;
-  }
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 16px; }
+  .search-bar { width: 200px; }
+  .username { display: none; }
+  .upload-btn { display: none; }
 }
 </style>

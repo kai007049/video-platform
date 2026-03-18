@@ -4,10 +4,9 @@
       <button class="tab" :class="{ active: activeTab === 'recommend' }" @click="switchTab('recommend')">推荐</button>
       <button class="tab" :class="{ active: activeTab === 'latest' }" @click="switchTab('latest')">最新</button>
       <button class="tab" :class="{ active: activeTab === 'hot' }" @click="switchTab('hot')">热门</button>
-      <button v-if="currentKeyword" class="tab active">
-        搜索：{{ currentKeyword }}
-      </button>
+      <button v-if="currentKeyword" class="tab active">搜索：{{ currentKeyword }}</button>
     </div>
+
     <div class="video-grid">
       <div
         v-for="item in videoList"
@@ -22,38 +21,49 @@
             class="cover"
             @error="onCoverError"
           />
-          <span class="stats">
-            <span class="play-count">
-              <span class="icon">▶</span> {{ formatCount(item.playCount) }}
+          <div class="cover-overlay">
+            <span class="stat">
+              <span class="stat-icon">▶</span> {{ formatCount(item.playCount) }}
             </span>
-            <span class="comment-count">
-              <span class="icon">💬</span> {{ formatCount(item.commentCount) }}
+            <span class="stat">
+              <span class="stat-icon">💬</span> {{ formatCount(item.commentCount) }}
             </span>
-          </span>
-          <span class="duration">{{ formatDuration(item.durationSeconds) }}</span>
-        </div>
-        <div class="info">
-          <h3 class="title">{{ item.title }}</h3>
-          <div class="author-line" @click.stop="goProfile(item.authorId)">
-            <span class="author">{{ item.authorName || '用户' }}</span>
           </div>
-          <div class="meta-line">
-            <span class="tag">{{ item.categoryName || '视频' }}</span>
-            <span>·</span>
-            <span>{{ item.createTime ? String(item.createTime).slice(5, 10) : '' }}</span>
+          <span class="duration-badge">{{ formatDuration(item.durationSeconds) }}</span>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">{{ item.title }}</h3>
+          <div class="card-author" @click.stop="goProfile(item.authorId)">
+            <span class="author-name">{{ item.authorName || '用户' }}</span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-tag">{{ item.categoryName || '视频' }}</span>
+            <span class="meta-dot">·</span>
+            <span class="meta-date">{{ item.createTime ? String(item.createTime).slice(5, 10) : '' }}</span>
           </div>
         </div>
       </div>
     </div>
-    <div v-if="loading" class="loading">加载中...</div>
+
+    <div v-if="loading" class="loading">
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
     <div v-if="!loading && hasMore && videoList.length" class="load-more">
       <button @click="loadMore">加载更多</button>
+    </div>
+
+    <div v-if="!loading && !videoList.length" class="empty">
+      <div class="empty-icon">📺</div>
+      <div>暂无视频</div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getVideoList, getRecommended, getHotList, searchVideos } from '../api/video'
 
@@ -64,21 +74,14 @@ const videoList = ref([])
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
-const pageSize = 12
+const pageSize = 16
 const currentKeyword = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
-const defaultAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'
 
 const fetchApi = (p) => {
-  if (activeTab.value === 'search') {
-    return searchVideos(currentKeyword.value, p, pageSize)
-  }
-  if (activeTab.value === 'hot') {
-    return getHotList(p, pageSize)
-  }
-  return activeTab.value === 'recommend'
-    ? getRecommended(p, pageSize)
-    : getVideoList(p, pageSize)
+  if (activeTab.value === 'search') return searchVideos(currentKeyword.value, p, pageSize)
+  if (activeTab.value === 'hot') return getHotList(p, pageSize)
+  return activeTab.value === 'recommend' ? getRecommended(p, pageSize) : getVideoList(p, pageSize)
 }
 
 async function fetchList(isMore = false) {
@@ -87,11 +90,8 @@ async function fetchList(isMore = false) {
   try {
     const res = await fetchApi(isMore ? page.value : 1)
     const list = res.records || []
-    if (isMore) {
-      videoList.value.push(...list)
-    } else {
-      videoList.value = list
-    }
+    if (isMore) videoList.value.push(...list)
+    else videoList.value = list
     hasMore.value = res.current < res.pages
     if (isMore) page.value++
     else page.value = 2
@@ -123,25 +123,16 @@ function goProfile(authorId) {
   if (authorId) router.push(`/user/${authorId}`)
 }
 
-function loadMore() {
-  fetchList(true)
-}
-
-function goVideo(id) {
-  router.push(`/video/${id}`)
-}
+function loadMore() { fetchList(true) }
+function goVideo(id) { router.push(`/video/${id}`) }
 
 function resolveCover(item) {
   if (item.previewUrl) return item.previewUrl
-  if (item.coverUrl) {
-    return `/api/file/cover?url=${encodeURIComponent(item.coverUrl)}`
-  }
+  if (item.coverUrl) return `/api/file/cover?url=${encodeURIComponent(item.coverUrl)}`
   return placeholderCover
 }
 
-function onCoverError(event) {
-  event.target.src = placeholderCover
-}
+function onCoverError(event) { event.target.src = placeholderCover }
 
 function formatCount(n) {
   if (!n) return '0'
@@ -168,66 +159,71 @@ watch(() => route.query, () => {
   padding-bottom: 40px;
 }
 
+/* ===== Tabs ===== */
 .tabs {
   display: flex;
-  gap: 24px;
-  margin-bottom: 16px;
-  padding: 0 6px;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e3e5e7;
+  padding-bottom: 0;
 }
 
 .tab {
   position: relative;
-  padding: 6px 0;
-  font-size: 14px;
+  padding: 10px 16px;
+  font-size: 15px;
   color: #61666d;
   background: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: color 0.2s;
 }
 
+.tab:hover { color: #18191c; }
+
 .tab.active {
-  color: var(--bili-pink);
+  color: #fb7299;
+  font-weight: 700;
 }
 
 .tab.active::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -2px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--bili-pink);
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: #fb7299;
 }
 
-.author-line {
-  cursor: pointer;
-}
-
-.author-line:hover .author {
-  color: var(--bili-pink);
-}
-
+/* ===== Video Grid ===== */
 .video-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 18px 16px;
+  gap: 16px;
 }
 
 .video-card {
   cursor: pointer;
-  transition: transform 0.2s;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .video-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
 }
 
+/* Cover */
 .cover-wrap {
   position: relative;
   aspect-ratio: 16/9;
-  background: var(--bg-gray);
-  border-radius: 6px;
+  background: #f4f5f7;
   overflow: hidden;
 }
 
@@ -235,99 +231,180 @@ watch(() => route.query, () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
 }
 
-.stats {
+.video-card:hover .cover {
+  transform: scale(1.03);
+}
+
+.cover-overlay {
   position: absolute;
-  left: 6px;
-  bottom: 8px;
-  display: inline-flex;
-  gap: 10px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 8px 6px;
+  background: linear-gradient(transparent, rgba(0,0,0,.6));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 1;
 }
 
-.play-count,
-.comment-count {
+.stat {
   font-size: 12px;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.5);
 }
 
-.icon {
-  font-size: 10px;
-}
+.stat-icon { font-size: 11px; }
 
-.duration {
+.duration-badge {
   position: absolute;
   right: 6px;
-  bottom: 8px;
-  font-size: 12px;
+  bottom: 6px;
+  padding: 2px 6px;
+  background: rgba(0,0,0,.8);
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
 }
 
-.info {
-  padding: 8px 2px 0;
+/* Card Info */
+.card-info {
+  padding: 10px;
 }
 
-.title {
+.card-title {
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.4;
-  margin-bottom: 7px;
+  color: #18191c;
+  margin-bottom: 6px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  color: #18191c;
 }
 
-.author {
-  font-size: 12px;
-  color: #61666d;
-}
-
-.meta-line {
+.card-author {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.author-name {
+  font-size: 12px;
+  color: #61666d;
+  transition: color 0.15s;
+}
+
+.card-author:hover .author-name {
+  color: #fb7299;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   color: #9499a0;
 }
 
-.tag {
+.meta-tag {
+  padding: 1px 6px;
+  background: #f4f5f7;
+  border-radius: 4px;
   color: #9499a0;
+  font-size: 11px;
 }
 
-.loading,
+.meta-dot { color: #c9cdd4; }
+
+/* Loading */
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background: #fb7299;
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Load more */
 .load-more {
   text-align: center;
-  padding: 24px;
-  color: var(--text-secondary);
+  padding: 28px 0 0;
 }
 
 .load-more button {
-  padding: 8px 24px;
+  padding: 9px 32px;
   font-size: 14px;
-  color: var(--bili-pink);
-  background: transparent;
-  border: 1px solid var(--bili-pink);
-  border-radius: 6px;
+  color: #fb7299;
+  background: #fff;
+  border: 1px solid #fb7299;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .load-more button:hover {
-  background: rgba(251,114,153,.08);
+  background: #fb7299;
+  color: #fff;
+}
+
+/* Empty */
+.empty {
+  text-align: center;
+  padding: 60px 0;
+  color: #9499a0;
+  font-size: 15px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+/* Responsive */
+@media (max-width: 1600px) {
+  .video-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 1200px) {
-  .video-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  .video-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
-  .video-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
+@media (max-width: 480px) {
+  .video-grid { grid-template-columns: 1fr; }
 }
 </style>
