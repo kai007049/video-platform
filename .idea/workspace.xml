@@ -4,54 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="缓存、头像、消息队列完善">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="视频标签增加">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Layout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Layout.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/UpProfile.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Upload.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/MqTopics.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/MqTopics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/RedisConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/common/RedisConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/CommentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FavoriteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FavoriteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/FollowController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/LikeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageCenterController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageCenterController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/MessageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/entity/Video.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mapper/VideoMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/model/vo/VideoVO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/SearchSyncConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/SearchSyncConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/mq/VideoProcessConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/VideoDocument.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/VideoDocument.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/impl/VideoSearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/search/impl/VideoSearchServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MQService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/MQService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/service/impl/WatchHistoryServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/task/PlayCountSyncTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/bilibili/video/utils/MinioUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/db/migration.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/docker/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/db/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/VideoDocument.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/VideoDocument.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/impl/VideoSearchServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/search/impl/VideoSearchServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/bilibili/video/service/impl/MQServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/db/migration.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/docker/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/schema.sql" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +25,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="lx" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -119,43 +73,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Docker.docker.elasticsearch: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker.kibana: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker.minio: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker.mysql: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker.redis: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker: Compose 部署.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.video-platform [clean].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Spring Boot.VideoPlatformApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;lx&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Java-Project/Bilibili/Video-Platform&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.23665893&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Docker.docker.elasticsearch: Compose 部署.executor": "Run",
+    "Docker.docker.kibana: Compose 部署.executor": "Run",
+    "Docker.docker.minio: Compose 部署.executor": "Run",
+    "Docker.docker.mysql: Compose 部署.executor": "Run",
+    "Docker.docker.redis: Compose 部署.executor": "Run",
+    "Docker.docker: Compose 部署.executor": "Run",
+    "Maven.video-platform [clean].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.VideoPlatformApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "E:/Java-Project/Bilibili/Video-Platform",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "项目",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.23665893",
+    "settings.editor.selected.configurable": "MavenSettings",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -244,6 +198,7 @@
         <item itemvalue="Docker.docker.redis: Compose 部署" />
         <item itemvalue="Docker.docker.minio: Compose 部署" />
         <item itemvalue="Docker.docker.kibana: Compose 部署" />
+        <item itemvalue="Docker.docker: Compose 部署" />
       </list>
     </recent_temporary>
   </component>
@@ -293,7 +248,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773757027994</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="视频标签增加">
+      <option name="closed" value="true" />
+      <created>1773919425871</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1773919425871</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -313,7 +276,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="删除垃圾文件提交" />
     <MESSAGE value="缓存、头像、消息队列完善" />
-    <option name="LAST_COMMIT_MESSAGE" value="缓存、头像、消息队列完善" />
+    <MESSAGE value="视频标签增加" />
+    <option name="LAST_COMMIT_MESSAGE" value="视频标签增加" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
