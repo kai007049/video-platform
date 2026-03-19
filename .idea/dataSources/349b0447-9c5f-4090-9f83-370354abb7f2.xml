@@ -996,7 +996,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     <schema id="288" parent="1" name="bilibili">
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-03-11.06:02:53</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-03-19.08:40:54</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <schema id="289" parent="1" name="demo">
@@ -1070,604 +1070,824 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
     <table id="307" parent="288" name="favorite">
+      <Comment>视频收藏表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
     <table id="308" parent="288" name="follow">
+      <Comment>用户关注表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
-    <table id="309" parent="288" name="user">
+    <table id="309" parent="288" name="message">
+      <Comment>用户私信表</Comment>
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="310" parent="288" name="notification">
+      <Comment>系统通知表</Comment>
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="311" parent="288" name="tag">
+      <Comment>标签表</Comment>
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_unicode_ci</CollationName>
+    </table>
+    <table id="312" parent="288" name="user">
       <Comment>用户表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
-    <table id="310" parent="288" name="video">
+    <table id="313" parent="288" name="video">
       <Comment>视频表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
-    <table id="311" parent="288" name="video_category">
+    <table id="314" parent="288" name="video_category">
       <Comment>视频与分类关联表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
-    <table id="312" parent="288" name="video_like">
+    <table id="315" parent="288" name="video_like">
       <Comment>视频点赞表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
-    <table id="313" parent="288" name="watch_history">
+    <table id="316" parent="288" name="video_tag">
+      <Comment>视频标签关联表</Comment>
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
-    <column id="314" parent="304" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <table id="317" parent="288" name="watch_history">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_unicode_ci</CollationName>
+    </table>
+    <column id="318" parent="304" name="id">
+      <AutoIncrement>24</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="315" parent="304" name="name">
+    <column id="319" parent="304" name="name">
       <Comment>分类名称</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(128)|0s</StoredType>
     </column>
-    <column id="316" parent="304" name="parent_id">
+    <column id="320" parent="304" name="parent_id">
       <Comment>父分类ID，用于多级分类</Comment>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="317" parent="304" name="create_time">
+    <column id="321" parent="304" name="create_time">
       <Comment>创建时间</Comment>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="318" parent="304" name="PRIMARY">
+    <index id="322" parent="304" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="319" parent="304" name="PRIMARY">
+    <key id="323" parent="304" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="320" parent="305" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <column id="324" parent="305" name="id">
+      <AutoIncrement>4</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="321" parent="305" name="video_id">
+    <column id="325" parent="305" name="video_id">
       <Comment>视频ID</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="322" parent="305" name="user_id">
+    <column id="326" parent="305" name="user_id">
       <Comment>评论用户ID</Comment>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="323" parent="305" name="content">
+    <column id="327" parent="305" name="content">
       <Comment>评论内容</Comment>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>varchar(1024)|0s</StoredType>
     </column>
-    <column id="324" parent="305" name="parent_id">
+    <column id="328" parent="305" name="parent_id">
       <Comment>父评论ID(回复时使用)</Comment>
       <Position>5</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="325" parent="305" name="create_time">
+    <column id="329" parent="305" name="create_time">
       <Comment>创建时间</Comment>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="326" parent="305" name="like_count">
+    <column id="330" parent="305" name="like_count">
       <Comment>评论点赞数</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <index id="327" parent="305" name="PRIMARY">
+    <index id="331" parent="305" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="328" parent="305" name="idx_comment_video">
+    <index id="332" parent="305" name="idx_comment_video">
       <ColNames>video_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="329" parent="305" name="idx_comment_parent">
+    <index id="333" parent="305" name="idx_comment_parent">
       <ColNames>parent_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="330" parent="305" name="PRIMARY">
+    <key id="334" parent="305" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="331" parent="306" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <column id="335" parent="306" name="id">
+      <AutoIncrement>20</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="332" parent="306" name="video_id">
+    <column id="336" parent="306" name="video_id">
       <Comment>视频ID</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="333" parent="306" name="user_id">
+    <column id="337" parent="306" name="user_id">
       <Comment>用户ID</Comment>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="334" parent="306" name="content">
+    <column id="338" parent="306" name="content">
       <Comment>弹幕内容</Comment>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>varchar(256)|0s</StoredType>
     </column>
-    <column id="335" parent="306" name="time_point">
+    <column id="339" parent="306" name="time_point">
       <Comment>弹幕出现时间点(秒)</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="336" parent="306" name="create_time">
+    <column id="340" parent="306" name="create_time">
       <Comment>创建时间</Comment>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="337" parent="306" name="PRIMARY">
+    <index id="341" parent="306" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="338" parent="306" name="idx_danmu_video">
+    <index id="342" parent="306" name="idx_danmu_video">
       <ColNames>video_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="339" parent="306" name="PRIMARY">
+    <key id="343" parent="306" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="340" parent="307" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <column id="344" parent="307" name="id">
+      <AutoIncrement>25</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="341" parent="307" name="user_id">
+    <column id="345" parent="307" name="user_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="342" parent="307" name="video_id">
+    <column id="346" parent="307" name="video_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="343" parent="307" name="create_time">
+    <column id="347" parent="307" name="create_time">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="344" parent="307" name="PRIMARY">
+    <index id="348" parent="307" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="345" parent="307" name="uk_fav">
+    <index id="349" parent="307" name="uk_fav">
       <ColNames>user_id
 video_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="346" parent="307" name="idx_fav_user">
+    <index id="350" parent="307" name="idx_fav_user">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="347" parent="307" name="PRIMARY">
+    <key id="351" parent="307" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="348" parent="307" name="uk_fav">
+    <key id="352" parent="307" name="uk_fav">
       <UnderlyingIndexName>uk_fav</UnderlyingIndexName>
     </key>
-    <column id="349" parent="308" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <column id="353" parent="308" name="id">
+      <AutoIncrement>6</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="350" parent="308" name="follower_id">
+    <column id="354" parent="308" name="follower_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="351" parent="308" name="following_id">
+    <column id="355" parent="308" name="following_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="352" parent="308" name="create_time">
+    <column id="356" parent="308" name="create_time">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="353" parent="308" name="PRIMARY">
+    <index id="357" parent="308" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="354" parent="308" name="uk_follow">
+    <index id="358" parent="308" name="uk_follow">
       <ColNames>follower_id
 following_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="355" parent="308" name="idx_follow_follower">
+    <index id="359" parent="308" name="idx_follow_follower">
       <ColNames>follower_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="356" parent="308" name="idx_follow_following">
+    <index id="360" parent="308" name="idx_follow_following">
       <ColNames>following_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="357" parent="308" name="PRIMARY">
+    <key id="361" parent="308" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="358" parent="308" name="uk_follow">
+    <key id="362" parent="308" name="uk_follow">
       <UnderlyingIndexName>uk_follow</UnderlyingIndexName>
     </key>
-    <column id="359" parent="309" name="id">
-      <AutoIncrement>4</AutoIncrement>
+    <column id="363" parent="309" name="id">
+      <AutoIncrement>27</AutoIncrement>
+      <Comment>消息ID</Comment>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="360" parent="309" name="username">
+    <column id="364" parent="309" name="sender_id">
+      <Comment>发送者ID</Comment>
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="365" parent="309" name="receiver_id">
+      <Comment>接收者ID</Comment>
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="366" parent="309" name="content">
+      <Comment>消息内容</Comment>
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(1000)|0s</StoredType>
+    </column>
+    <column id="367" parent="309" name="status">
+      <Comment>消息状态：0未读 1已读</Comment>
+      <DefaultExpression>0</DefaultExpression>
+      <Position>5</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="368" parent="309" name="create_time">
+      <Comment>创建时间</Comment>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>6</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="369" parent="309" name="sender_deleted">
+      <Comment>发送方是否删除</Comment>
+      <DefaultExpression>0</DefaultExpression>
+      <Position>7</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="370" parent="309" name="receiver_deleted">
+      <Comment>接收方是否删除</Comment>
+      <DefaultExpression>0</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <index id="371" parent="309" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="372" parent="309" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="373" parent="310" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <Comment>通知ID</Comment>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="374" parent="310" name="user_id">
+      <Comment>用户ID</Comment>
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="375" parent="310" name="type">
+      <Comment>通知类型</Comment>
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(50)|0s</StoredType>
+    </column>
+    <column id="376" parent="310" name="content">
+      <Comment>通知内容</Comment>
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(1000)|0s</StoredType>
+    </column>
+    <column id="377" parent="310" name="status">
+      <Comment>通知状态：0未读 1已读</Comment>
+      <DefaultExpression>0</DefaultExpression>
+      <Position>5</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="378" parent="310" name="create_time">
+      <Comment>创建时间</Comment>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>6</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <index id="379" parent="310" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="380" parent="310" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="381" parent="311" name="id">
+      <AutoIncrement>16</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="382" parent="311" name="name">
+      <Comment>标签名称</Comment>
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(50)|0s</StoredType>
+    </column>
+    <column id="383" parent="311" name="create_time">
+      <Comment>创建时间</Comment>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <index id="384" parent="311" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="385" parent="311" name="uk_tag_name">
+      <ColNames>name</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="386" parent="311" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="387" parent="311" name="uk_tag_name">
+      <UnderlyingIndexName>uk_tag_name</UnderlyingIndexName>
+    </key>
+    <column id="388" parent="312" name="id">
+      <AutoIncrement>9</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="389" parent="312" name="username">
       <Comment>用户名</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(64)|0s</StoredType>
     </column>
-    <column id="361" parent="309" name="password">
+    <column id="390" parent="312" name="password">
       <Comment>密码(BCrypt加密)</Comment>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(128)|0s</StoredType>
     </column>
-    <column id="362" parent="309" name="avatar">
+    <column id="391" parent="312" name="avatar">
       <Comment>头像URL</Comment>
       <Position>4</Position>
       <StoredType>varchar(512)|0s</StoredType>
     </column>
-    <column id="363" parent="309" name="create_time">
+    <column id="392" parent="312" name="create_time">
       <Comment>创建时间</Comment>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="364" parent="309" name="is_admin">
+    <column id="393" parent="312" name="is_admin">
       <Comment>是否为管理员</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <column id="365" parent="309" name="phone">
+    <column id="394" parent="312" name="phone">
       <Comment>电话号</Comment>
       <Position>7</Position>
       <StoredType>varchar(20)|0s</StoredType>
     </column>
-    <column id="366" parent="309" name="email">
+    <column id="395" parent="312" name="email">
       <Comment>邮箱</Comment>
-      <NotNull>1</NotNull>
       <Position>8</Position>
       <StoredType>varchar(25)|0s</StoredType>
     </column>
-    <index id="367" parent="309" name="PRIMARY">
+    <index id="396" parent="312" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="368" parent="309" name="username">
+    <index id="397" parent="312" name="username">
       <ColNames>username</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="369" parent="309" name="PRIMARY">
+    <key id="398" parent="312" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="370" parent="309" name="username">
+    <key id="399" parent="312" name="username">
       <UnderlyingIndexName>username</UnderlyingIndexName>
     </key>
-    <column id="371" parent="310" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <column id="400" parent="313" name="id">
+      <AutoIncrement>49</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="372" parent="310" name="title">
+    <column id="401" parent="313" name="title">
       <Comment>视频标题</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(256)|0s</StoredType>
     </column>
-    <column id="373" parent="310" name="description">
+    <column id="402" parent="313" name="description">
       <Comment>视频描述</Comment>
       <Position>3</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="374" parent="310" name="author_id">
+    <column id="403" parent="313" name="author_id">
       <Comment>作者用户ID</Comment>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="375" parent="310" name="cover_url">
+    <column id="404" parent="313" name="cover_url">
       <Comment>封面图URL</Comment>
       <Position>5</Position>
       <StoredType>varchar(512)|0s</StoredType>
     </column>
-    <column id="376" parent="310" name="video_url">
+    <column id="405" parent="313" name="video_url">
       <Comment>视频文件URL</Comment>
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>varchar(512)|0s</StoredType>
     </column>
-    <column id="377" parent="310" name="play_count">
+    <column id="406" parent="313" name="play_count">
       <Comment>播放量</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="378" parent="310" name="like_count">
+    <column id="407" parent="313" name="like_count">
       <Comment>点赞数</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>8</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="379" parent="310" name="create_time">
+    <column id="408" parent="313" name="create_time">
       <Comment>创建时间</Comment>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>9</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="380" parent="310" name="preview_url">
+    <column id="409" parent="313" name="preview_url">
       <Comment>预览动图URL</Comment>
       <Position>10</Position>
       <StoredType>varchar(512)|0s</StoredType>
     </column>
-    <column id="381" parent="310" name="duration_seconds">
+    <column id="410" parent="313" name="duration_seconds">
       <Comment>视频时长(秒)</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>11</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="382" parent="310" name="is_recommended">
+    <column id="411" parent="313" name="is_recommended">
       <Comment>是否推荐</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>12</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <column id="383" parent="310" name="save_count">
+    <column id="412" parent="313" name="save_count">
       <Comment>收藏数</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>13</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="384" parent="310" name="category_id">
+    <column id="413" parent="313" name="category_id">
       <Comment>种类id</Comment>
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>14</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <index id="385" parent="310" name="PRIMARY">
+    <index id="414" parent="313" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="386" parent="310" name="idx_video_author">
+    <index id="415" parent="313" name="idx_video_author">
       <ColNames>author_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="387" parent="310" name="idx_video_create_time">
+    <index id="416" parent="313" name="idx_video_create_time">
       <ColNames>create_time</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="388" parent="310" name="PRIMARY">
+    <key id="417" parent="313" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="389" parent="311" name="video_id">
+    <column id="418" parent="314" name="video_id">
       <Comment>视频ID</Comment>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="390" parent="311" name="category_id">
+    <column id="419" parent="314" name="category_id">
       <Comment>分类ID</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <foreign-key id="391" parent="311" name="fk_video">
+    <foreign-key id="420" parent="314" name="fk_video">
       <ColNames>video_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <RefColNames>id</RefColNames>
       <RefTableName>video</RefTableName>
     </foreign-key>
-    <foreign-key id="392" parent="311" name="fk_category">
+    <foreign-key id="421" parent="314" name="fk_category">
       <ColNames>category_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <RefColNames>id</RefColNames>
       <RefTableName>category</RefTableName>
     </foreign-key>
-    <index id="393" parent="311" name="PRIMARY">
+    <index id="422" parent="314" name="PRIMARY">
       <ColNames>video_id
 category_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="394" parent="311" name="fk_category">
+    <index id="423" parent="314" name="fk_category">
       <ColNames>category_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="395" parent="311" name="PRIMARY">
+    <key id="424" parent="314" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="396" parent="312" name="id">
-      <AutoIncrement>1</AutoIncrement>
+    <column id="425" parent="315" name="id">
+      <AutoIncrement>26</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="397" parent="312" name="video_id">
+    <column id="426" parent="315" name="video_id">
       <Comment>视频ID</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="398" parent="312" name="user_id">
+    <column id="427" parent="315" name="user_id">
       <Comment>用户ID</Comment>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="399" parent="312" name="create_time">
+    <column id="428" parent="315" name="create_time">
       <Comment>创建时间</Comment>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="400" parent="312" name="PRIMARY">
+    <index id="429" parent="315" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="401" parent="312" name="uk_video_user">
+    <index id="430" parent="315" name="uk_video_user">
       <ColNames>video_id
 user_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="402" parent="312" name="idx_video_like_video">
+    <index id="431" parent="315" name="idx_video_like_video">
       <ColNames>video_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="403" parent="312" name="PRIMARY">
+    <key id="432" parent="315" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="404" parent="312" name="uk_video_user">
+    <key id="433" parent="315" name="uk_video_user">
       <UnderlyingIndexName>uk_video_user</UnderlyingIndexName>
     </key>
-    <column id="405" parent="313" name="id">
+    <column id="434" parent="316" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="406" parent="313" name="user_id">
+    <column id="435" parent="316" name="video_id">
+      <Comment>视频ID</Comment>
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="407" parent="313" name="video_id">
+    <column id="436" parent="316" name="tag_id">
+      <Comment>标签ID</Comment>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="408" parent="313" name="watch_seconds">
+    <column id="437" parent="316" name="create_time">
+      <Comment>创建时间</Comment>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <index id="438" parent="316" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="439" parent="316" name="uk_video_tag">
+      <ColNames>video_id
+tag_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="440" parent="316" name="idx_video_tag_video">
+      <ColNames>video_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="441" parent="316" name="idx_video_tag_tag">
+      <ColNames>tag_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="442" parent="316" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="443" parent="316" name="uk_video_tag">
+      <UnderlyingIndexName>uk_video_tag</UnderlyingIndexName>
+    </key>
+    <column id="444" parent="317" name="id">
+      <AutoIncrement>11</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="445" parent="317" name="user_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="446" parent="317" name="video_id">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="447" parent="317" name="watch_seconds">
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="409" parent="313" name="create_time">
+    <column id="448" parent="317" name="create_time">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="410" parent="313" name="update_time">
+    <column id="449" parent="317" name="update_time">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <NotNull>1</NotNull>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
       <Position>6</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="411" parent="313" name="PRIMARY">
+    <index id="450" parent="317" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="412" parent="313" name="uk_user_video">
+    <index id="451" parent="317" name="uk_user_video">
       <ColNames>user_id
 video_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="413" parent="313" name="idx_watch_user">
+    <index id="452" parent="317" name="idx_watch_user">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="414" parent="313" name="idx_watch_time">
+    <index id="453" parent="317" name="idx_watch_time">
       <ColNames>update_time</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="415" parent="313" name="PRIMARY">
+    <key id="454" parent="317" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="416" parent="313" name="uk_user_video">
+    <key id="455" parent="317" name="uk_user_video">
       <UnderlyingIndexName>uk_user_video</UnderlyingIndexName>
     </key>
   </database-model>

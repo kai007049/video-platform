@@ -1,9 +1,12 @@
 package com.bilibili.video.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 视频上传 DTO
@@ -20,4 +23,7 @@ public class VideoUploadDTO {
 
     @NotNull(message = "分类不能为空")
     private Long categoryId;
+
+    @NotEmpty(message = "标签不能为空")
+    private List<Long> tagIds;
 }

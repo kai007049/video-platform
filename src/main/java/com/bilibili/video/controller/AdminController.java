@@ -89,7 +89,7 @@ public class AdminController {
     }
 
     private void ensureAdmin(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = com.bilibili.video.utils.UserContext.get();
         if (userId == null) throw new BizException(401, "请先登录");
         User user = userMapper.selectById(userId);
         if (user == null || user.getIsAdmin() == null || !user.getIsAdmin()) {

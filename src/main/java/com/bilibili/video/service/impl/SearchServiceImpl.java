@@ -1,10 +1,14 @@
 package com.bilibili.video.service.impl;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bilibili.video.entity.User;
 import com.bilibili.video.entity.Video;
+import com.bilibili.video.mapper.UserMapper;
 import com.bilibili.video.mapper.VideoMapper;
+import com.bilibili.video.model.vo.SearchUserVO;
 import com.bilibili.video.model.vo.VideoVO;
 import com.bilibili.video.search.VideoDocument;
 import com.bilibili.video.search.VideoSearchService;
@@ -20,12 +24,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
 
     private final VideoMapper videoMapper;
+    private final UserMapper userMapper;
     private final ElasticsearchOperations elasticsearchOperations;
     private final VideoSearchService videoSearchService;
 
@@ -68,6 +74,29 @@ public class SearchServiceImpl implements SearchService {
         Page<VideoVO> resultPage = new Page<>(page, size, result.getTotalHits());
         resultPage.setRecords(records);
         return resultPage;
+    }
+
+    @Override
+    public List<SearchUserVO> searchUsers(String keyword, int page, int size) {
+        if (keyword == null || keyword.isBlank()) {
+            return new ArrayList<>();
+        }
+        int safePage = Math.max(1, page);
+        int safeSize = Math.min(50, Math.max(1, size));
+        int offset = (safePage - 1) * safeSize;
+
+        List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>()
+                .like(User::getUsername, keyword)
+                .orderByDesc(User::getCreateTime)
+                .last("limit " + offset + "," + safeSize));
+
+        return users.stream().map(u -> {
+            SearchUserVO vo = new SearchUserVO();
+            vo.setId(u.getId());
+            vo.setUsername(u.getUsername());
+            vo.setAvatar(u.getAvatar());
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     @Override

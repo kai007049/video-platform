@@ -23,15 +23,12 @@ request.interceptors.response.use(
   res => {
     const { code, data, message } = res.data
     if (code === 200) return data
-    if (code === 401 || code === 403) {
-      const store = useUserStore()
-      store.logout()
-    }
+    // 业务 code 不再直接触发登出，避免将“权限不足”等场景误判为登录失效
     return Promise.reject(new Error(message || '请求失败'))
   },
   err => {
     const msg = err.response?.data?.message || err.message || '网络错误'
-    if (err.response?.status === 401 || err.response?.status === 403) {
+    if (err.response?.status === 401) {
       const store = useUserStore()
       store.logout()
     }

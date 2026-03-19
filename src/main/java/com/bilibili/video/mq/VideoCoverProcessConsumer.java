@@ -1,5 +1,6 @@
 package com.bilibili.video.mq;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.bilibili.video.common.MqTopics;
 import com.bilibili.video.entity.Video;
 import com.bilibili.video.mapper.VideoMapper;
@@ -38,9 +39,13 @@ public class VideoCoverProcessConsumer implements RocketMQListener<VideoProcessM
             // 从视频中抽取封面并上传对象存储
             String coverUrl = videoCoverExtractor.extractAndUploadCover(video.getVideoUrl());
             if (coverUrl != null) {
-                // 持久化封面地址并刷新缓存
-                video.setCoverUrl(coverUrl);
-                videoMapper.updateById(video);
+                // 仅更新封面字段，避免覆盖其他异步更新（如 durationSeconds）
+                videoMapper.update(
+                        null,
+                        new LambdaUpdateWrapper<Video>()
+                                .set(Video::getCoverUrl, coverUrl)
+                                .eq(Video::getId, video.getId())
+                );
                 videoCacheService.evictVideoCache(video.getId());
                 videoCacheService.doubleDeleteVideoCache(video.getId());
                 log.info("[MQ] 封面生成完成: videoId={}", video.getId());

@@ -38,7 +38,7 @@
               </label>
               <div class="menu-item" @click="goCreator">个人中心</div>
               <router-link class="menu-item" to="/message" @click="showUserMenu = false">消息中心</router-link>
-              <router-link v-if="userStore.userInfo?.isAdmin" class="menu-item admin" to="/admin" @click="showUserMenu = false">管理面板</router-link>
+              <router-link v-if="isAdmin" class="menu-item admin" to="/admin" @click="showUserMenu = false">管理面板</router-link>
               <div class="menu-divider"></div>
               <div class="menu-item logout" @click="handleLogout">退出登录</div>
             </div>
@@ -83,7 +83,7 @@
           <span class="side-label">最新</span>
         </router-link>
 
-        <template v-if="userStore.userInfo?.isAdmin">
+        <template v-if="isAdmin">
           <div class="side-divider"></div>
           <router-link class="side-item admin-item" :class="{ active: $route.path === '/admin' }" to="/admin" title="管理">
             <span class="side-icon">⚙️</span>
@@ -104,13 +104,13 @@
       <router-view />
     </main>
 
-    <LoginModal v-if="showLogin" @close="showLogin = false" />
-    <RegisterModal v-if="showRegister" @close="showRegister = false" />
+    <LoginModal v-if="showLogin" :model-value="showLogin" @update:modelValue="showLogin = $event" />
+    <RegisterModal v-if="showRegister" :model-value="showRegister" @update:modelValue="showRegister = $event" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { updateAvatar } from '../api/user'
@@ -121,13 +121,17 @@ const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
 const showUserMenu = ref(false)
-const showLogin = ref(false)
-const showRegister = ref(false)
+const showLogin = ref(route.query.login === '1')
+const showRegister = ref(route.query.register === '1')
 const keyword = ref('')
 const sidebarCollapsed = ref(false)
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 const isUploadingAvatar = ref(false)
 const maxAvatarSize = 2 * 1024 * 1024
+const isAdmin = computed(() => {
+  const v = userStore.userInfo?.isAdmin
+  return v === true || v === 1 || v === '1'
+})
 
 function resolveAvatar(avatar) {
   if (!avatar) return avatarPlaceholder
@@ -164,8 +168,25 @@ onMounted(() => {
   if (userStore.isLoggedIn && !userStore.userInfo) userStore.fetchUserInfo()
 })
 
-function openLogin() { showLogin.value = true }
-function openRegister() { showRegister.value = true }
+watch(
+  () => route.query,
+  (q) => {
+    showLogin.value = q.login === '1'
+    showRegister.value = q.register === '1'
+  },
+  { immediate: true }
+)
+
+function openLogin() {
+  const q = { ...route.query, login: '1' }
+  delete q.register
+  router.push({ path: route.path, query: q })
+}
+function openRegister() {
+  const q = { ...route.query, register: '1' }
+  delete q.login
+  router.push({ path: route.path, query: q })
+}
 
 function goCreator() {
   router.push('/creator')

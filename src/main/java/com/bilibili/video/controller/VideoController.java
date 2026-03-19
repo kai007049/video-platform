@@ -49,12 +49,14 @@ public class VideoController {
             @Parameter(description = "视频标题", required = true) @RequestParam("title") String title,
             @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
             @Parameter(description = "分类ID", required = true) @RequestParam("categoryId") Long categoryId,
+            @Parameter(description = "标签ID列表", required = true) @RequestParam("tagIds") java.util.List<Long> tagIds,
             @Parameter(hidden = true) HttpServletRequest request) {
         Long userId = UserContext.get();
         VideoUploadDTO dto = new VideoUploadDTO();
         dto.setTitle(title);
         dto.setDescription(description);
         dto.setCategoryId(categoryId);
+        dto.setTagIds(tagIds);
         return Result.success(videoService.upload(videoFile, coverFile, dto, userId));
     }
 

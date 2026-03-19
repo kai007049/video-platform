@@ -40,6 +40,19 @@
           <input v-model="form.title" type="text" placeholder="请输入视频标题" required />
         </div>
         <div class="field">
+          <label>标签 <span class="required">*</span></label>
+          <div class="tag-actions">
+            <button type="button" class="btn-recommend" @click="recommendTags" :disabled="loadingSuggest">{{ loadingSuggest ? '推荐中...' : '智能推荐标签' }}</button>
+          </div>
+          <div class="tag-list">
+            <label v-for="t in tags" :key="t.id" class="tag-item">
+              <input type="checkbox" :value="t.id" v-model="form.tagIds" />
+              <span>{{ t.name }}</span>
+            </label>
+          </div>
+          <p v-if="tagError" class="hint">{{ tagError }}</p>
+        </div>
+        <div class="field">
           <label>简介（可选）</label>
           <textarea v-model="form.description" placeholder="介绍一下你的视频吧~" rows="4"></textarea>
         </div>
@@ -57,6 +70,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { uploadVideo } from '../api/video'
 import { getCategoryTree } from '../api/category'
+import { getTagList, recommendTags as recommendTagsApi } from '../api/tag'
 
 const router = useRouter()
 const videoInput = ref(null)
@@ -64,14 +78,18 @@ const coverInput = ref(null)
 const loading = ref(false)
 const error = ref('')
 const categoryError = ref('')
+const tagError = ref('')
+const loadingSuggest = ref(false)
 const videoFile = ref(null)
 const coverFile = ref(null)
 const categories = ref([])
+const tags = ref([])
 const form = reactive({
   title: '',
   description: '',
   parentCategoryId: '',
-  categoryId: ''
+  categoryId: '',
+  tagIds: []
 })
 
 const childCategories = computed(() => {
@@ -99,6 +117,31 @@ async function loadCategories() {
   }
 }
 
+async function loadTags() {
+  try {
+    tags.value = await getTagList()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+async function recommendTags() {
+  if (!tags.value.length) return
+  loadingSuggest.value = true
+  try {
+    const ids = await recommendTagsApi({
+      title: form.title || '',
+      description: form.description || ''
+    })
+    form.tagIds = Array.isArray(ids) ? ids : []
+    tagError.value = ''
+  } catch (e) {
+    tagError.value = e.message || '智能推荐失败'
+  } finally {
+    loadingSuggest.value = false
+  }
+}
+
 async function submit() {
   if (!videoFile.value || !form.title.trim()) {
     error.value = '请选择视频并填写标题'
@@ -108,8 +151,13 @@ async function submit() {
     categoryError.value = '请选择视频分类'
     return
   }
+  if (!form.tagIds.length) {
+    tagError.value = '请至少选择一个标签'
+    return
+  }
   error.value = ''
   categoryError.value = ''
+  tagError.value = ''
   loading.value = true
   try {
     const fd = new FormData()
@@ -118,6 +166,7 @@ async function submit() {
     fd.append('title', form.title.trim())
     if (form.description.trim()) fd.append('description', form.description.trim())
     fd.append('categoryId', String(form.categoryId))
+    form.tagIds.forEach(id => fd.append('tagIds', String(id)))
     const res = await uploadVideo(fd)
     alert('投稿成功')
     router.push(`/video/${res.id}`)
@@ -130,6 +179,7 @@ async function submit() {
 
 onMounted(() => {
   loadCategories()
+  loadTags()
 })
 </script>
 

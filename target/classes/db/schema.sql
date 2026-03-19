@@ -185,4 +185,54 @@ create table favorite
 create index idx_fav_user
     on favorite (user_id);
 
+-- 标签
+create table tag
+(
+    id          bigint auto_increment
+        primary key,
+    name        varchar(50)                         not null comment '标签名称',
+    create_time datetime   default CURRENT_TIMESTAMP not null comment '创建时间',
+    constraint uk_tag_name
+        unique (name)
+)
+    comment '标签表' collate = utf8mb4_unicode_ci;
+
+-- 视频-标签关联
+create table video_tag
+(
+    id          bigint auto_increment
+        primary key,
+    video_id    bigint                             not null comment '视频ID',
+    tag_id      bigint                             not null comment '标签ID',
+    create_time datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    constraint uk_video_tag
+        unique (video_id, tag_id)
+)
+    comment '视频标签关联表' collate = utf8mb4_unicode_ci;
+
+create index idx_video_tag_video
+    on video_tag (video_id);
+
+create index idx_video_tag_tag
+    on video_tag (tag_id);
+
+-- 标签初始化数据
+insert into tag (name) values
+('动画'),
+('影视'),
+('音乐'),
+('游戏'),
+('科技'),
+('生活'),
+('娱乐'),
+('搞笑'),
+('鬼畜'),
+('知识'),
+('影视解说'),
+('美食'),
+('旅行'),
+('数码'),
+('二次元'),
+('Vlog');
+
 

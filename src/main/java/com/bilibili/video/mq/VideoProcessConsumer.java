@@ -1,5 +1,6 @@
 package com.bilibili.video.mq;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.bilibili.video.common.MqTopics;
 import com.bilibili.video.entity.Video;
 import com.bilibili.video.mapper.VideoMapper;
@@ -35,11 +36,21 @@ public class VideoProcessConsumer implements RocketMQListener<VideoProcessMessag
             Integer durationSeconds = videoCoverExtractor.extractDurationSeconds(video.getVideoUrl());
             log.info("[MQ] 获取视频时长: {}", durationSeconds);
             if (durationSeconds != null && durationSeconds > 0) {
-                // 更新时长并清理缓存（双删确保一致性）
-                video.setDurationSeconds(durationSeconds);
-                videoMapper.updateById(video);
-                videoCacheService.evictVideoCache(video.getId());
-                videoCacheService.doubleDeleteVideoCache(video.getId());
+                // 仅在时长仍为 0/空时更新，避免被其他异步流程覆盖
+                int updated = videoMapper.update(
+                        null,
+                        new LambdaUpdateWrapper<Video>()
+                                .set(Video::getDurationSeconds, durationSeconds)
+                                .eq(Video::getId, video.getId())
+                                .and(w -> w.isNull(Video::getDurationSeconds).or().eq(Video::getDurationSeconds, 0))
+                );
+                if (updated > 0) {
+                    videoCacheService.evictVideoCache(video.getId());
+                    videoCacheService.doubleDeleteVideoCache(video.getId());
+                    log.info("[MQ] 更新视频时长成功: videoId={}, duration={}", video.getId(), durationSeconds);
+                } else {
+                    log.info("[MQ] 跳过更新时长(已存在非0时长): videoId={}", video.getId());
+                }
             }
         } catch (Exception e) {
             log.warn("[MQ] 计算视频时长失败: {}", message.getVideoId(), e);

@@ -11,6 +11,7 @@ import com.bilibili.video.entity.Favorite;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.entity.Video;
 import com.bilibili.video.entity.VideoLike;
+import com.bilibili.video.entity.VideoTag;
 import com.bilibili.video.entity.WatchHistory;
 import com.bilibili.video.exception.BizException;
 import com.bilibili.video.mapper.CommentMapper;
@@ -18,6 +19,7 @@ import com.bilibili.video.mapper.FavoriteMapper;
 import com.bilibili.video.mapper.UserMapper;
 import com.bilibili.video.mapper.VideoLikeMapper;
 import com.bilibili.video.mapper.VideoMapper;
+import com.bilibili.video.mapper.VideoTagMapper;
 import com.bilibili.video.mapper.WatchHistoryMapper;
 import com.bilibili.video.service.FavoriteService;
 import com.bilibili.video.service.LikeService;
@@ -28,7 +30,6 @@ import com.bilibili.video.service.VideoCacheService;
 import com.bilibili.video.service.VideoService;
 import com.bilibili.video.service.WatchHistoryService;
 import com.bilibili.video.utils.MinioUtils;
-import com.bilibili.video.utils.VideoCoverExtractor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -56,7 +57,6 @@ public class VideoServiceImpl implements VideoService {
     private final CommentMapper commentMapper;
     private final UserMapper userMapper;
     private final MinioUtils minioUtils;
-    private final VideoCoverExtractor videoCoverExtractor;
     private final RedisTemplate<String, Object> redisTemplate;
     private final LikeService likeService;
     private final FavoriteService favoriteService;
@@ -64,6 +64,7 @@ public class VideoServiceImpl implements VideoService {
     private final VideoLikeMapper videoLikeMapper;
     private final FavoriteMapper favoriteMapper;
     private final WatchHistoryMapper watchHistoryMapper;
+    private final VideoTagMapper videoTagMapper;
     private final VideoCacheService videoCacheService;
     private final MQService mqService;
 
@@ -112,6 +113,19 @@ public class VideoServiceImpl implements VideoService {
         video.setCategoryId(dto.getCategoryId());
         videoMapper.insert(video);
 
+        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
+            java.util.Set<Long> uniqueTagIds = dto.getTagIds().stream()
+                    .filter(java.util.Objects::nonNull)
+                    .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+            for (Long tagId : uniqueTagIds) {
+                VideoTag relation = new VideoTag();
+                relation.setVideoId(video.getId());
+                relation.setTagId(tagId);
+                videoTagMapper.insert(relation);
+            }
+        }
+
+        // 发送MQ消息
         mqService.sendVideoProcess(new com.bilibili.video.model.mq.VideoProcessMessage(video.getId(), authorId));
         mqService.sendSearchSync(new com.bilibili.video.model.mq.SearchSyncMessage("video", video.getId(), "create"));
         mqService.sendVideoCoverProcess(new com.bilibili.video.model.mq.VideoProcessMessage(video.getId(), authorId));

@@ -4,10 +4,16 @@
       <button class="tab" :class="{ active: activeTab === 'recommend' }" @click="switchTab('recommend')">推荐</button>
       <button class="tab" :class="{ active: activeTab === 'latest' }" @click="switchTab('latest')">最新</button>
       <button class="tab" :class="{ active: activeTab === 'hot' }" @click="switchTab('hot')">热门</button>
-      <button v-if="currentKeyword" class="tab active">搜索：{{ currentKeyword }}</button>
+      <button v-if="currentKeyword" class="tab" :class="{ active: activeTab === 'search' }" @click="switchTab('search')">搜索：{{ currentKeyword }}</button>
     </div>
 
-    <div class="video-grid">
+    <div v-if="activeTab === 'search' && currentKeyword" class="search-cats">
+      <button class="cat" :class="{ active: searchType === 'all' }" @click="switchSearchType('all')">综合</button>
+      <button class="cat" :class="{ active: searchType === 'video' }" @click="switchSearchType('video')">视频</button>
+      <button class="cat" :class="{ active: searchType === 'user' }" @click="switchSearchType('user')">用户</button>
+    </div>
+
+    <div v-if="searchType !== 'user'" class="video-grid">
       <div
         v-for="item in videoList"
         :key="item.id"
@@ -45,6 +51,13 @@
       </div>
     </div>
 
+    <div v-if="activeTab === 'search' && currentKeyword && (searchType === 'user' || searchType === 'all') && userList.length" class="user-grid">
+      <div v-for="u in userList" :key="u.id" class="user-card" @click="goProfile(u.id)">
+        <img :src="resolveAvatar(u.avatar)" class="user-avatar" alt="avatar" />
+        <div class="user-name">{{ u.username }}</div>
+      </div>
+    </div>
+
     <div v-if="loading" class="loading">
       <div class="loading-dots">
         <span></span><span></span><span></span>
@@ -55,7 +68,12 @@
       <button @click="loadMore">加载更多</button>
     </div>
 
-    <div v-if="!loading && !videoList.length" class="empty">
+    <div v-if="!loading && searchType === 'user' && !userList.length" class="empty">
+      <div class="empty-icon">👤</div>
+      <div>暂无用户</div>
+    </div>
+
+    <div v-else-if="!loading && searchType !== 'user' && !videoList.length" class="empty">
       <div class="empty-icon">📺</div>
       <div>暂无视频</div>
     </div>
@@ -65,7 +83,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getVideoList, getRecommended, getHotList, searchVideos } from '../api/video'
+import { getVideoList, getRecommended, getHotList, searchVideos, searchUsers } from '../api/video'
 
 const router = useRouter()
 const route = useRoute()
@@ -76,6 +94,8 @@ const page = ref(1)
 const hasMore = ref(true)
 const pageSize = 16
 const currentKeyword = ref('')
+const searchType = ref('all')
+const userList = ref([])
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 
 const fetchApi = (p) => {
@@ -84,10 +104,22 @@ const fetchApi = (p) => {
   return activeTab.value === 'recommend' ? getRecommended(p, pageSize) : getVideoList(p, pageSize)
 }
 
+const fetchUserApi = (p) => searchUsers(currentKeyword.value, p, pageSize)
+
 async function fetchList(isMore = false) {
   if (loading.value) return
   loading.value = true
   try {
+    if (activeTab.value === 'search' && searchType.value === 'user') {
+      const list = await fetchUserApi(isMore ? page.value : 1)
+      if (isMore) userList.value.push(...(list || []))
+      else userList.value = list || []
+      hasMore.value = (list || []).length >= pageSize
+      if (isMore) page.value++
+      else page.value = 2
+      return
+    }
+
     const res = await fetchApi(isMore ? page.value : 1)
     const list = res.records || []
     if (isMore) videoList.value.push(...list)
@@ -95,6 +127,13 @@ async function fetchList(isMore = false) {
     hasMore.value = res.current < res.pages
     if (isMore) page.value++
     else page.value = 2
+
+    if (activeTab.value === 'search' && searchType.value === 'all') {
+      const u = await fetchUserApi(1)
+      userList.value = u || []
+    } else {
+      userList.value = []
+    }
   } catch (e) {
     console.error(e)
   } finally {
@@ -104,6 +143,13 @@ async function fetchList(isMore = false) {
 
 function switchTab(tab) {
   activeTab.value = tab
+  if (tab !== 'search') searchType.value = 'all'
+  page.value = 1
+  fetchList(false)
+}
+
+function switchSearchType(type) {
+  searchType.value = type
   page.value = 1
   fetchList(false)
 }
@@ -119,12 +165,22 @@ function syncFromQuery() {
   }
 }
 
+function resolveAvatar(avatar) {
+  if (!avatar) return new URL('../assets/avatar-placeholder.png', import.meta.url).href
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  if (avatar.startsWith('/api/file/avatar') || avatar.startsWith('/file/avatar')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
 function goProfile(authorId) {
   if (authorId) router.push(`/user/${authorId}`)
 }
 
 function loadMore() { fetchList(true) }
-function goVideo(id) { router.push(`/video/${id}`) }
+function goVideo(id) {
+  const href = router.resolve({ path: `/video/${id}` }).href
+  window.open(href, '_blank')
+}
 
 function resolveCover(item) {
   if (item.previewUrl) return item.previewUrl
@@ -157,6 +213,64 @@ watch(() => route.query, () => {
 <style scoped>
 .home {
   padding-bottom: 40px;
+}
+
+.search-cats {
+  display: flex;
+  gap: 8px;
+  margin: -6px 0 14px;
+}
+
+.search-cats .cat {
+  padding: 6px 14px;
+  font-size: 13px;
+  border: 1px solid #e3e5e7;
+  border-radius: 16px;
+  background: #fff;
+  color: #61666d;
+  cursor: pointer;
+}
+
+.search-cats .cat.active {
+  border-color: #fb7299;
+  color: #fb7299;
+  background: #fff0f4;
+}
+
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.user-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #f0f1f2;
+}
+
+.user-card:hover {
+  border-color: #fb7299;
+}
+
+.user-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+.user-name {
+  font-size: 13px;
+  color: #18191c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ===== Tabs ===== */

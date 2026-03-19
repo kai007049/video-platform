@@ -61,7 +61,9 @@ function close() {
 
 function switchToLogin() {
   close()
-  router.push({ path: router.currentRoute.value.path, query: { ...router.currentRoute.value.query, login: '1' } })
+  const q = { ...router.currentRoute.value.query, login: '1' }
+  delete q.register
+  router.push({ path: router.currentRoute.value.path, query: q })
 }
 
 function showToast(message, type = 'success') {

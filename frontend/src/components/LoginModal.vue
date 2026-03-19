@@ -74,7 +74,9 @@ function close() {
 
 function switchToRegister() {
   close()
-  router.push({ path: router.currentRoute.value.path, query: { ...router.currentRoute.value.query, register: '1' } })
+  const q = { ...router.currentRoute.value.query, register: '1' }
+  delete q.login
+  router.push({ path: router.currentRoute.value.path, query: q })
 }
 
 function showToast(message, type = 'success') {

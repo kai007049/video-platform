@@ -88,3 +88,7 @@ ffmpeg:
 video:
   search:
     enabled: true
+
+agent:
+  service:
+    url: http://localhost:8001
