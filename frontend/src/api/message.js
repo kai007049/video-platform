@@ -9,6 +9,9 @@ export const getMessageList = (targetId, page = 1, size = 20) =>
 
 export const sendMessageApi = (data) => request.post('/message', data)
 
+export const uploadMessageImageApi = (formData) =>
+  request.post('/message/upload-image', formData)
+
 export const readMessageApi = (targetId) => request.post('/message/read', null, { params: { targetId } })
 
 export const revokeMessageApi = (id) => request.post('/message/revoke', null, { params: { id } })

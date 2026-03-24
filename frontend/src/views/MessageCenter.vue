@@ -37,7 +37,6 @@
                   <span>{{ item.targetName || '用户' }}</span>
                   <span class="count" v-if="item.unread > 0">{{ item.unread }}</span>
                 </div>
-                <div class="subtitle">{{ item.lastContent }}</div>
               </div>
               <div class="actions" @click.stop>
                 <button class="more-btn" @click="toggleActionMenu(item)">⋯</button>
@@ -66,7 +65,13 @@
                   :class="{ self: item.msg.senderId === userId }"
                 >
                   <div class="bubble">
-                    <span>{{ item.msg.content }}</span>
+                    <img
+                      v-if="isImageMessage(item.msg.content)"
+                      class="msg-image"
+                      :src="resolveMessageImage(item.msg.content)"
+                      alt="图片消息"
+                    />
+                    <span v-else>{{ item.msg.content }}</span>
                     <button
                       v-if="item.msg.senderId === userId"
                       class="revoke"
@@ -80,6 +85,20 @@
             </div>
             <div class="detail-input">
               <input v-model="messageText" placeholder="输入私信内容" @keyup.enter="sendMessage" />
+              <button class="ai-draft-btn" :disabled="draftingAi || !currentTarget" @click="runAiDraft">
+                {{ draftingAi ? '生成中...' : 'AI 草稿' }}
+              </button>
+              <label class="img-upload-btn" :class="{ disabled: uploadingImage }" :title="uploadingImage ? '上传中...' : '发送图片'">
+                <input type="file" accept="image/*" @change="sendImageMessage" :disabled="uploadingImage" />
+                <span v-if="!uploadingImage" class="img-upload-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3.2" y="4" width="17.6" height="16" rx="3" stroke="currentColor" stroke-width="1.9"/>
+                    <circle cx="9" cy="10" r="1.8" fill="currentColor"/>
+                    <path d="M6.8 16.4L10.2 12.8C10.6 12.4 11.2 12.4 11.6 12.8L13.6 14.8C14 15.2 14.6 15.2 15 14.8L17.2 12.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <span v-else class="img-uploading-dot" aria-hidden="true"></span>
+              </label>
               <button @click="sendMessage">发送</button>
             </div>
           </div>
@@ -115,12 +134,14 @@ import {
   getConversations,
   getMessageList,
   sendMessageApi,
+  uploadMessageImageApi,
   readMessageApi,
   revokeMessageApi,
   clearConversationApi,
   getNotifications,
   readNotificationApi
 } from '../api/message'
+import { createMessageDraftTask, pollAgentTask } from '../api/agent'
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -133,6 +154,8 @@ const currentTarget = ref(null)
 const messages = ref([])
 const messageItems = ref([])
 const messageText = ref('')
+const uploadingImage = ref(false)
+const draftingAi = ref(false)
 const notifications = ref([])
 const systemNotifications = ref([])
 const actionMenu = ref({ visible: false, target: null })
@@ -164,6 +187,45 @@ async function sendMessage() {
   await sendMessageApi({ receiverId: currentTarget.value.targetId, content: messageText.value })
   messageText.value = ''
   await loadMessages()
+}
+
+async function sendImageMessage(event) {
+  const file = event.target.files && event.target.files[0]
+  event.target.value = ''
+  if (!file || !currentTarget.value || uploadingImage.value) return
+  try {
+    uploadingImage.value = true
+    const formData = new FormData()
+    formData.append('file', file)
+    const objectName = await uploadMessageImageApi(formData)
+    await sendMessageApi({ receiverId: currentTarget.value.targetId, content: objectName })
+    await loadMessages()
+  } finally {
+    uploadingImage.value = false
+  }
+}
+
+async function runAiDraft() {
+  if (!currentTarget.value) return
+  draftingAi.value = true
+  try {
+    const latest = messages.value.length ? messages.value[messages.value.length - 1].content || '' : '你好'
+    const { data } = await createMessageDraftTask({
+      target_id: currentTarget.value.targetId,
+      scenario: 'reply',
+      latest_user_message: latest,
+      tone: 'friendly'
+    })
+    const done = await pollAgentTask(data.task_id)
+    if (done.status !== 'success' || !done.result) {
+      throw new Error(done.error || 'AI 草稿生成失败')
+    }
+    messageText.value = done.result.draft || ''
+  } catch (e) {
+    alert(e.message || 'AI 草稿生成失败')
+  } finally {
+    draftingAi.value = false
+  }
 }
 
 async function revokeMessage(id) {
@@ -245,6 +307,22 @@ function resolveAvatar(avatar) {
 
 function onAvatarError(event) {
   event.target.src = avatarPlaceholder
+}
+
+function isImageMessage(content) {
+  if (!content) return false
+  const lower = String(content).toLowerCase()
+  return lower.startsWith('message/') && (
+    lower.endsWith('.png') ||
+    lower.endsWith('.jpg') ||
+    lower.endsWith('.jpeg') ||
+    lower.endsWith('.webp') ||
+    lower.endsWith('.gif')
+  )
+}
+
+function resolveMessageImage(content) {
+  return `/api/file/message?url=${encodeURIComponent(content)}`
 }
 
 function toggleActionMenu(item) {
@@ -465,9 +543,15 @@ onUnmounted(() => {
   justify-content: center;
 }
 
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
 .info .title {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 14px;
 }
 
@@ -543,11 +627,83 @@ onUnmounted(() => {
   border: 1px solid var(--border-color);
 }
 
+.img-upload-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .18s ease;
+}
+
+.img-upload-btn:hover {
+  border-color: var(--bili-pink);
+  color: var(--bili-pink);
+  background: rgba(251, 114, 153, .06);
+}
+
+.img-upload-btn input {
+  display: none;
+}
+
+.img-upload-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+}
+
+.img-upload-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.img-uploading-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bili-pink);
+  animation: msg-upload-pulse 1s infinite ease-in-out;
+}
+
+.img-upload-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .detail-input button {
   padding: 10px 18px;
   background: var(--bili-pink);
   color: #fff;
   border-radius: 8px;
+}
+
+.ai-draft-btn {
+  white-space: nowrap;
+  background: #fff !important;
+  color: var(--bili-pink) !important;
+  border: 1px solid var(--bili-pink);
+}
+
+.ai-draft-btn:disabled {
+  opacity: .65;
+}
+
+.msg-image {
+  max-width: 180px;
+  max-height: 180px;
+  border-radius: 8px;
+  display: block;
+}
+
+@keyframes msg-upload-pulse {
+  0%, 100% { transform: scale(0.75); opacity: 0.5; }
+  50% { transform: scale(1); opacity: 1; }
 }
 
 .notify-item {

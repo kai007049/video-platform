@@ -20,20 +20,26 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
 
+    private static final String SEARCH_HISTORY_KEY_PREFIX = "search:history:";
+    private static final String HOT_SEARCH_KEY = "search:hot";
+
     private final VideoMapper videoMapper;
     private final UserMapper userMapper;
     private final ElasticsearchOperations elasticsearchOperations;
     private final VideoSearchService videoSearchService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public IPage<VideoVO> searchVideos(String keyword, int page, int size) {
@@ -110,5 +116,59 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public void deleteVideo(Long videoId) {
         videoSearchService.delete(videoId);
+    }
+
+    @Override
+    public void recordSearchKeyword(Long userId, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return;
+        }
+        String normalized = keyword.trim();
+
+        // 全站热搜计数
+        redisTemplate.opsForZSet().incrementScore(HOT_SEARCH_KEY, normalized, 1D);
+
+        // 登录用户记录个人搜索历史（最近在前）
+        if (userId != null) {
+            String key = SEARCH_HISTORY_KEY_PREFIX + userId;
+            // 先删再加，保证最新搜索排在最前
+            redisTemplate.opsForList().remove(key, 0, normalized);
+            redisTemplate.opsForList().leftPush(key, normalized);
+            // 仅保留最近 30 条
+            redisTemplate.opsForList().trim(key, 0, 29);
+        }
+    }
+
+    @Override
+    public List<String> getSearchHistory(Long userId, int limit) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+        int safeLimit = Math.max(1, Math.min(limit, 30));
+        String key = SEARCH_HISTORY_KEY_PREFIX + userId;
+        List<Object> values = redisTemplate.opsForList().range(key, 0, safeLimit - 1);
+        if (values == null || values.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return values.stream().map(String::valueOf).collect(Collectors.toList());
+    }
+
+    @Override
+    public void clearSearchHistory(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        String key = SEARCH_HISTORY_KEY_PREFIX + userId;
+        redisTemplate.delete(key);
+    }
+
+    @Override
+    public List<String> getHotSearches(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 20));
+        Set<Object> values = redisTemplate.opsForZSet().reverseRange(HOT_SEARCH_KEY, 0, safeLimit - 1);
+        if (values == null || values.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return values.stream().map(String::valueOf).collect(Collectors.toList());
     }
 }

@@ -28,6 +28,9 @@ public class MinioUtils {
     @Value("${minio.bucket-avatar}")
     private String bucketAvatar;
 
+    @Value("${minio.bucket-message}")
+    private String bucketMessage;
+
     @Value("${minio.endpoint}")
     private String endpoint;
 
@@ -60,6 +63,25 @@ public class MinioUtils {
         try (InputStream is = file.getInputStream()) {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketAvatar)
+                    .object(objectName)
+                    .stream(is, file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
+        }
+
+        return objectName;
+    }
+
+    public String uploadMessageImage(MultipartFile file) throws Exception {
+        ensureBucketExists(bucketMessage);
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".png";
+        String objectName = "message/" + UUID.randomUUID() + ext;
+
+        try (InputStream is = file.getInputStream()) {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketMessage)
                     .object(objectName)
                     .stream(is, file.getSize(), -1)
                     .contentType(file.getContentType())
@@ -200,6 +222,18 @@ public class MinioUtils {
                 .build());
     }
 
+    /** 仅允许 message 桶对象名，防止任意文件读取 */
+    public InputStream getMessageStreamByObjectName(String objectName) throws Exception {
+        String object = normalizeMessageObject(objectName);
+        if (object == null || !isSafeMessageObject(object)) {
+            throw new IllegalArgumentException("无效的对象名: " + objectName);
+        }
+        return minioClient.getObject(GetObjectArgs.builder()
+                .bucket(bucketMessage)
+                .object(object)
+                .build());
+    }
+
     /** 从对象URL解析 bucket 和 object，格式: http(s)://host:9000/bucket/object/path */
     private String[] parseBucketAndObject(String objectUrl) {
         if (objectUrl == null || objectUrl.isBlank()) {
@@ -276,6 +310,14 @@ public class MinioUtils {
         return true;
     }
 
+    private boolean isSafeMessageObject(String objectName) {
+        if (objectName == null || objectName.isBlank()) return false;
+        if (!objectName.startsWith("message/")) return false;
+        if (objectName.contains("..") || objectName.contains("\\") || objectName.startsWith("/")) return false;
+        if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
+        return true;
+    }
+
     /** 兼容 avatarUrl（完整URL）和 objectName 两种格式 */
     private String normalizeAvatarObject(String value) {
         if (value == null || value.isBlank()) return null;
@@ -283,6 +325,17 @@ public class MinioUtils {
             String[] bucketAndObject = parseBucketAndObject(value);
             if (bucketAndObject == null) return null;
             if (!bucketAvatar.equals(bucketAndObject[0])) return null;
+            return bucketAndObject[1];
+        }
+        return value;
+    }
+
+    private String normalizeMessageObject(String value) {
+        if (value == null || value.isBlank()) return null;
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            String[] bucketAndObject = parseBucketAndObject(value);
+            if (bucketAndObject == null) return null;
+            if (!bucketMessage.equals(bucketAndObject[0])) return null;
             return bucketAndObject[1];
         }
         return value;

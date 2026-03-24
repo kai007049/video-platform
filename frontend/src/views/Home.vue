@@ -7,6 +7,12 @@
       <button v-if="currentKeyword" class="tab" :class="{ active: activeTab === 'search' }" @click="switchTab('search')">搜索：{{ currentKeyword }}</button>
     </div>
 
+    <div class="ai-ask-box">
+      <input v-model="aiQuestion" type="text" placeholder="AI 问答搜索：例如 帮我找 SpringBoot 实战视频" @keyup.enter="runAiAsk" />
+      <button :disabled="aiLoading || !aiQuestion.trim()" @click="runAiAsk">{{ aiLoading ? '分析中...' : 'AI 搜索' }}</button>
+    </div>
+    <div v-if="aiAnswer" class="ai-answer">{{ aiAnswer }}</div>
+
     <div v-if="activeTab === 'search' && currentKeyword" class="search-cats">
       <button class="cat" :class="{ active: searchType === 'all' }" @click="switchSearchType('all')">综合</button>
       <button class="cat" :class="{ active: searchType === 'video' }" @click="switchSearchType('video')">视频</button>
@@ -84,6 +90,7 @@
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getVideoList, getRecommended, getHotList, searchVideos, searchUsers } from '../api/video'
+import { createAskTask, pollAgentTask } from '../api/agent'
 
 const router = useRouter()
 const route = useRoute()
@@ -96,6 +103,9 @@ const pageSize = 16
 const currentKeyword = ref('')
 const searchType = ref('all')
 const userList = ref([])
+const aiQuestion = ref('')
+const aiAnswer = ref('')
+const aiLoading = ref(false)
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 
 const fetchApi = (p) => {
@@ -176,6 +186,43 @@ function goProfile(authorId) {
   if (authorId) router.push(`/user/${authorId}`)
 }
 
+async function runAiAsk() {
+  if (!aiQuestion.value.trim()) return
+  aiLoading.value = true
+  aiAnswer.value = ''
+  try {
+    const { data } = await createAskTask({ question: aiQuestion.value.trim(), page: 1, size: pageSize })
+    const done = await pollAgentTask(data.task_id)
+    if (done.status !== 'success' || !done.result) {
+      throw new Error(done.error || 'AI 搜索失败')
+    }
+    aiAnswer.value = done.result.answer || ''
+    const refs = done.result.references || []
+    if (refs.length) {
+      const refIds = refs.map(r => r.videoId).filter(Boolean)
+      const map = new Map(videoList.value.map(v => [v.id, v]))
+      const merged = []
+      for (const id of refIds) {
+        if (map.has(id)) merged.push(map.get(id))
+      }
+      if (!merged.length) {
+        currentKeyword.value = aiQuestion.value.trim()
+        activeTab.value = 'search'
+        searchType.value = 'video'
+        page.value = 1
+        await fetchList(false)
+      } else {
+        videoList.value = merged
+        hasMore.value = false
+      }
+    }
+  } catch (e) {
+    aiAnswer.value = e.message || 'AI 搜索失败'
+  } finally {
+    aiLoading.value = false
+  }
+}
+
 function loadMore() { fetchList(true) }
 function goVideo(id) {
   const href = router.resolve({ path: `/video/${id}` }).href
@@ -213,6 +260,37 @@ watch(() => route.query, () => {
 <style scoped>
 .home {
   padding-bottom: 40px;
+}
+
+.ai-ask-box {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.ai-ask-box input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e3e5e7;
+  border-radius: 8px;
+}
+
+.ai-ask-box button {
+  padding: 10px 14px;
+  border: 1px solid #fb7299;
+  color: #fb7299;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.ai-answer {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff3f7;
+  color: #61666d;
+  border: 1px solid #ffd1df;
+  font-size: 13px;
 }
 
 .search-cats {

@@ -58,6 +58,22 @@ public class FileController {
         }
     }
 
+    @GetMapping("/message")
+    @Operation(summary = "私信图片转发")
+    public ResponseEntity<byte[]> message(@RequestParam("url") String objectName) {
+        try (InputStream in = minioUtils.getMessageStreamByObjectName(objectName)) {
+            byte[] bytes = in.readAllBytes();
+            MediaType mediaType = resolveMediaType(objectName).orElse(MediaType.IMAGE_JPEG);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CACHE_CONTROL, "max-age=86400")
+                    .contentType(mediaType)
+                    .body(bytes);
+        } catch (Exception e) {
+            log.warn("message image proxy failed: {}", objectName, e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private Optional<MediaType> resolveMediaType(String url) {
         try {
             return MediaTypeFactory.getMediaType(url);

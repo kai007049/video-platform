@@ -15,16 +15,47 @@
       </div>
 
       <div class="header-right">
-        <div class="search-bar">
-          <input
-            v-model="keyword"
-            type="text"
-            placeholder="搜索视频、用户"
-            @keyup.enter="goSearch"
-          />
-          <button class="search-btn" @click="goSearch">
-            <span class="search-icon">🔍</span>
-          </button>
+        <div class="search-wrap" ref="searchWrapRef">
+          <div class="search-bar">
+            <input
+              v-model="keyword"
+              type="text"
+              placeholder="搜索视频、用户"
+              @focus="openSearchPanel"
+              @keyup.enter="goSearch"
+            />
+            <button class="search-btn" @click="goSearch">
+              <span class="search-icon">🔍</span>
+            </button>
+          </div>
+
+          <div v-if="showSearchPanel" class="search-panel" @mousedown.prevent>
+            <div class="panel-section">
+              <div class="panel-title-row">
+                <span class="panel-title">搜索历史</span>
+                <button class="panel-link" @click="handleClearHistory">清空</button>
+              </div>
+              <div v-if="searchHistory.length" class="tag-list">
+                <button v-for="item in searchHistory" :key="`h-${item}`" class="search-tag" @click="clickSuggest(item)">
+                  {{ item }}
+                </button>
+              </div>
+              <div v-else class="panel-empty">暂无搜索历史</div>
+            </div>
+
+            <div class="panel-section">
+              <div class="panel-title-row">
+                <span class="panel-title">热搜</span>
+              </div>
+              <div v-if="hotSearches.length" class="hot-list">
+                <button v-for="(item, idx) in hotSearches" :key="`hot-${item}`" class="hot-item" @click="clickSuggest(item)">
+                  <span class="rank">{{ idx + 1 }}</span>
+                  <span class="hot-text">{{ item }}</span>
+                </button>
+              </div>
+              <div v-else class="panel-empty">暂无热搜</div>
+            </div>
+          </div>
         </div>
         <template v-if="userStore.isLoggedIn">
           <router-link to="/upload" class="upload-btn">+ 投稿</router-link>
@@ -110,10 +141,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { updateAvatar } from '../api/user'
+import { getSearchHistory, clearSearchHistory, getHotSearches } from '../api/search'
 import LoginModal from '../components/LoginModal.vue'
 import RegisterModal from '../components/RegisterModal.vue'
 
@@ -124,6 +156,10 @@ const showUserMenu = ref(false)
 const showLogin = ref(route.query.login === '1')
 const showRegister = ref(route.query.register === '1')
 const keyword = ref('')
+const showSearchPanel = ref(false)
+const searchHistory = ref([])
+const hotSearches = ref([])
+const searchWrapRef = ref(null)
 const sidebarCollapsed = ref(false)
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 const isUploadingAvatar = ref(false)
@@ -166,6 +202,11 @@ async function onAvatarChange(event) {
 
 onMounted(() => {
   if (userStore.isLoggedIn && !userStore.userInfo) userStore.fetchUserInfo()
+  document.addEventListener('click', onGlobalClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onGlobalClick)
 })
 
 watch(
@@ -199,9 +240,54 @@ function handleLogout() {
   router.push('/')
 }
 
+async function loadSearchPanelData() {
+  try {
+    const [history, hot] = await Promise.all([
+      getSearchHistory(10).catch(() => []),
+      getHotSearches(10).catch(() => [])
+    ])
+    searchHistory.value = Array.isArray(history) ? history : []
+    hotSearches.value = Array.isArray(hot) ? hot : []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+async function openSearchPanel() {
+  showSearchPanel.value = true
+  await loadSearchPanelData()
+}
+
+function closeSearchPanel() {
+  showSearchPanel.value = false
+}
+
+function clickSuggest(text) {
+  keyword.value = text || ''
+  goSearch()
+}
+
+async function handleClearHistory() {
+  try {
+    await clearSearchHistory()
+    searchHistory.value = []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+function onGlobalClick(e) {
+  const el = searchWrapRef.value
+  if (!el) return
+  if (!el.contains(e.target)) {
+    closeSearchPanel()
+  }
+}
+
 function goSearch() {
   const value = keyword.value.trim()
   if (!value) return
+  closeSearchPanel()
   router.push({ path: '/', query: { keyword: value, tab: 'search' } })
 }
 </script>
@@ -275,15 +361,120 @@ function goSearch() {
   justify-content: center;
 }
 
+.search-wrap {
+  position: relative;
+  width: 400px;
+}
+
 .search-bar {
   display: flex;
   align-items: center;
-  width: 400px;
+  width: 100%;
   height: 36px;
   background: #f1f2f3;
   border-radius: 18px;
   padding: 0 6px 0 16px;
   transition: box-shadow 0.2s;
+}
+
+.search-panel {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e3e5e7;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .12);
+  padding: 12px;
+  z-index: 250;
+}
+
+.panel-section + .panel-section {
+  margin-top: 14px;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #18191c;
+}
+
+.panel-link {
+  border: none;
+  background: transparent;
+  color: #9499a0;
+  font-size: 13px;
+}
+
+.panel-link:hover {
+  color: #fb7299;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.search-tag {
+  border: 1px solid #e3e5e7;
+  background: #f6f7f8;
+  color: #61666d;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  max-width: 100%;
+}
+
+.search-tag:hover {
+  border-color: #fb7299;
+  color: #fb7299;
+}
+
+.hot-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.hot-item {
+  border: none;
+  background: transparent;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #18191c;
+  padding: 4px 2px;
+}
+
+.hot-item:hover .hot-text {
+  color: #fb7299;
+}
+
+.rank {
+  width: 18px;
+  color: #9499a0;
+  font-weight: 700;
+}
+
+.hot-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-empty {
+  font-size: 13px;
+  color: #9499a0;
 }
 
 .search-bar:focus-within {

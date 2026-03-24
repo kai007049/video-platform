@@ -15,4 +15,24 @@ public interface SearchService {
     void indexVideo(Long videoId);
 
     void deleteVideo(Long videoId);
+
+    /**
+     * 记录搜索词（写入用户历史 + 热搜计数）
+     */
+    void recordSearchKeyword(Long userId, String keyword);
+
+    /**
+     * 获取当前用户搜索历史（最近在前）
+     */
+    List<String> getSearchHistory(Long userId, int limit);
+
+    /**
+     * 清空当前用户搜索历史
+     */
+    void clearSearchHistory(Long userId);
+
+    /**
+     * 获取热门搜索
+     */
+    List<String> getHotSearches(int limit);
 }

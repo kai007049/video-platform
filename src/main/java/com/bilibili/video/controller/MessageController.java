@@ -5,12 +5,14 @@ import com.bilibili.video.common.Result;
 import com.bilibili.video.model.dto.SendMessageDTO;
 import com.bilibili.video.model.vo.MessageVO;
 import com.bilibili.video.service.MessageService;
+import com.bilibili.video.utils.MinioUtils;
 import com.bilibili.video.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/message")
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class MessageController {
 
     private final MessageService messageService;
+    private final MinioUtils minioUtils;
 
     @PostMapping
     @Operation(summary = "发送私信")
@@ -68,5 +71,26 @@ public class MessageController {
         Long userId = UserContext.get();
         messageService.clearConversation(userId, targetId);
         return Result.success();
+    }
+
+    @PostMapping("/upload-image")
+    @Operation(summary = "上传私信图片")
+    public Result<String> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        Long userId = UserContext.get();
+        if (userId == null) {
+            return Result.error(401, "请先登录");
+        }
+        if (file == null || file.isEmpty()) {
+            return Result.error(400, "图片不能为空");
+        }
+        if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+            return Result.error(400, "仅支持图片上传");
+        }
+        try {
+            String objectName = minioUtils.uploadMessageImage(file);
+            return Result.success(objectName);
+        } catch (Exception e) {
+            return Result.error(500, "上传失败: " + e.getMessage());
+        }
     }
 }

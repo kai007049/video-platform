@@ -63,6 +63,7 @@ minio:
   bucket-video: video
   bucket-cover: cover
   bucket-avatar: avatar
+  bucket-message: message
 
 # RocketMQ
 rocketmq:
