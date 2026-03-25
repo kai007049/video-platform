@@ -10,6 +10,7 @@
         @play="onPlay"
         @pause="onPause"
         @timeupdate="onTimeUpdate"
+        @seeking="onSeeking"
         @ended="onEnded"
         @loadedmetadata="onLoadedMetadata"
       />
@@ -110,7 +111,8 @@ const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.met
 let ws = null
 let played = false
 const historicalDanmus = ref([])
-const shownDanmuIds = ref(new Set())
+const danmuBySecond = ref(new Map())
+const lastTickSecond = ref(-1)
 const danmuPaused = ref(false)
 const trackCount = 8
 const trackNextAvailable = Array.from({ length: trackCount }, () => 0)
@@ -118,6 +120,11 @@ const danmuSpeed = 140
 const danmuGap = 32
 
 const videoId = computed(() => Number(route.params.id))
+const currentUserId = computed(() => {
+  const id = userStore.userInfo?.id
+  if (id === undefined || id === null || id === '') return null
+  return Number(id)
+})
 
 async function loadVideo() {
   try {
@@ -132,10 +139,21 @@ async function loadVideo() {
 async function loadDanmus() {
   try {
     historicalDanmus.value = await getDanmus(videoId.value) || []
-    shownDanmuIds.value = new Set()
+    rebuildDanmuIndex()
+    lastTickSecond.value = -1
   } catch (e) {
     console.error(e)
   }
+}
+
+function rebuildDanmuIndex() {
+  const map = new Map()
+  for (const d of historicalDanmus.value || []) {
+    const sec = Math.max(0, Number(d.timePoint) || 0)
+    if (!map.has(sec)) map.set(sec, [])
+    map.get(sec).push(d)
+  }
+  danmuBySecond.value = map
 }
 
 async function loadComments() {
@@ -156,9 +174,23 @@ function connectDanmu() {
     try {
       const d = JSON.parse(e.data)
       if (d.error) return
+      addIncomingDanmu(d)
       appendDanmu(d)
     } catch (_) {}
   }
+}
+
+function addIncomingDanmu(d) {
+  const normalized = {
+    ...d,
+    timePoint: Math.max(0, Number(d.timePoint) || 0)
+  }
+  historicalDanmus.value.push(normalized)
+  const sec = normalized.timePoint
+  if (!danmuBySecond.value.has(sec)) {
+    danmuBySecond.value.set(sec, [])
+  }
+  danmuBySecond.value.get(sec).push(normalized)
 }
 
 function appendDanmu(d) {
@@ -185,6 +217,9 @@ function appendDanmu(d) {
 
   const span = document.createElement('span')
   span.className = 'danmu-item'
+  if (currentUserId.value != null && Number(d.userId) === currentUserId.value) {
+    span.classList.add('self')
+  }
   span.textContent = d.content
   span.style.top = track * lineHeight + 8 + 'px'
   span.style.opacity = '0.95'
@@ -206,7 +241,7 @@ function sendDanmu() {
   if (!danmuText.value.trim() || !userStore.isLoggedIn) return
   const content = danmuText.value.trim()
   const time = videoEl.value ? Math.floor(videoEl.value.currentTime) : 0
-  const d = { content, timePoint: time }
+  const d = { content, timePoint: time, userId: currentUserId.value }
   appendDanmu(d)
   danmuText.value = ''
   if (ws && ws.readyState === WebSocket.OPEN) {
@@ -235,20 +270,29 @@ function onLoadedMetadata() {
 function onTimeUpdate() {
   if (videoEl.value) {
     const t = Math.floor(videoEl.value.currentTime)
-    if (showDanmu.value) {
-      historicalDanmus.value.forEach((d) => {
-        if (d.timePoint <= t + 1 && !shownDanmuIds.value.has(d.id)) {
-          shownDanmuIds.value.add(d.id)
-          appendDanmu({ ...d })
-        }
-      })
+    if (showDanmu.value && t !== lastTickSecond.value) {
+      const list = danmuBySecond.value.get(t) || []
+      for (const d of list) {
+        appendDanmu({ ...d })
+      }
+      lastTickSecond.value = t
     }
+
     if (userStore.isLoggedIn) {
       if (progressTimer) clearTimeout(progressTimer)
       progressTimer = setTimeout(() => {
         saveProgress(videoId.value, t).catch(() => {})
       }, 2000)
     }
+  }
+}
+
+function onSeeking() {
+  if (!videoEl.value) return
+  const t = Math.floor(videoEl.value.currentTime)
+  lastTickSecond.value = t - 1
+  if (danmuContainer.value) {
+    danmuContainer.value.querySelectorAll('.danmu-item').forEach(el => el.remove())
   }
 }
 
@@ -440,6 +484,13 @@ onUnmounted(() => {
   animation: danmu-move 12s linear;
   will-change: transform;
   pointer-events: none;
+}
+
+:deep(.danmu-item.self) {
+  padding: 1px 6px;
+  border: 2px solid rgba(126, 223, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45) inset;
 }
 
 @keyframes danmu-move {

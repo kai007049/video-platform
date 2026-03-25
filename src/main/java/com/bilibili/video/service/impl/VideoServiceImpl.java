@@ -82,6 +82,7 @@ public class VideoServiceImpl implements VideoService {
         if (videoFile == null || videoFile.isEmpty()) {
             throw new BizException(400, "视频文件不能为空");
         }
+        validateVideoFile(videoFile);
         if (dto.getCategoryId() == null || dto.getCategoryId() <= 0) {
             throw new BizException(400, "请选择视频分类");
         }
@@ -508,5 +509,26 @@ public class VideoServiceImpl implements VideoService {
             value = value + ((Number) deltaObj).longValue();
         }
         return value;
+    }
+
+    /**
+     * 上传视频文件校验：支持主流容器格式。
+     */
+    private void validateVideoFile(MultipartFile videoFile) {
+        String name = videoFile.getOriginalFilename();
+        String ext = "";
+        if (name != null && name.contains(".")) {
+            ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+        }
+
+        java.util.Set<String> allowed = java.util.Set.of("mp4", "mov", "mkv", "webm", "avi", "flv", "m4v");
+        if (!allowed.contains(ext)) {
+            throw new BizException(400, "暂不支持该视频格式，支持：mp4/mov/mkv/webm/avi/flv/m4v");
+        }
+
+        String contentType = videoFile.getContentType();
+        if (contentType != null && !contentType.startsWith("video/")) {
+            throw new BizException(400, "上传文件不是视频类型");
+        }
     }
 }

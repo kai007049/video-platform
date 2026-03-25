@@ -5,6 +5,7 @@
       <form @submit.prevent="submit" class="form">
         <div class="field">
           <label>视频文件 <span class="required">*</span></label>
+          <p class="hint">支持格式：mp4 / mov / mkv / webm / avi / flv / m4v</p>
           <input
             ref="videoInput"
             type="file"
