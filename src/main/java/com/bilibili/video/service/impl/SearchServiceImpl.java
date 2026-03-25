@@ -46,22 +46,13 @@ public class SearchServiceImpl implements SearchService {
         if (keyword == null || keyword.isBlank()) {
             return new Page<>(page, size, 0);
         }
-        NativeQuery.Builder builder = NativeQuery.builder()
+        Query query = NativeQuery.builder()
                 .withQuery(QueryBuilders.multiMatch(m -> m
                         .fields("title", "description")
                         .query(keyword)
                 ))
-                .withPageable(PageRequest.of(Math.max(0, page - 1), Math.min(50, size)));
-
-        if ("like".equalsIgnoreCase(sortBy)) {
-            builder.withSort(s -> s.field(f -> f.field("likes").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc)));
-        } else if ("latest".equalsIgnoreCase(sortBy)) {
-            builder.withSort(s -> s.field(f -> f.field("createTime").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc)));
-        } else if ("play".equalsIgnoreCase(sortBy)) {
-            builder.withSort(s -> s.field(f -> f.field("views").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc)));
-        }
-
-        Query query = builder.build();
+                .withPageable(PageRequest.of(Math.max(0, page - 1), Math.min(50, size)))
+                .build();
 
         SearchHits<VideoDocument> result = elasticsearchOperations.search(query, VideoDocument.class);
         List<VideoVO> records = new ArrayList<>();

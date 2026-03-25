@@ -10,5 +10,5 @@
 /dataSources.local.xml
 src/main/resources/docker/minio_data/
 src/main/resources/docker/es_data/
-
+.idea/workspace.xml
 
