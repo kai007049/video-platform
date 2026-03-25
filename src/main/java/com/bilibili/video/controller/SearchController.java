@@ -30,10 +30,11 @@ public class SearchController {
     public Result<IPage<VideoVO>> search(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "comprehensive") String sortBy) {
         Long userId = UserContext.get();
         searchService.recordSearchKeyword(userId, keyword);
-        return Result.success(searchService.searchVideos(keyword, page, size));
+        return Result.success(searchService.searchVideos(keyword, page, size, sortBy));
     }
 
     @GetMapping("/users")

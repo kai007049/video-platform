@@ -36,8 +36,8 @@ export const getHistoryVideos = (page = 1, size = 12) =>
 
 export const deleteVideo = (id) => request.delete(`/video/${id}`)
 
-export const searchVideos = (keyword, page = 1, size = 12) =>
-  request.get('/search', { params: { keyword, page, size } })
+export const searchVideos = (keyword, page = 1, size = 12, sortBy = 'comprehensive') =>
+  request.get('/search', { params: { keyword, page, size, sortBy } })
 
 export const searchUsers = (keyword, page = 1, size = 12) =>
   request.get('/search/users', { params: { keyword, page, size } })

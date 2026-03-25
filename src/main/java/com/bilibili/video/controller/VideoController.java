@@ -250,6 +250,11 @@ public class VideoController {
         String lower = videoUrl.toLowerCase();
         if (lower.endsWith(".webm")) return "video/webm";
         if (lower.endsWith(".ogg") || lower.endsWith(".ogv")) return "video/ogg";
+        if (lower.endsWith(".mov")) return "video/quicktime";
+        if (lower.endsWith(".mkv")) return "video/x-matroska";
+        if (lower.endsWith(".avi")) return "video/x-msvideo";
+        if (lower.endsWith(".flv")) return "video/x-flv";
+        if (lower.endsWith(".m4v")) return "video/x-m4v";
         return "video/mp4";
     }
 

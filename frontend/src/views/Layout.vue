@@ -85,6 +85,10 @@
     <!-- 左侧侧边栏 -->
     <aside class="sidebar">
       <div class="sidebar-inner">
+        <button class="side-item side-back" :class="{ disabled: !canBackToHomeFromSearch }" :disabled="!canBackToHomeFromSearch" type="button" @click="goBack" title="返回主页">
+          <span class="side-icon">‹</span>
+          <span class="side-label">返回</span>
+        </button>
         <router-link class="side-item" :class="{ active: $route.path === '/' }" to="/" title="首页">
           <span class="side-icon">🏠</span>
           <span class="side-label">首页</span>
@@ -167,6 +171,10 @@ const maxAvatarSize = 2 * 1024 * 1024
 const isAdmin = computed(() => {
   const v = userStore.userInfo?.isAdmin
   return v === true || v === 1 || v === '1'
+})
+
+const canBackToHomeFromSearch = computed(() => {
+  return route.path === '/search' && !!String(route.query.keyword || '').trim()
 })
 
 function resolveAvatar(avatar) {
@@ -288,7 +296,13 @@ function goSearch() {
   const value = keyword.value.trim()
   if (!value) return
   closeSearchPanel()
-  router.push({ path: '/', query: { keyword: value, tab: 'search' } })
+  router.push({ path: '/search', query: { keyword: value, type: 'comprehensive', sortBy: 'comprehensive' } })
+}
+
+function goBack() {
+  // 仅在“首页的搜索态”生效：回到首页默认推荐流
+  if (!canBackToHomeFromSearch.value) return
+  router.push({ path: '/', query: {} })
 }
 </script>
 
@@ -724,6 +738,29 @@ function goSearch() {
 }
 
 /* ===== 主内容区 ===== */
+.side-back {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.side-back.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.side-back.disabled:hover {
+  background: transparent;
+  color: #61666d;
+}
+
+.side-back .side-icon {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+}
+
 .main {
   margin-top: 60px;
   margin-left: 180px;

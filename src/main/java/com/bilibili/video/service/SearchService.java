@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface SearchService {
 
-    IPage<VideoVO> searchVideos(String keyword, int page, int size);
+    IPage<VideoVO> searchVideos(String keyword, int page, int size, String sortBy);
 
     List<SearchUserVO> searchUsers(String keyword, int page, int size);
 

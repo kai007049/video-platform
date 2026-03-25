@@ -42,17 +42,26 @@ public class SearchServiceImpl implements SearchService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public IPage<VideoVO> searchVideos(String keyword, int page, int size) {
+    public IPage<VideoVO> searchVideos(String keyword, int page, int size, String sortBy) {
         if (keyword == null || keyword.isBlank()) {
             return new Page<>(page, size, 0);
         }
-        Query query = NativeQuery.builder()
+        NativeQuery.Builder builder = NativeQuery.builder()
                 .withQuery(QueryBuilders.multiMatch(m -> m
                         .fields("title", "description")
                         .query(keyword)
                 ))
-                .withPageable(PageRequest.of(Math.max(0, page - 1), Math.min(50, size)))
-                .build();
+                .withPageable(PageRequest.of(Math.max(0, page - 1), Math.min(50, size)));
+
+        if ("like".equalsIgnoreCase(sortBy)) {
+            builder.withSort(s -> s.field(f -> f.field("likes").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc)));
+        } else if ("latest".equalsIgnoreCase(sortBy)) {
+            builder.withSort(s -> s.field(f -> f.field("createTime").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc)));
+        } else if ("play".equalsIgnoreCase(sortBy)) {
+            builder.withSort(s -> s.field(f -> f.field("views").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc)));
+        }
+
+        Query query = builder.build();
 
         SearchHits<VideoDocument> result = elasticsearchOperations.search(query, VideoDocument.class);
         List<VideoVO> records = new ArrayList<>();
@@ -71,12 +80,22 @@ public class SearchServiceImpl implements SearchService {
                 vo.setPlayCount(video.getPlayCount());
                 vo.setLikeCount(video.getLikeCount());
                 vo.setSaveCount(video.getSaveCount());
+                if (video.getSaveCount() != null && "save".equalsIgnoreCase(sortBy)) {
+                    // saveCount 无 ES 字段，补充内存排序在后面统一处理
+                }
                 vo.setDurationSeconds(video.getDurationSeconds());
                 vo.setCategoryId(video.getCategoryId());
                 vo.setCreateTime(video.getCreateTime());
                 records.add(vo);
             }
         }
+        if ("save".equalsIgnoreCase(sortBy)) {
+            records.sort((a, b) -> Long.compare(
+                    b.getSaveCount() == null ? 0L : b.getSaveCount(),
+                    a.getSaveCount() == null ? 0L : a.getSaveCount()
+            ));
+        }
+
         Page<VideoVO> resultPage = new Page<>(page, size, result.getTotalHits());
         resultPage.setRecords(records);
         return resultPage;
