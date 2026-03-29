@@ -942,7 +942,7 @@
     <schema id="299" parent="1" name="bilibili">
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-03-23.07:22:28</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-03-26.09:51:13</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="300" parent="1" name="mysql.infoschema">
@@ -1143,7 +1143,7 @@
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="335" parent="306" name="id">
-      <AutoIncrement>23</AutoIncrement>
+      <AutoIncrement>27</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1289,7 +1289,7 @@ following_id</ColNames>
       <UnderlyingIndexName>uk_follow</UnderlyingIndexName>
     </key>
     <column id="363" parent="309" name="id">
-      <AutoIncrement>31</AutoIncrement>
+      <AutoIncrement>42</AutoIncrement>
       <Comment>消息ID</Comment>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1497,7 +1497,7 @@ following_id</ColNames>
       <UnderlyingIndexName>username</UnderlyingIndexName>
     </key>
     <column id="400" parent="313" name="id">
-      <AutoIncrement>55</AutoIncrement>
+      <AutoIncrement>58</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1690,7 +1690,7 @@ user_id</ColNames>
       <UnderlyingIndexName>uk_video_user</UnderlyingIndexName>
     </key>
     <column id="434" parent="316" name="id">
-      <AutoIncrement>2</AutoIncrement>
+      <AutoIncrement>7</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>

@@ -12,6 +12,7 @@ try:
     )
     from app.repos.task_store import create_task, complete_task, fail_task, get_task
     from app.clients.backend_client import search_videos, list_messages
+    from app.services.retrieval_service import hybrid_merge
     from app.services.agent_service import (
         extract_data,
         build_rag_answer,
@@ -21,6 +22,8 @@ try:
         llm_upload_assist,
         draft_message_fallback,
         draft_message_with_agent,
+        get_cached_summary,
+        set_cached_summary,
     )
 except ImportError:
     from schemas.task import (
@@ -34,6 +37,7 @@ except ImportError:
     )
     from repos.task_store import create_task, complete_task, fail_task, get_task
     from clients.backend_client import search_videos, list_messages
+    from services.retrieval_service import hybrid_merge
     from services.agent_service import (
         extract_data,
         build_rag_answer,
@@ -43,6 +47,8 @@ except ImportError:
         llm_upload_assist,
         draft_message_fallback,
         draft_message_with_agent,
+        get_cached_summary,
+        set_cached_summary,
     )
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -55,8 +61,9 @@ async def create_ask_task(req: AskRequest, authorization: str | None = Header(de
         search_resp = await search_videos(req.question, req.page, req.size, token=authorization)
         data = extract_data(search_resp) or {}
         records = data.get("records", []) if isinstance(data, dict) else []
+        merged_records = await hybrid_merge(req.question, records)
 
-        result = (await build_rag_answer(req.question, records)).model_dump()
+        result = (await build_rag_answer(req.question, merged_records)).model_dump()
         complete_task(task_id, result)
         return TaskResponse(task_id=task_id, status="success")
     except Exception as e:
@@ -114,19 +121,25 @@ async def create_upload_assist_task(req: UploadAssistRequest, authorization: str
 async def create_message_draft_task(req: MessageDraftRequest, authorization: str | None = Header(default=None)):
     task_id = create_task()
     try:
-        history_resp = await list_messages(req.target_id, page=1, size=10, token=authorization)
-        data = extract_data(history_resp) or {}
-        records = data.get("records", []) if isinstance(data, dict) else []
+        user_id = None
+        cache_brief = get_cached_summary(user_id=user_id, target_id=req.target_id)
+        if cache_brief:
+            conversation_brief = cache_brief
+        else:
+            history_resp = await list_messages(req.target_id, page=1, size=10, token=authorization)
+            data = extract_data(history_resp) or {}
+            records = data.get("records", []) if isinstance(data, dict) else []
 
-        conversation_brief = "最近会话较短。"
-        if records:
-            preview = []
-            for m in records[-3:]:
-                content = str(m.get("content", "")).strip()
-                if content:
-                    preview.append(content[:20])
-            if preview:
-                conversation_brief = " / ".join(preview)
+            conversation_brief = "最近会话较短。"
+            if records:
+                preview = []
+                for m in records[-3:]:
+                    content = str(m.get("content", "")).strip()
+                    if content:
+                        preview.append(content[:20])
+                if preview:
+                    conversation_brief = " / ".join(preview)
+            set_cached_summary(user_id=user_id, target_id=req.target_id, summary=conversation_brief)
 
         try:
             draft = await draft_message_with_agent(

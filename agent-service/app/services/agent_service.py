@@ -4,9 +4,13 @@ import json
 try:
     from app.schemas.task import AskResult, UploadAssistResult
     from app.clients.llm_client import chat_completion
+    from app.clients.redis_client import get_redis
+    from app.core.config import settings
 except ImportError:
-    from schemas.task import AskResult, UploadAssistResult
-    from clients.llm_client import chat_completion
+    from app.schemas.task import AskResult, UploadAssistResult
+    from app.clients.llm_client import chat_completion
+    from app.clients.redis_client import get_redis
+    from app.core.config import settings
 
 
 def extract_data(payload: Dict[str, Any]) -> Any:
@@ -20,7 +24,7 @@ def _build_references(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     for item in records[:5]:
         refs.append(
             {
-                "videoId": item.get("id"),
+                "videoId": item.get("id") or item.get("videoId"),
                 "title": item.get("title"),
                 "description": item.get("description"),
                 "authorId": item.get("authorId"),
@@ -221,6 +225,33 @@ def draft_message_fallback(scenario: str, tone: str, latest_user_message: str) -
         quote = quote[:60] + "..."
 
     return f"{prefix}{body}（你提到：{quote}）"
+
+
+def _summary_cache_key(user_id: int | None, target_id: int) -> str:
+    uid = user_id if user_id is not None else 0
+    return f"agent:msg:summary:{uid}:{target_id}"
+
+
+def get_cached_summary(user_id: int | None, target_id: int) -> str | None:
+    r = get_redis()
+    if r is None:
+        return None
+    try:
+        return r.get(_summary_cache_key(user_id, target_id))
+    except Exception:
+        return None
+
+
+def set_cached_summary(user_id: int | None, target_id: int, summary: str) -> None:
+    if not summary:
+        return
+    r = get_redis()
+    if r is None:
+        return
+    try:
+        r.setex(_summary_cache_key(user_id, target_id), settings.redis_summary_ttl_seconds, summary)
+    except Exception:
+        return
 
 
 async def draft_message_with_agent(
