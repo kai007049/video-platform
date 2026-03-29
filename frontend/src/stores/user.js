@@ -36,8 +36,21 @@ export const useUserStore = defineStore('user', () => {
     token.value = ''
     userInfo.value = null
     sessionStorage.removeItem('token')
-    sessionStorage.removeItem('userInfo')
+    sessionStorage.removeItem('userInfo')    
   }
 
-  return { token, userInfo, isLoggedIn, login, register, fetchUserInfo, fetchCaptcha, logout }
+  // 模拟登录状态，用于开发测试
+  function mockLogin() {
+    token.value = 'mock-token-123456'
+    userInfo.value = {
+      id: 1,
+      username: '测试用户',
+      avatar: '',
+      isAdmin: false
+    }
+    sessionStorage.setItem('token', token.value)
+    sessionStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+  }
+
+  return { token, userInfo, isLoggedIn, login, register, fetchUserInfo, fetchCaptcha, logout, mockLogin }
 })

@@ -1,0 +1,144 @@
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"2e92157d-8d66-416d-8b28-d09a51483d9e\" name=\"更改\" comment=\"视频标签增加\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Merge.Settings\">\r\n    <option name=\"BRANCH\" value=\"gitee/main\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"lx\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;kai007049&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/kai007049/easy-bilibili.git&quot;,\r\n    &quot;accountId&quot;: &quot;0daab3ac-50f7-40b3-8d41-239063f13234&quot;\r\n  }\r\n}</component>\r\n  <component name=\"KubernetesApiPersistence\">{}</component>\r\n  <component name=\"KubernetesApiProvider\">{\r\n  &quot;isMigrated&quot;: true\r\n}</component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"customMavenHome\" value=\"D:\\IDEA\\Maven\\apache-maven-3.9.9\" />\r\n        <option name=\"localRepository\" value=\"D:\\IDEA\\maven.repo\" />\r\n        <option name=\"mavenHomeTypeForPersistence\" value=\"CUSTOM\" />\r\n        <option name=\"userSettingsFile\" value=\"E:\\Maven\\settings.xml\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"MavenRunner\">\r\n    <option name=\"jreName\" value=\"jbr-17\" />\r\n  </component>\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"CurrentFile\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 2\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"3Ak2atMeoDNdwbQ4D8R9IAjQRyd\" />\r\n  <component name=\"ProjectLevelVcsManager\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Docker.docker.elasticsearch: Compose 部署.executor\": \"Run\",\r\n    \"Docker.docker.kibana: Compose 部署.executor\": \"Run\",\r\n    \"Docker.docker.minio: Compose 部署.executor\": \"Run\",\r\n    \"Docker.docker.mysql: Compose 部署.executor\": \"Run\",\r\n    \"Docker.docker.redis: Compose 部署.executor\": \"Run\",\r\n    \"Docker.docker: Compose 部署.executor\": \"Run\",\r\n    \"Maven.video-platform [clean].executor\": \"Run\",\r\n    \"ModuleVcsDetector.initialDetectionPerformed\": \"true\",\r\n    \"RequestMappingsPanelOrder0\": \"0\",\r\n    \"RequestMappingsPanelOrder1\": \"1\",\r\n    \"RequestMappingsPanelWidth0\": \"75\",\r\n    \"RequestMappingsPanelWidth1\": \"75\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.git.unshallow\": \"true\",\r\n    \"SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\r\n    \"Spring Boot.VideoPlatformApplication.executor\": \"Run\",\r\n    \"git-widget-placeholder\": \"main\",\r\n    \"last_opened_file_path\": \"E:/Java-Project/Bilibili/Video-Platform\",\r\n    \"node.js.detected.package.eslint\": \"true\",\r\n    \"node.js.detected.package.tslint\": \"true\",\r\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\r\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\r\n    \"nodejs_package_manager_path\": \"npm\",\r\n    \"project.structure.last.edited\": \"项目\",\r\n    \"project.structure.proportion\": \"0.15\",\r\n    \"project.structure.side.proportion\": \"0.23665893\",\r\n    \"settings.editor.selected.configurable\": \"MavenSettings\",\r\n    \"vue.rearranger.settings.migration\": \"true\"\r\n  },\r\n  \"keyToStringList\": {\r\n    \"DatabaseDriversLRU\": [\r\n      \"mysql\"\r\n    ]\r\n  }\r\n}]]></component>\r\n  <component name=\"ReactorSettings\">\r\n    <option name=\"notificationShown\" value=\"true\" />\r\n  </component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"E:\\Java-Project\\Bilibili\\Video-Platform\\src\\main\\resources\\db\" />\r\n      <recent name=\"E:\\Java-Project\\Bilibili\\Video-Platform\\bachend\" />\r\n      <recent name=\"E:\\Java-Project\\Bilibili\\Video-Platform\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Spring Boot.VideoPlatformApplication\">\r\n    <configuration default=\"true\" type=\"JetRunConfigurationType\">\r\n      <module name=\"Video-Platform\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration default=\"true\" type=\"KotlinStandaloneScriptRunConfigurationType\">\r\n      <module name=\"Video-Platform\" />\r\n      <option name=\"filePath\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"VideoPlatformApplication\" type=\"SpringBootApplicationConfigurationType\" factoryName=\"Spring Boot\" nameIsGenerated=\"true\">\r\n      <module name=\"video-platform\" />\r\n      <option name=\"SPRING_BOOT_MAIN_CLASS\" value=\"com.bilibili.video.VideoPlatformApplication\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration default=\"true\" type=\"docker-deploy\" factoryName=\"docker-compose.yml\" temporary=\"true\">\r\n      <deployment type=\"docker-compose.yml\">\r\n        <settings />\r\n      </deployment>\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"docker: Compose 部署\" type=\"docker-deploy\" factoryName=\"docker-compose.yml\" temporary=\"true\" server-name=\"Docker\">\r\n      <deployment type=\"docker-compose.yml\">\r\n        <settings>\r\n          <option name=\"sourceFilePath\" value=\"src/main/resources/docker/docker-compose.yml\" />\r\n        </settings>\r\n      </deployment>\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"docker.kibana: Compose 部署\" type=\"docker-deploy\" factoryName=\"docker-compose.yml\" temporary=\"true\" server-name=\"Docker\">\r\n      <deployment type=\"docker-compose.yml\">\r\n        <settings>\r\n          <option name=\"services\">\r\n            <list>\r\n              <option value=\"kibana\" />\r\n            </list>\r\n          </option>\r\n          <option name=\"sourceFilePath\" value=\"src/main/resources/docker/docker-compose.yml\" />\r\n        </settings>\r\n      </deployment>\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"docker.minio: Compose 部署\" type=\"docker-deploy\" factoryName=\"docker-compose.yml\" temporary=\"true\" server-name=\"Docker\">\r\n      <deployment type=\"docker-compose.yml\">\r\n        <settings>\r\n          <option name=\"services\">\r\n            <list>\r\n              <option value=\"minio\" />\r\n            </list>\r\n          </option>\r\n          <option name=\"sourceFilePath\" value=\"src/main/resources/docker/docker-compose.yml\" />\r\n        </settings>\r\n      </deployment>\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"docker.redis: Compose 部署\" type=\"docker-deploy\" factoryName=\"docker-compose.yml\" temporary=\"true\" server-name=\"Docker\">\r\n      <deployment type=\"docker-compose.yml\">\r\n        <settings>\r\n          <option name=\"services\">\r\n            <list>\r\n              <option value=\"redis\" />\r\n            </list>\r\n          </option>\r\n          <option name=\"sourceFilePath\" value=\"src/main/resources/docker/docker-compose.yml\" />\r\n        </settings>\r\n      </deployment>\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Docker.docker: Compose 部署\" />\r\n        <item itemvalue=\"Docker.docker.redis: Compose 部署\" />\r\n        <item itemvalue=\"Docker.docker.minio: Compose 部署\" />\r\n        <item itemvalue=\"Docker.docker.kibana: Compose 部署\" />\r\n        <item itemvalue=\"Docker.docker: Compose 部署\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.26094.121\" />\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-IU-251.26094.121\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"默认任务\">\r\n      <changelist id=\"2e92157d-8d66-416d-8b28-d09a51483d9e\" name=\"更改\" comment=\"\" />\r\n      <created>1773122315367</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1773122315367</updated>\r\n      <workItem from=\"1773122316501\" duration=\"62679000\" />\r\n      <workItem from=\"1773373745418\" duration=\"10285000\" />\r\n      <workItem from=\"1773391515669\" duration=\"343000\" />\r\n      <workItem from=\"1773391865982\" duration=\"3587000\" />\r\n      <workItem from=\"1773747132792\" duration=\"1872000\" />\r\n      <workItem from=\"1773756986334\" duration=\"119000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"增加管理员管理面板、新注册用户默认头像、视频弹幕等\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1773646269928</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1773646269928</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"增加管理员管理面板、新注册用户默认头像、视频弹幕等\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1773646279797</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1773646279797</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"缓存、头像、消息队列完善\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1773757027994</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1773757027994</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"视频标签增加\">\r\n      <option name=\"closed\" value=\"true\" />\r\n      <created>1773919425871</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1773919425871</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"5\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"删除垃圾文件提交\" />\r\n    <MESSAGE value=\"缓存、头像、消息队列完善\" />\r\n    <MESSAGE value=\"视频标签增加\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"视频标签增加\" />\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision c4fcaa6a7b377836a30a89407e5b95b0ee4032e8)
++++ b/.idea/workspace.xml	(date 1774346300369)
+@@ -4,9 +4,7 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="视频标签增加">
+-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-    </list>
++    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="ai助手、ai辅助搜索功能加入" />
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+@@ -25,7 +23,7 @@
+   <component name="Git.Settings">
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="lx" />
++        <entry key="$PROJECT_DIR$" value="main" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+@@ -73,43 +71,43 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "Docker.docker.elasticsearch: Compose 部署.executor": "Run",
+-    "Docker.docker.kibana: Compose 部署.executor": "Run",
+-    "Docker.docker.minio: Compose 部署.executor": "Run",
+-    "Docker.docker.mysql: Compose 部署.executor": "Run",
+-    "Docker.docker.redis: Compose 部署.executor": "Run",
+-    "Docker.docker: Compose 部署.executor": "Run",
+-    "Maven.video-platform [clean].executor": "Run",
+-    "ModuleVcsDetector.initialDetectionPerformed": "true",
+-    "RequestMappingsPanelOrder0": "0",
+-    "RequestMappingsPanelOrder1": "1",
+-    "RequestMappingsPanelWidth0": "75",
+-    "RequestMappingsPanelWidth1": "75",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "RunOnceActivity.git.unshallow": "true",
+-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+-    "Spring Boot.VideoPlatformApplication.executor": "Run",
+-    "git-widget-placeholder": "main",
+-    "last_opened_file_path": "E:/Java-Project/Bilibili/Video-Platform",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "project.structure.last.edited": "项目",
+-    "project.structure.proportion": "0.15",
+-    "project.structure.side.proportion": "0.23665893",
+-    "settings.editor.selected.configurable": "MavenSettings",
+-    "vue.rearranger.settings.migration": "true"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;Docker.docker.elasticsearch: Compose 部署.executor&quot;: &quot;Run&quot;,
++    &quot;Docker.docker.kibana: Compose 部署.executor&quot;: &quot;Run&quot;,
++    &quot;Docker.docker.minio: Compose 部署.executor&quot;: &quot;Run&quot;,
++    &quot;Docker.docker.mysql: Compose 部署.executor&quot;: &quot;Run&quot;,
++    &quot;Docker.docker.redis: Compose 部署.executor&quot;: &quot;Run&quot;,
++    &quot;Docker.docker: Compose 部署.executor&quot;: &quot;Run&quot;,
++    &quot;Maven.video-platform [clean].executor&quot;: &quot;Run&quot;,
++    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
++    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
++    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
++    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
++    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
++    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
++    &quot;Spring Boot.VideoPlatformApplication.executor&quot;: &quot;Run&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;lx&quot;,
++    &quot;last_opened_file_path&quot;: &quot;E:/Java-Project/Bilibili/Video-Platform&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
++    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
++    &quot;project.structure.side.proportion&quot;: &quot;0.23665893&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
++    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+   },
+-  "keyToStringList": {
+-    "DatabaseDriversLRU": [
+-      "mysql"
++  &quot;keyToStringList&quot;: {
++    &quot;DatabaseDriversLRU&quot;: [
++      &quot;mysql&quot;
+     ]
+   }
+-}]]></component>
++}</component>
+   <component name="ReactorSettings">
+     <option name="notificationShown" value="true" />
+   </component>
+@@ -223,6 +221,7 @@
+       <workItem from="1773391865982" duration="3587000" />
+       <workItem from="1773747132792" duration="1872000" />
+       <workItem from="1773756986334" duration="119000" />
++      <workItem from="1774250517926" duration="7181000" />
+     </task>
+     <task id="LOCAL-00001" summary="增加管理员管理面板、新注册用户默认头像、视频弹幕等">
+       <option name="closed" value="true" />
+@@ -248,13 +247,13 @@
+       <option name="project" value="LOCAL" />
+       <updated>1773757027994</updated>
+     </task>
+-    <task id="LOCAL-00004" summary="视频标签增加">
++    <task id="LOCAL-00004" summary="ai助手、ai辅助搜索功能加入">
+       <option name="closed" value="true" />
+-      <created>1773919425871</created>
++      <created>1774346287007</created>
+       <option name="number" value="00004" />
+       <option name="presentableId" value="LOCAL-00004" />
+       <option name="project" value="LOCAL" />
+-      <updated>1773919425871</updated>
++      <updated>1774346287007</updated>
+     </task>
+     <option name="localTasksCounter" value="5" />
+     <servers />
+@@ -276,8 +275,8 @@
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="删除垃圾文件提交" />
+     <MESSAGE value="缓存、头像、消息队列完善" />
+-    <MESSAGE value="视频标签增加" />
+-    <option name="LAST_COMMIT_MESSAGE" value="视频标签增加" />
++    <MESSAGE value="ai助手、ai辅助搜索功能加入" />
++    <option name="LAST_COMMIT_MESSAGE" value="ai助手、ai辅助搜索功能加入" />
+   </component>
+   <component name="XSLT-Support.FileAssociations.UIState">
+     <expand />
