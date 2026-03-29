@@ -1,173 +1,319 @@
 <template>
   <div class="search-page">
-    <div class="search-head">
-      <h2>“{{ keyword }}” 的搜索结果</h2>
+    <div class="search-header">
+      <h1>搜索结果</h1>
     </div>
-
-    <div class="type-tabs">
-      <button v-for="t in typeOptions" :key="t.value" class="tab" :class="{ active: searchType === t.value }" @click="changeType(t.value)">
-        {{ t.label }}
-      </button>
-    </div>
-
-    <div v-if="searchType !== 'user'" class="sort-tabs">
-      <button v-for="s in sortOptions" :key="s.value" class="sort-item" :class="{ active: sortBy === s.value }" @click="changeSort(s.value)">
-        {{ s.label }}
-      </button>
-    </div>
-
-    <div v-if="searchType !== 'user'" class="video-grid">
-      <div v-for="item in videoList" :key="item.id" class="video-card" @click="goVideo(item.id)">
-        <img class="cover" :src="resolveCover(item)" @error="onCoverError" />
-        <div class="title">{{ item.title }}</div>
-        <div class="meta">播放 {{ formatCount(item.playCount) }} · 点赞 {{ formatCount(item.likeCount) }} · 收藏 {{ formatCount(item.saveCount) }}</div>
+    <div class="search-content">
+      <div class="search-filters">
+        <div class="filter-tabs">
+          <button 
+            v-for="tab in filterTabs" 
+            :key="tab.key"
+            :class="{ active: activeTab === tab.key }"
+            @click="activeTab = tab.key"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+        <div class="sort-options">
+          <span>排序：</span>
+          <button 
+            v-for="sort in sortOptions" 
+            :key="sort.key"
+            :class="{ active: activeSort === sort.key }"
+            @click="activeSort = sort.key"
+          >
+            {{ sort.label }}
+          </button>
+        </div>
+      </div>
+      <div class="search-results">
+        <div v-if="loading" class="loading">加载中...</div>
+        <div v-else-if="noResults" class="no-results">
+          <p>未找到相关内容</p>
+          <p>请尝试其他关键词</p>
+        </div>
+        <div v-else class="video-list">
+          <div v-for="video in videos" :key="video.id" class="video-item">
+            <div class="video-cover">
+              <img :src="video.cover" alt="视频封面" />
+              <span class="video-duration">{{ formatDuration(video.duration) }}</span>
+            </div>
+            <div class="video-info">
+              <h3 class="video-title">{{ video.title }}</h3>
+              <div class="video-meta">
+                <span class="video-up">{{ video.username }}</span>
+                <span class="video-views">{{ formatNumber(video.viewCount) }} 播放</span>
+                <span class="video-date">{{ formatDate(video.createTime) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div v-if="(searchType === 'user' || searchType === 'comprehensive') && userList.length" class="user-grid">
-      <div v-for="u in userList" :key="u.id" class="user-card" @click="goProfile(u.id)">
-        <img :src="resolveAvatar(u.avatar)" class="user-avatar" />
-        <div class="user-name">{{ u.username }}</div>
-      </div>
-    </div>
-
-    <div v-if="!loading && !videoList.length && searchType !== 'user'" class="empty">暂无视频结果</div>
-    <div v-if="!loading && !userList.length && searchType === 'user'" class="empty">暂无用户结果</div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { searchVideos, searchUsers } from '../api/video'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { searchVideos } from '../api/video'
 
 const route = useRoute()
-const router = useRouter()
 const keyword = ref('')
-const searchType = ref('comprehensive')
-const sortBy = ref('comprehensive')
 const loading = ref(false)
-const videoList = ref([])
-const userList = ref([])
-const pageSize = 20
-const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
+const videos = ref([])
+const noResults = ref(false)
+const activeTab = ref('comprehensive')
+const activeSort = ref('comprehensive')
 
-const typeOptions = [
-  { label: '综合', value: 'comprehensive' },
-  { label: '视频', value: 'video' },
-  { label: '用户', value: 'user' }
+const filterTabs = [
+  { key: 'comprehensive', label: '综合' },
+  { key: 'video', label: '视频' },
+  { key: 'user', label: '用户' }
 ]
 
 const sortOptions = [
-  { label: '综合排序', value: 'comprehensive' },
-  { label: '最多点赞', value: 'like' },
-  { label: '最多收藏', value: 'save' },
-  { label: '最新发布', value: 'latest' },
-  { label: '最多播放', value: 'play' }
+  { key: 'comprehensive', label: '综合排序' },
+  { key: 'viewCount', label: '播放量' },
+  { key: 'createTime', label: '最新发布' }
 ]
 
-function syncFromQuery() {
-  keyword.value = String(route.query.keyword || '').trim()
-  searchType.value = String(route.query.type || 'comprehensive')
-  sortBy.value = String(route.query.sortBy || 'comprehensive')
-}
+onMounted(() => {
+  const query = route.query.keyword
+  if (query) {
+    keyword.value = query
+    performSearch()
+  }
+})
 
-function updateQuery(next = {}) {
-  router.replace({
-    path: '/search',
-    query: {
-      keyword: keyword.value,
-      type: searchType.value,
-      sortBy: sortBy.value,
-      ...next
-    }
-  })
-}
-
-function changeType(v) {
-  searchType.value = v
-  updateQuery({ type: v })
-}
-
-function changeSort(v) {
-  sortBy.value = v
-  updateQuery({ sortBy: v })
-}
-
-async function loadData() {
+async function performSearch() {
   if (!keyword.value) return
+  
   loading.value = true
   try {
-    if (searchType.value === 'user') {
-      userList.value = await searchUsers(keyword.value, 1, pageSize)
-      videoList.value = []
-      return
-    }
-
-    const res = await searchVideos(keyword.value, 1, pageSize, sortBy.value)
-    videoList.value = res.records || []
-
-    if (searchType.value === 'comprehensive') {
-      userList.value = await searchUsers(keyword.value, 1, 8)
-    } else {
-      userList.value = []
-    }
+    const result = await searchVideos({
+      keyword: keyword.value,
+      type: activeTab.value,
+      sortBy: activeSort.value,
+      page: 1,
+      size: 20
+    })
+    
+    videos.value = result.data || []
+    noResults.value = videos.value.length === 0
+  } catch (error) {
+    console.error('搜索失败:', error)
+    noResults.value = true
   } finally {
     loading.value = false
   }
 }
 
-function goVideo(id) {
-  const href = router.resolve({ path: `/video/${id}` }).href
-  window.open(href, '_blank')
+function formatDuration(seconds) {
+  if (!seconds) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-function resolveCover(item) {
-  if (item.previewUrl) return item.previewUrl
-  if (item.coverUrl) return `/api/file/cover?url=${encodeURIComponent(item.coverUrl)}`
-  return placeholderCover
+function formatNumber(num) {
+  if (num < 1000) return num
+  if (num < 10000) return (num / 1000).toFixed(1) + 'k'
+  return (num / 10000).toFixed(1) + 'w'
 }
 
-function onCoverError(event) {
-  event.target.src = placeholderCover
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString()
 }
-
-function resolveAvatar(avatar) {
-  if (!avatar) return new URL('../assets/avatar-placeholder.png', import.meta.url).href
-  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
-  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
-}
-
-function goProfile(id) {
-  router.push(`/user/${id}`)
-}
-
-function formatCount(n) {
-  if (!n) return '0'
-  if (n >= 10000) return (n / 10000).toFixed(1) + '万'
-  return String(n)
-}
-
-watch(() => route.query, async () => {
-  syncFromQuery()
-  await loadData()
-}, { immediate: true })
 </script>
 
 <style scoped>
-.search-page { padding-bottom: 30px; }
-.search-head h2 { margin: 0 0 14px; font-size: 22px; }
-.type-tabs, .sort-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.tab, .sort-item { border: 1px solid #e3e5e7; background: #fff; border-radius: 18px; padding: 6px 12px; font-size: 13px; }
-.tab.active, .sort-item.active { color: #fb7299; border-color: #fb7299; background: #fff0f4; }
-.video-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.video-card { background: #fff; border-radius: 8px; overflow: hidden; cursor: pointer; }
-.cover { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-.title { font-size: 14px; padding: 8px 10px 4px; }
-.meta { font-size: 12px; color: #9499a0; padding: 0 10px 10px; }
-.user-grid { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 12px; margin-top: 16px; }
-.user-card { background: #fff; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; }
-.user-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
-.user-name { margin-top: 8px; font-size: 13px; }
-.empty { color: #9499a0; text-align: center; padding: 40px 0; }
+.search-page {
+  padding: 20px;
+}
+
+.search-header {
+  margin-bottom: 20px;
+}
+
+.search-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #18191c;
+}
+
+.search-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e3e5e7;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 16px;
+}
+
+.filter-tabs button {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: #61666d;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.filter-tabs button:hover {
+  color: #fb7299;
+}
+
+.filter-tabs button.active {
+  color: #fb7299;
+  font-weight: 600;
+  background: #fff0f4;
+}
+
+.sort-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #61666d;
+}
+
+.sort-options button {
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: #61666d;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.sort-options button:hover {
+  color: #fb7299;
+}
+
+.sort-options button.active {
+  color: #fb7299;
+  font-weight: 600;
+}
+
+.search-results {
+  min-height: 400px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 16px;
+  color: #9499a0;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  text-align: center;
+  color: #9499a0;
+}
+
+.no-results p:first-child {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.video-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.video-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.video-item:hover {
+  transform: translateY(-4px);
+}
+
+.video-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.video-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #18191c;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.video-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #9499a0;
+}
+
+@media (max-width: 768px) {
+  .search-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .video-list {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
 </style>

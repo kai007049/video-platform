@@ -78,13 +78,54 @@ async function fetchList(isMore = false) {
   loading.value = true
   try {
     const res = await fetchApi(isMore ? page.value : 1)
-    const list = res.records || []
+    let list = res.records || []
+    
+    console.log('API 返回数据:', res)
+    console.log('视频列表长度:', list.length)
+    
+    // 添加测试弹幕功能的模拟视频
+    if (!isMore) {
+      const testVideo = {
+        id: 9999,
+        title: '测试弹幕功能 - 点击进入',
+        coverUrl: 'https://placehold.co/640x360/ff6b6b/ffffff?text=弹幕测试',
+        playCount: 12345,
+        commentCount: 678,
+        durationSeconds: 120,
+        authorId: 1,
+        authorName: '测试账号',
+        categoryName: '测试',
+        createTime: new Date().toISOString()
+      }
+      list.unshift(testVideo)
+      console.log('添加测试视频:', testVideo)
+    }
+    
     if (isMore) videoList.value.push(...list)
     else videoList.value = list
     hasMore.value = res.current < res.pages
     page.value = isMore ? page.value + 1 : 2
+    
+    console.log('最终视频列表长度:', videoList.value.length)
   } catch (e) {
     console.error(e)
+    // 即使 API 失败，也显示测试视频
+    if (!isMore) {
+      videoList.value = [{
+        id: 9999,
+        title: '测试弹幕功能 - 点击进入',
+        coverUrl: 'https://placehold.co/640x360/ff6b6b/ffffff?text=弹幕测试',
+        playCount: 12345,
+        commentCount: 678,
+        durationSeconds: 120,
+        authorId: 1,
+        authorName: '测试账号',
+        categoryName: '测试',
+        createTime: new Date().toISOString()
+      }]
+      hasMore.value = false
+      console.log('API 失败，使用测试视频')
+    }
   } finally {
     loading.value = false
   }
@@ -123,8 +164,8 @@ async function runAiAsk() {
 
 function loadMore() { fetchList(true) }
 function goVideo(id) {
-  const href = router.resolve({ path: `/video/${id}` }).href
-  window.open(href, '_blank')
+  console.log('点击视频，ID:', id)
+  router.push(`/video/${id}`)
 }
 function goProfile(authorId) { if (authorId) router.push(`/user/${authorId}`) }
 

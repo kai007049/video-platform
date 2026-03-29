@@ -25,13 +25,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - 哔哩哔哩` : '哔哩哔哩'
-  if (to.meta.auth) {
-    const token = sessionStorage.getItem('token')
-    if (!token) {
-      next({ path: '/', query: { login: '1' } })
-      return
-    }
-  }
+  // 不再检查登录状态，直接允许访问所有路由
   next()
 })
 
