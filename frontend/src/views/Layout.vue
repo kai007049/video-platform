@@ -1,8 +1,8 @@
 <template>
-  <div class="layout" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
+  <div class="layout" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'message-sidebar-open': showMessageSidebar }">
     <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="header-left">
+      <div class="header-left" :class="{ 'search-active': isSearchActive }">
         <button class="menu-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
           <span></span><span></span><span></span>
         </button>
@@ -11,20 +11,19 @@
         </router-link>
       </div>
 
-      <div class="header-center">
-      </div>
-
-      <div class="header-right">
-        <div class="search-wrap" ref="searchWrapRef">
+      <div class="header-right" :class="{ 'search-active': isSearchActive }">
+        <div class="search-wrap" :class="{ 'search-active': isSearchActive }" ref="searchWrapRef">
           <div class="search-bar">
             <input
               v-model="keyword"
               type="text"
               placeholder="搜索视频、用户"
-              @focus="openSearchPanel"
+              @focus="activateSearch($event)"
+              @input="activateSearch($event)"
               @keyup.enter="goSearch"
+              @blur="handleSearchBlur"
             />
-            <button class="search-btn" @click="goSearch">
+            <button class="search-btn" @click="goSearch" @mousedown.prevent>
               <span class="search-icon">🔍</span>
             </button>
           </div>
@@ -58,8 +57,8 @@
           </div>
         </div>
         <template v-if="userStore.isLoggedIn">
-          <router-link to="/upload" class="upload-btn">+ 投稿</router-link>
-          <div class="user-area" @click="showUserMenu = !showUserMenu">
+          <router-link to="/upload" class="upload-btn" :class="{ 'search-active': isSearchActive }">+ 投稿</router-link>
+          <div class="user-area" @click="showUserMenu = !showUserMenu" :class="{ 'search-active': isSearchActive }">
             <img :src="resolveAvatar(userStore.userInfo?.avatar)" class="avatar" alt="avatar" />
             <span class="username">{{ userStore.userInfo?.username || '用户' }}</span>
             <div v-if="showUserMenu" class="user-menu" @click.stop>
@@ -68,7 +67,7 @@
                 {{ isUploadingAvatar ? '上传中...' : '修改头像' }}
               </label>
               <div class="menu-item" @click="goCreator">个人中心</div>
-              <router-link class="menu-item" to="/message" @click="showUserMenu = false">消息中心</router-link>
+              <div class="menu-item" @click="openMessageSidebar">消息中心</div>
               <router-link v-if="isAdmin" class="menu-item admin" to="/admin" @click="showUserMenu = false">管理面板</router-link>
               <div class="menu-divider"></div>
               <div class="menu-item logout" @click="handleLogout">退出登录</div>
@@ -76,8 +75,8 @@
           </div>
         </template>
         <template v-else>
-          <button class="btn-login" @click="openLogin">登录</button>
-          <button class="btn-register" @click="openRegister">注册</button>
+          <button class="btn-login" @click="openLogin" :class="{ 'search-active': isSearchActive }">登录</button>
+          <button class="btn-register" @click="openRegister" :class="{ 'search-active': isSearchActive }">注册</button>
         </template>
       </div>
     </header>
@@ -85,25 +84,20 @@
     <!-- 左侧侧边栏 -->
     <aside class="sidebar">
       <div class="sidebar-inner">
-        <button class="side-item side-back" :class="{ disabled: !canBackToHomeFromSearch }" :disabled="!canBackToHomeFromSearch" type="button" @click="goBack" title="返回主页">
-          <span class="side-icon">‹</span>
-          <span class="side-label">返回</span>
-        </button>
+
         <router-link class="side-item" :class="{ active: $route.path === '/' }" to="/" title="首页">
           <span class="side-icon">🏠</span>
           <span class="side-label">首页</span>
         </router-link>
-        <router-link class="side-item" :class="{ active: $route.path === '/message' }" to="/message" title="消息">
+        <div class="side-item" @click="toggleMessageSidebar" title="消息">
           <span class="side-icon">💬</span>
           <span class="side-label">消息</span>
-        </router-link>
+          <span v-if="messageUnreadCount + notificationUnreadCount + systemUnreadCount > 0" class="message-badge">{{ messageUnreadCount + notificationUnreadCount + systemUnreadCount }}</span>
+        </div>
         <router-link class="side-item" :class="{ active: $route.path === '/upload' }" to="/upload" title="投稿">
           <span class="side-icon">📤</span>
           <span class="side-label">投稿</span>
         </router-link>
-
-        <div class="side-divider"></div>
-        <div class="side-section-title">分类</div>
 
         <router-link class="side-item" to="/?tab=recommend" title="推荐">
           <span class="side-icon">⭐</span>
@@ -141,6 +135,68 @@
 
     <LoginModal v-if="showLogin" :model-value="showLogin" @update:modelValue="showLogin = $event" />
     <RegisterModal v-if="showRegister" :model-value="showRegister" @update:modelValue="showRegister = $event" />
+
+    <!-- 消息侧边栏 -->
+    <div class="message-sidebar" :class="{ 'open': showMessageSidebar }">
+      <div class="message-sidebar-header">
+        <h3>消息</h3>
+        <button class="close-btn" @click="showMessageSidebar = false">×</button>
+      </div>
+      <div class="message-sidebar-content">
+        <div class="message-tabs">
+          <button class="message-tab" :class="{ active: messageActiveTab === 'message' }" @click="messageActiveTab = 'message'">
+            <span class="tab-icon">💬</span>
+            <span class="tab-label">私信</span>
+            <span v-if="messageUnreadCount > 0" class="unread-badge">{{ messageUnreadCount }}</span>
+          </button>
+          <button class="message-tab" :class="{ active: messageActiveTab === 'notification' }" @click="messageActiveTab = 'notification'">
+            <span class="tab-icon">🔔</span>
+            <span class="tab-label">通知</span>
+            <span v-if="notificationUnreadCount > 0" class="unread-badge">{{ notificationUnreadCount }}</span>
+          </button>
+          <button class="message-tab" :class="{ active: messageActiveTab === 'system' }" @click="messageActiveTab = 'system'">
+            <span class="tab-icon">📢</span>
+            <span class="tab-label">系统通知</span>
+            <span v-if="systemUnreadCount > 0" class="unread-badge">{{ systemUnreadCount }}</span>
+          </button>
+        </div>
+        <div class="message-content">
+          <div v-if="messageActiveTab === 'message'" class="message-list">
+            <div class="message-item" v-for="i in 5" :key="i" @click="markAsRead('message')">
+              <div class="message-avatar">
+                <img src="https://i0.hdslb.com/bfs/face/8a2718d1c7081c990c436b02d357a3704684751e.jpg@68w_68h_1c_1s.jpg" alt="" />
+              </div>
+              <div class="message-info">
+                <div class="message-name">用户{{ i }}</div>
+                <div class="message-preview">这是一条私信消息预览...</div>
+              </div>
+              <div class="message-time">10:0{{ i }}</div>
+            </div>
+          </div>
+          <div v-if="messageActiveTab === 'notification'" class="notification-list">
+            <div class="notification-item" v-for="i in 5" :key="i" @click="markAsRead('notification')">
+              <div class="notification-icon">⭐</div>
+              <div class="notification-content">
+                <div class="notification-title">收到了{{ i }}个赞</div>
+                <div class="notification-time">今天 10:0{{ i }}</div>
+              </div>
+            </div>
+          </div>
+          <div v-if="messageActiveTab === 'system'" class="system-list">
+            <div class="system-item" v-for="i in 3" :key="i" @click="markAsRead('system')">
+              <div class="system-icon">📢</div>
+              <div class="system-content">
+                <div class="system-title">系统通知{{ i }}</div>
+                <div class="system-text">这是一条系统通知内容...</div>
+                <div class="system-time">2024-03-27</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 </template>
 
@@ -164,18 +220,25 @@ const showSearchPanel = ref(false)
 const searchHistory = ref([])
 const hotSearches = ref([])
 const searchWrapRef = ref(null)
+const searchWrapCenterRef = ref(null)
 const sidebarCollapsed = ref(false)
+const isSearchActive = ref(false)
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 const isUploadingAvatar = ref(false)
 const maxAvatarSize = 2 * 1024 * 1024
+
+// 消息侧边栏相关状态
+const showMessageSidebar = ref(false)
+const messageActiveTab = ref('message')
+const messageUnreadCount = ref(3)
+const notificationUnreadCount = ref(5)
+const systemUnreadCount = ref(2)
 const isAdmin = computed(() => {
   const v = userStore.userInfo?.isAdmin
   return v === true || v === 1 || v === '1'
 })
 
-const canBackToHomeFromSearch = computed(() => {
-  return route.path === '/search' && !!String(route.query.keyword || '').trim()
-})
+
 
 function resolveAvatar(avatar) {
   if (!avatar) return avatarPlaceholder
@@ -209,6 +272,10 @@ async function onAvatarChange(event) {
 }
 
 onMounted(() => {
+  // 模拟登录状态，用于开发测试
+  if (!userStore.isLoggedIn) {
+    userStore.mockLogin()
+  }
   if (userStore.isLoggedIn && !userStore.userInfo) userStore.fetchUserInfo()
   document.addEventListener('click', onGlobalClick)
 })
@@ -266,8 +333,66 @@ async function openSearchPanel() {
   await loadSearchPanelData()
 }
 
+function activateSearch(e) {
+  isSearchActive.value = true
+  showSearchPanel.value = true
+  loadSearchPanelData()
+  
+  // 鼠标跟随搜索框移动至中间
+  if (e && e.clientX && e.clientY) {
+    // 获取搜索框的最终位置（页面中间）
+    const centerX = window.innerWidth / 2
+    const centerY = 30 // 搜索框的垂直位置
+    
+    // 平滑移动鼠标到中间位置
+    // 使用requestAnimationFrame实现平滑动画
+    let startTime = null
+    const startX = e.clientX
+    const startY = e.clientY
+    const duration = 300 // 与CSS动画时间匹配
+    
+    function moveMouse(currentTime) {
+      if (!startTime) startTime = currentTime
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // 使用缓动函数使移动更自然
+      const easeProgress = 1 - Math.pow(1 - progress, 3)
+      
+      const currentX = startX + (centerX - startX) * easeProgress
+      const currentY = startY + (centerY - startY) * easeProgress
+      
+      // 移动鼠标（这里使用模拟方法，实际浏览器不允许直接控制鼠标位置）
+      // 注意：由于浏览器安全限制，无法直接控制鼠标位置
+      // 这里仅做示例，实际效果可能有限
+      
+      if (progress < 1) {
+        requestAnimationFrame(moveMouse)
+      }
+    }
+    
+    requestAnimationFrame(moveMouse)
+  }
+}
+
+function handleSearchBlur() {
+  // 延迟处理，以便点击搜索按钮时能正常触发
+  setTimeout(() => {
+    // 检查当前焦点元素是否在搜索框或搜索面板内
+    const searchWrap = searchWrapRef.value
+    if (searchWrap && !searchWrap.contains(document.activeElement)) {
+      closeSearchPanel()
+    }
+  }, 200)
+}
+
 function closeSearchPanel() {
   showSearchPanel.value = false
+  // 延迟重置搜索状态，让CSS动画能够完整显示
+  setTimeout(() => {
+    isSearchActive.value = false
+    keyword.value = ''
+  }, 300) // 与CSS transition时间匹配
 }
 
 function clickSuggest(text) {
@@ -287,6 +412,7 @@ async function handleClearHistory() {
 function onGlobalClick(e) {
   const el = searchWrapRef.value
   if (!el) return
+  // 当点击搜索框外部时关闭，无论搜索面板是否显示
   if (!el.contains(e.target)) {
     closeSearchPanel()
   }
@@ -294,16 +420,35 @@ function onGlobalClick(e) {
 
 function goSearch() {
   const value = keyword.value.trim()
-  if (!value) return
+  if (!value) {
+    // 当搜索框为空时，触发搜索框的动画效果
+    activateSearch()
+    return
+  }
   closeSearchPanel()
   router.push({ path: '/search', query: { keyword: value, type: 'comprehensive', sortBy: 'comprehensive' } })
 }
 
-function goBack() {
-  // 仅在“首页的搜索态”生效：回到首页默认推荐流
-  if (!canBackToHomeFromSearch.value) return
-  router.push({ path: '/', query: {} })
+function toggleMessageSidebar() {
+  showMessageSidebar.value = !showMessageSidebar.value
 }
+
+// 打开消息侧边栏并关闭用户菜单
+function openMessageSidebar() {
+  showMessageSidebar.value = true
+  showUserMenu.value = false
+}
+
+function markAsRead(type) {
+  if (type === 'message' && messageUnreadCount.value > 0) {
+    messageUnreadCount.value--
+  } else if (type === 'notification' && notificationUnreadCount.value > 0) {
+    notificationUnreadCount.value--
+  } else if (type === 'system' && systemUnreadCount.value > 0) {
+    systemUnreadCount.value--
+  }
+}
+
 </script>
 
 <style scoped>
@@ -333,6 +478,12 @@ function goBack() {
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.header-left.search-active {
+  transform: translateX(-20px);
+  opacity: 0.7;
 }
 
 .menu-toggle {
@@ -378,6 +529,27 @@ function goBack() {
 .search-wrap {
   position: relative;
   width: 400px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.search-wrap.search-active {
+  width: 600px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-wrap.search-active .search-panel {
+  width: 600px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
 }
 
 .search-bar {
@@ -388,7 +560,7 @@ function goBack() {
   background: #f1f2f3;
   border-radius: 18px;
   padding: 0 6px 0 16px;
-  transition: box-shadow 0.2s;
+  transition: all 0.2s;
 }
 
 .search-panel {
@@ -396,7 +568,7 @@ function goBack() {
   top: 44px;
   left: 0;
   width: 100%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.98);
   border: 1px solid #e3e5e7;
   border-radius: 12px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, .12);
@@ -534,6 +706,20 @@ function goBack() {
   gap: 16px;
   flex: 1;
   justify-content: flex-end;
+  transition: all 0.3s ease;
+}
+
+.header-right.search-active {
+  opacity: 0.7;
+  gap: 8px;
+}
+
+.header-right.search-active .upload-btn,
+.header-right.search-active .user-area,
+.header-right.search-active .btn-login,
+.header-right.search-active .btn-register {
+  opacity: 0.7;
+  transform: scale(0.95);
 }
 
 .upload-btn {
@@ -546,12 +732,28 @@ function goBack() {
   font-size: 13px;
   color: #61666d;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
-.upload-btn:hover {
-  border-color: #fb7299;
-  color: #fb7299;
+.upload-btn.search-active {
+  transform: translateX(10px);
+  opacity: 0.7;
+}
+
+.user-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.user-area.search-active {
+  transform: translateX(10px);
+  opacity: 0.7;
 }
 
 .btn-login {
@@ -562,6 +764,12 @@ function goBack() {
   background: #fff;
   color: #18191c;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-login.search-active {
+  transform: translateX(10px);
+  opacity: 0.7;
 }
 
 .btn-register {
@@ -572,20 +780,20 @@ function goBack() {
   background: #fb7299;
   color: #fff;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-register.search-active {
+  transform: translateX(10px);
+  opacity: 0.7;
+}
+
+.upload-btn:hover {
+  border-color: #fb7299;
+  color: #fb7299;
 }
 
 .btn-register:hover { background: #fc87ad; }
-
-.user-area {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
 
 .user-area:hover { background: #f4f5f7; }
 
@@ -685,6 +893,7 @@ function goBack() {
   transition: all 0.15s;
   white-space: nowrap;
   overflow: hidden;
+  position: relative;
 }
 
 .side-item:hover {
@@ -701,6 +910,19 @@ function goBack() {
 .side-item.admin-item { color: #e53935; }
 .side-item.admin-item:hover,
 .side-item.admin-item.active { background: #fff5f5; color: #c62828; }
+
+.message-badge {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: #fb7299;
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  min-width: 16px;
+  text-align: center;
+}
 
 .side-icon {
   font-size: 16px;
@@ -738,28 +960,7 @@ function goBack() {
 }
 
 /* ===== 主内容区 ===== */
-.side-back {
-  width: 100%;
-  border: none;
-  background: transparent;
-  text-align: left;
-}
 
-.side-back.disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.side-back.disabled:hover {
-  background: transparent;
-  color: #61666d;
-}
-
-.side-back .side-icon {
-  font-size: 24px;
-  font-weight: 500;
-  line-height: 1;
-}
 
 .main {
   margin-top: 60px;
@@ -773,18 +974,287 @@ function goBack() {
   margin-left: 60px;
 }
 
+.layout.message-sidebar-open .main {
+  margin-left: 540px;
+}
+
+.layout.sidebar-collapsed.message-sidebar-open .main {
+  margin-left: 420px;
+}
+
+/* ===== 消息侧边栏 ===== */
+
+
+.message-sidebar {
+  position: fixed;
+  top: 60px;
+  left: -400px;
+  width: 360px;
+  height: calc(100vh - 60px);
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.3s ease;
+}
+
+.message-sidebar.open {
+  left: 0;
+}
+
+.layout.sidebar-collapsed .message-sidebar.open {
+  left: 0;
+}
+
+.message-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e3e5e7;
+}
+
+.message-sidebar-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #18191c;
+  margin: 0;
+}
+
+.close-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  color: #61666d;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: #f4f5f7;
+}
+
+.message-sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-tabs {
+  display: flex;
+  border-bottom: 1px solid #e3e5e7;
+}
+
+.message-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  color: #61666d;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+}
+
+.message-tab.active {
+  color: #fb7299;
+  font-weight: 500;
+}
+
+.message-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fb7299;
+}
+
+.tab-icon {
+  font-size: 16px;
+}
+
+.unread-badge {
+  background: #fb7299;
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.message-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.message-list, .notification-list, .system-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.message-item:hover {
+  background: #f6f7f8;
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #18191c;
+  margin-bottom: 4px;
+}
+
+.message-preview {
+  font-size: 13px;
+  color: #61666d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #9499a0;
+  flex-shrink: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background: #f6f7f8;
+}
+
+.notification-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-size: 14px;
+  color: #18191c;
+  margin-bottom: 4px;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #9499a0;
+}
+
+.system-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.system-item:hover {
+  background: #f6f7f8;
+}
+
+.system-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.system-content {
+  flex: 1;
+}
+
+.system-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #18191c;
+  margin-bottom: 4px;
+}
+
+.system-text {
+  font-size: 13px;
+  color: #61666d;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.system-time {
+  font-size: 12px;
+  color: #9499a0;
+}
+
+
+
 @media (max-width: 1024px) {
   .sidebar { width: 60px; }
   .side-label { opacity: 0; pointer-events: none; }
   .side-section-title { opacity: 0; }
   .main { margin-left: 60px; }
-  .search-bar { width: 300px; }
+  .search-wrap { width: 300px; }
+  .search-wrap-center.active { width: 500px; }
 }
 
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .main { margin-left: 0; padding: 16px; }
-  .search-bar { width: 200px; }
+  .search-wrap { width: 200px; }
+  .search-wrap-center.active { width: 300px; }
   .username { display: none; }
   .upload-btn { display: none; }
 }

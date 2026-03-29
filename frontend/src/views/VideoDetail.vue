@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getVideoDetail, recordPlay, saveProgress } from '../api/video'
 import { getComments, addComment } from '../api/comment'
@@ -93,6 +93,8 @@ import { getDanmus } from '../api/danmu'
 import { like, unlike } from '../api/like'
 import { addFavorite, removeFavorite } from '../api/favorite'
 import { useUserStore } from '../stores/user'
+import DanmuPlayer from '../utils/danmu-player.js'
+import DanmuControlPanel from '../utils/danmu-control-panel.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,13 +113,8 @@ const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.met
 let ws = null
 let played = false
 const historicalDanmus = ref([])
-const danmuBySecond = ref(new Map())
-const lastTickSecond = ref(-1)
-const danmuPaused = ref(false)
-const trackCount = 8
-const trackNextAvailable = Array.from({ length: trackCount }, () => 0)
-const danmuSpeed = 140
-const danmuGap = 32
+let danmuPlayer = null
+let danmuControlPanel = null
 
 const videoId = computed(() => Number(route.params.id))
 const currentUserId = computed(() => {
@@ -133,27 +130,93 @@ async function loadVideo() {
     await loadDanmus()
   } catch (e) {
     console.error(e)
+    
+    // 为测试视频提供模拟数据
+    if (videoId.value === 9999) {
+      video.value = {
+        id: 9999,
+        title: '测试弹幕功能',
+        description: '这是一个测试弹幕功能的视频，你可以在这里发送和查看弹幕。',
+        playUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+        coverUrl: 'https://placehold.co/960x540/ff6b6b/ffffff?text=弹幕测试',
+        playCount: 12345,
+        likeCount: 678,
+        saveCount: 345,
+        authorId: 1,
+        authorName: '测试账号',
+        authorAvatar: 'https://placehold.co/100x100/333/fff?text=测试',
+        duration: 120,
+        liked: false,
+        favorited: false
+      }
+      
+      // 加载模拟弹幕数据
+      historicalDanmus.value = [
+        { id: 1, content: '前方高能！', timePoint: 2, userId: 1 },
+        { id: 2, content: '这个视频太棒了', timePoint: 5, userId: 2 },
+        { id: 3, content: '666666', timePoint: 8, userId: 3 },
+        { id: 4, content: 'UP主加油！', timePoint: 10, userId: 4 },
+        { id: 5, content: '哈哈哈哈笑死我了', timePoint: 12, userId: 5 },
+        { id: 6, content: '这个技巧太实用了', timePoint: 15, userId: 6 },
+        { id: 7, content: '学到了学到了', timePoint: 18, userId: 7 },
+        { id: 8, content: '感谢分享', timePoint: 20, userId: 8 },
+        { id: 9, content: '膜拜大神', timePoint: 22, userId: 9 },
+        { id: 10, content: '这个画面太美了', timePoint: 25, userId: 10 }
+      ]
+      
+      initDanmuPlayer()
+    }
   }
 }
 
 async function loadDanmus() {
   try {
     historicalDanmus.value = await getDanmus(videoId.value) || []
-    rebuildDanmuIndex()
-    lastTickSecond.value = -1
+    initDanmuPlayer()
   } catch (e) {
     console.error(e)
   }
 }
 
-function rebuildDanmuIndex() {
-  const map = new Map()
-  for (const d of historicalDanmus.value || []) {
-    const sec = Math.max(0, Number(d.timePoint) || 0)
-    if (!map.has(sec)) map.set(sec, [])
-    map.get(sec).push(d)
+function initDanmuPlayer() {
+  if (!videoEl.value || !danmuContainer.value) return
+
+  // Destroy old instance
+  if (danmuPlayer) {
+    danmuPlayer.destroy()
   }
-  danmuBySecond.value = map
+  if (danmuControlPanel) {
+    danmuControlPanel.destroy()
+  }
+
+  // Convert danmu data format
+  const danmuData = historicalDanmus.value.map(d => ({
+    content: d.content,
+    time: Number(d.timePoint) || 0,
+    type: 'scroll',
+    color: '#ffffff'
+  }))
+
+  // Initialize danmu player
+  danmuPlayer = new DanmuPlayer({
+    video: videoEl.value,
+    container: danmuContainer.value,
+    danmuData: danmuData,
+    enabled: showDanmu.value,
+    speed: 140,
+    opacity: 0.95,
+    fontSize: 22,
+    trackCount: 8,
+    trackHeight: 32,
+    danmuGap: 32
+  })
+
+  // Initialize control panel
+  nextTick(() => {
+    danmuControlPanel = new DanmuControlPanel(danmuPlayer, {
+      container: document.body
+    })
+  })
 }
 
 async function loadComments() {
@@ -186,63 +249,33 @@ function addIncomingDanmu(d) {
     timePoint: Math.max(0, Number(d.timePoint) || 0)
   }
   historicalDanmus.value.push(normalized)
-  const sec = normalized.timePoint
-  if (!danmuBySecond.value.has(sec)) {
-    danmuBySecond.value.set(sec, [])
+
+  // Add to danmu player
+  if (danmuPlayer) {
+    danmuPlayer.addDanmu({
+      content: normalized.content,
+      time: normalized.timePoint,
+      type: 'scroll',
+      color: '#ffffff'
+    })
   }
-  danmuBySecond.value.get(sec).push(normalized)
-}
-
-function appendDanmu(d) {
-  if (!danmuContainer.value || !showDanmu.value) return
-
-  const containerHeight = danmuContainer.value.clientHeight || 240
-  const lineHeight = 28
-  const tracks = Math.max(4, Math.floor(containerHeight / lineHeight))
-  const now = performance.now()
-
-  let track = 0
-  let bestTime = Number.POSITIVE_INFINITY
-  for (let i = 0; i < Math.min(tracks, trackCount); i += 1) {
-    if (trackNextAvailable[i] <= now) {
-      track = i
-      bestTime = now
-      break
-    }
-    if (trackNextAvailable[i] < bestTime) {
-      bestTime = trackNextAvailable[i]
-      track = i
-    }
-  }
-
-  const span = document.createElement('span')
-  span.className = 'danmu-item'
-  if (currentUserId.value != null && Number(d.userId) === currentUserId.value) {
-    span.classList.add('self')
-  }
-  span.textContent = d.content
-  span.style.top = track * lineHeight + 8 + 'px'
-  span.style.opacity = '0.95'
-
-  danmuContainer.value.appendChild(span)
-  const width = span.getBoundingClientRect().width || 0
-  const travel = (danmuContainer.value.clientWidth || 960) + width
-  const duration = Math.max(6, travel / danmuSpeed)
-  span.style.animationDuration = duration + 's'
-
-  const gapTime = ((width + danmuGap) / danmuSpeed) * 1000
-  trackNextAvailable[track] = now + gapTime
-
-  span.addEventListener('animationend', () => span.remove())
-  span.addEventListener('animationcancel', () => span.remove())
 }
 
 function sendDanmu() {
   if (!danmuText.value.trim() || !userStore.isLoggedIn) return
   const content = danmuText.value.trim()
   const time = videoEl.value ? Math.floor(videoEl.value.currentTime) : 0
-  const d = { content, timePoint: time, userId: currentUserId.value }
-  appendDanmu(d)
+
+  // Add to danmu player
+  if (danmuPlayer) {
+    danmuPlayer.addDanmu({
+      content: content,
+      time: time,
+      type: 'scroll',
+      color: '#ffffff'
+    })
+  }
+
   danmuText.value = ''
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ content, timePoint: time }))
@@ -250,10 +283,6 @@ function sendDanmu() {
 }
 
 function onPlay() {
-  danmuPaused.value = false
-  if (danmuContainer.value) {
-    danmuContainer.value.classList.remove('paused')
-  }
   if (!played && userStore.isLoggedIn) {
     played = true
     recordPlay(videoId.value).catch(() => {})
@@ -270,13 +299,6 @@ function onLoadedMetadata() {
 function onTimeUpdate() {
   if (videoEl.value) {
     const t = Math.floor(videoEl.value.currentTime)
-    if (showDanmu.value && t !== lastTickSecond.value) {
-      const list = danmuBySecond.value.get(t) || []
-      for (const d of list) {
-        appendDanmu({ ...d })
-      }
-      lastTickSecond.value = t
-    }
 
     if (userStore.isLoggedIn) {
       if (progressTimer) clearTimeout(progressTimer)
@@ -288,29 +310,16 @@ function onTimeUpdate() {
 }
 
 function onSeeking() {
-  if (!videoEl.value) return
-  const t = Math.floor(videoEl.value.currentTime)
-  lastTickSecond.value = t - 1
-  if (danmuContainer.value) {
-    danmuContainer.value.querySelectorAll('.danmu-item').forEach(el => el.remove())
-  }
+  // DanmuPlayer handles seeking internally
 }
 
 function onPause() {
-  danmuPaused.value = true
-  if (danmuContainer.value) {
-    danmuContainer.value.classList.add('paused')
-  }
   if (videoEl.value && userStore.isLoggedIn) {
     saveProgress(videoId.value, Math.floor(videoEl.value.currentTime)).catch(() => {})
   }
 }
 
 function onEnded() {
-  danmuPaused.value = true
-  if (danmuContainer.value) {
-    danmuContainer.value.classList.add('paused')
-  }
   if (videoEl.value && userStore.isLoggedIn) {
     saveProgress(videoId.value, Math.floor(videoEl.value.duration || 0)).catch(() => {})
   }
@@ -408,6 +417,12 @@ onMounted(() => {
 onUnmounted(() => {
   if (ws) ws.close()
   if (progressTimer) clearTimeout(progressTimer)
+  if (danmuPlayer) {
+    danmuPlayer.destroy()
+  }
+  if (danmuControlPanel) {
+    danmuControlPanel.destroy()
+  }
   if (videoEl.value && userStore.isLoggedIn) {
     saveProgress(videoId.value, Math.floor(videoEl.value.currentTime)).catch(() => {})
   }
@@ -462,40 +477,6 @@ onUnmounted(() => {
 
 .danmu-container.hidden {
   display: none;
-}
-
-.danmu-container.paused :deep(.danmu-item) {
-  animation-play-state: paused;
-}
-
-:deep(.danmu-item) {
-  position: absolute;
-  left: 100%;
-  white-space: nowrap;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: #ffffff;
-  text-shadow:
-    0 0 2px rgba(0, 0, 0, 0.8),
-    0 0 6px rgba(0, 0, 0, 0.6),
-    1px 1px 1px rgba(0, 0, 0, 0.9);
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
-  animation: danmu-move 12s linear;
-  will-change: transform;
-  pointer-events: none;
-}
-
-:deep(.danmu-item.self) {
-  padding: 1px 6px;
-  border: 2px solid rgba(126, 223, 255, 0.95);
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45) inset;
-}
-
-@keyframes danmu-move {
-  from { transform: translateX(0); }
-  to { transform: translateX(-140vw); }
 }
 
 .content {
