@@ -2,15 +2,22 @@
   --bili-pink: #FB7299;
   --bili-pink-hover: #ff85ad;
   --bili-pink-dark: #e65180;
-  --bili-blue: #00a1d6;
-  --bg-gray: #f4f4f4;
+  --bili-blue: #00AEEC;
+  --bili-orange: #FF924F;
+  --bg-gray: #F1F2F3;
   --bg-dark: #1a1a1a;
-  --bg-page: #f7f8fa;
+  --bg-page: #F1F2F3;
   --bg-surface: #ffffff;
   --text-primary: #212121;
-  --text-secondary: #999;
-  --border-color: #e5e5e5;
+  --text-secondary: #61666D;
+  --text-hint: #9499A0;
+  --border-color: #E3E8EC;
+  --border-dashed: #CCD0D7;
   --card-shadow: 0 2px 12px rgba(0,0,0,.08);
+  --neumorphic-shadow-down: 8px 8px 16px rgba(163, 177, 198, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.7);
+  --neumorphic-inset: inset 4px 4px 8px rgba(163, 177, 198, 0.15), inset -4px -4px 8px rgba(255, 255, 255, 0.7);
+  --neon-glow-blue: 0 0 20px rgba(0, 174, 236, 0.4), 0 0 40px rgba(0, 174, 236, 0.2);
+  --neon-glow-pink: 0 0 20px rgba(251, 114, 153, 0.4), 0 0 40px rgba(251, 114, 153, 0.2);
   --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
