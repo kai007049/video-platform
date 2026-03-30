@@ -1,14 +1,46 @@
-# 默认忽略的文件
-/shelf/
-/workspace.xml
-# 基于编辑器的 HTTP 客户端请求
-/httpRequests/
-# 依赖于环境的 Maven 主目录路径
-/mavenHomeManager.xml
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
+# IDE
+.idea/
+.vscode/
+.qoder/
+
+# OS / editor temp
+*.log
+*.tmp
+*.swp
+
+# Java / Maven
+backend/target/
+backend/.mvn/
+target/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Python
+agent-service/.venv/
+agent-service/venv/
+agent-service/__pycache__/
+agent-service/**/*.pyc
+agent-service/**/__pycache__/
+
+# Local data
+backend/src/main/resources/docker/minio_data/
+backend/src/main/resources/docker/es_data/
 src/main/resources/docker/minio_data/
 src/main/resources/docker/es_data/
-.idea/workspace.xml
 
+# Local env / runtime config
+.env
+.env.*
+frontend/.env
+frontend/.env.*
+agent-service/.env
+agent-service/.env.*
+
+# Python eval / cache artifacts
+agent-service/app/evals/__pycache__/
+
+# Misc
+*.iml
