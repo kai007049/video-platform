@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class VideoCommandService {
 
+    public static final String DEFAULT_COVER_OBJECT = "default/default-video-cover.png";
     private static final String PLAY_COUNT_KEY = RedisConstants.VIDEO_STATS_KEY_PREFIX;
     private static final long PLAY_COUNT_EXPIRE = RedisConstants.VIDEO_STATS_EXPIRE_DAYS;
     private static final TimeUnit PLAY_COUNT_EXPIRE_UNIT = TimeUnit.DAYS;
@@ -46,6 +47,7 @@ public class VideoCommandService {
     private final VideoCacheService videoCacheService;
     private final MQService mqService;
     private final VideoViewAssembler videoViewAssembler;
+    private final VideoPostProcessFallbackService videoPostProcessFallbackService;
 
     /**
      * 上传视频并创建视频记录
@@ -61,10 +63,14 @@ public class VideoCommandService {
 
         String videoUrl;
         String coverUrl = null;
+        boolean useDefaultCover = false;
         try {
             videoUrl = minioUtils.uploadVideo(videoFile);
             if (coverFile != null && !coverFile.isEmpty()) {
                 coverUrl = minioUtils.uploadCover(coverFile);
+            } else {
+                coverUrl = DEFAULT_COVER_OBJECT;
+                useDefaultCover = true;
             }
         } catch (Exception e) {
             throw new BizException(500, "文件上传失败: " + e.getMessage());
@@ -89,6 +95,9 @@ public class VideoCommandService {
         mqService.sendVideoProcess(new VideoProcessMessage(video.getId(), authorId));
         mqService.sendSearchSync(new SearchSyncMessage("video", video.getId(), "create"));
         mqService.sendVideoCoverProcess(new VideoProcessMessage(video.getId(), authorId));
+        if (useDefaultCover) {
+            videoPostProcessFallbackService.triggerCoverProcessFallback(video.getId());
+        }
         incrHotScore(video.getId(), Constants.HOT_WEIGHT_PLAY);
 
         return videoViewAssembler.toVideoVO(video, authorId);

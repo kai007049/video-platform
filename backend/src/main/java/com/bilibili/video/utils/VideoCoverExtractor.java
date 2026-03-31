@@ -4,22 +4,25 @@ import com.bilibili.video.config.FfmpegConfig;
 import com.bilibili.video.exception.BizException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 
-@Schema(description = "视频封面提取工具")
+@Schema(description = "Video cover extraction helper")
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class VideoCoverExtractor {
 
     private final MinioUtils minioUtils;
     private final FfmpegConfig ffmpegConfig;
-    /**
-     * 截取视频封面
-     * @param videoUrl
-     * @return
-     */
+
     public String extractAndUploadCover(String videoUrl) {
         File videoFile = null;
         File coverFile = null;
@@ -31,15 +34,18 @@ public class VideoCoverExtractor {
             }
 
             coverFile = Files.createTempFile("cover_", ".jpg").toFile();
-            double captureTime = 0.0;
-            runFfmpeg(videoFile, coverFile, captureTime);
-
+            runFfmpeg(videoFile, coverFile, 0.0);
             return minioUtils.uploadCoverFile(coverFile, "image/jpeg");
         } catch (Exception e) {
+            log.warn("extractAndUploadCover failed: videoUrl={}", videoUrl, e);
             return null;
         } finally {
-            if (videoFile != null) videoFile.delete();
-            if (coverFile != null) coverFile.delete();
+            if (videoFile != null) {
+                videoFile.delete();
+            }
+            if (coverFile != null) {
+                coverFile.delete();
+            }
         }
     }
 
@@ -53,9 +59,12 @@ public class VideoCoverExtractor {
             }
             return probeDurationSeconds(videoFile);
         } catch (Exception e) {
+            log.warn("extractDurationSeconds failed: videoUrl={}", videoUrl, e);
             return null;
         } finally {
-            if (videoFile != null) videoFile.delete();
+            if (videoFile != null) {
+                videoFile.delete();
+            }
         }
     }
 
@@ -79,20 +88,26 @@ public class VideoCoverExtractor {
 
         int code = process.waitFor();
         if (code != 0 && seconds == null) {
-            throw new BizException(500, "ffmpeg 获取时长失败");
+            throw new BizException(500, "ffmpeg failed to parse duration");
         }
         return seconds;
     }
 
     private Integer parseDurationSeconds(String line) {
         int idx = line.indexOf("Duration:");
-        if (idx < 0) return null;
+        if (idx < 0) {
+            return null;
+        }
         String part = line.substring(idx + 9);
         int comma = part.indexOf(',');
-        if (comma > 0) part = part.substring(0, comma);
+        if (comma > 0) {
+            part = part.substring(0, comma);
+        }
         part = part.trim();
         String[] seg = part.split(":");
-        if (seg.length < 3) return null;
+        if (seg.length < 3) {
+            return null;
+        }
         try {
             int h = Integer.parseInt(seg[0].trim());
             int m = Integer.parseInt(seg[1].trim());
@@ -117,15 +132,14 @@ public class VideoCoverExtractor {
         Process process = builder.start();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println("[ffmpeg] " + line);
+            while (reader.readLine() != null) {
+                // Intentionally consume ffmpeg output to avoid process buffer blocking.
             }
         }
 
         int code = process.waitFor();
         if (code != 0) {
-            throw new BizException(500, "ffmpeg 截图失败");
+            throw new BizException(500, "ffmpeg failed to capture cover");
         }
     }
 }

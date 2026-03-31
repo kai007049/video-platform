@@ -181,6 +181,14 @@ const allCategories = computed(() => {
   return flatCategories
 })
 
+function collectTagIds() {
+  const presetTagIds = selectedPresetTags.value
+    .map(tagName => tags.value.find(tag => tag.name === tagName)?.id)
+    .filter(id => id != null)
+
+  return [...new Set([...(form.tagIds || []), ...presetTagIds])]
+}
+
 function onVideoChange(e) {
   videoFile.value = e.target.files?.[0] || null
 }
@@ -284,12 +292,9 @@ async function submit() {
     fd.append('title', form.title.trim())
     if (form.description.trim()) fd.append('description', form.description.trim())
     fd.append('categoryId', String(form.categoryId))
-    // 添加预设标签对应的 tagIds
-    selectedPresetTags.value.forEach(tag => {
-      const tagObj = tags.value.find(t => t.name === tag)
-      if (tagObj) {
-        fd.append('tagIds', String(tagObj.id))
-      }
+    const tagIds = collectTagIds()
+    tagIds.forEach(tagId => {
+      fd.append('tagIds', String(tagId))
     })
     const res = await uploadVideo(fd)
     alert('投稿成功')

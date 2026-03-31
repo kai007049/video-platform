@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 视频控制器
@@ -49,14 +51,14 @@ public class VideoController {
             @Parameter(description = "视频标题", required = true) @RequestParam("title") String title,
             @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
             @Parameter(description = "分类ID", required = true) @RequestParam("categoryId") Long categoryId,
-            @Parameter(description = "标签ID列表", required = true) @RequestParam("tagIds") java.util.List<Long> tagIds,
+            @Parameter(description = "标签ID列表") @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @Parameter(hidden = true) HttpServletRequest request) {
         Long userId = UserContext.get();
         VideoUploadDTO dto = new VideoUploadDTO();
         dto.setTitle(title);
         dto.setDescription(description);
         dto.setCategoryId(categoryId);
-        dto.setTagIds(tagIds);
+        dto.setTagIds(tagIds == null ? new ArrayList<>() : tagIds);
         return Result.success(videoService.upload(videoFile, coverFile, dto, userId));
     }
 

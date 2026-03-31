@@ -98,7 +98,7 @@ public class MinioUtils {
         ensureBucketExists(bucketCover);
         String name = file.getName();
         String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')) : ".jpg";
-        String objectName = java.util.UUID.randomUUID() + ext;
+        String objectName = "cover/" + java.util.UUID.randomUUID() + ext;
         try (InputStream is = new java.io.FileInputStream(file)) {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketCover)
@@ -201,12 +201,13 @@ public class MinioUtils {
 
     /** 仅允许 cover 桶对象名，防止任意文件读取 */
     public InputStream getCoverStreamByObjectName(String objectName) throws Exception {
-        if (objectName == null || !objectName.matches("^[a-zA-Z0-9._-]+$")) {
+        String object = normalizeCoverObject(objectName);
+        if (object == null || !isSafeCoverObject(object)) {
             throw new IllegalArgumentException("无效的对象名: " + objectName);
         }
         return minioClient.getObject(GetObjectArgs.builder()
                 .bucket(bucketCover)
-                .object(objectName)
+                .object(object)
                 .build());
     }
 
@@ -302,6 +303,21 @@ public class MinioUtils {
         return value;
     }
 
+    private boolean isSafeCoverObject(String objectName) {
+        if (objectName == null || objectName.isBlank()) return false;
+        if (objectName.contains("..") || objectName.contains("\\") || objectName.startsWith("/")) return false;
+        // Support both prefixed object keys and legacy flat keys like "uuid.jpg".
+        if (objectName.startsWith("default/") || objectName.startsWith("user/") || objectName.startsWith("cover/")) {
+            if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
+            return true;
+        }
+        // Flat key must not contain slash and should include an extension.
+        if (objectName.contains("/")) return false;
+        int dot = objectName.lastIndexOf('.');
+        if (dot <= 0 || dot == objectName.length() - 1) return false;
+        return true;
+    }
+
     private boolean isSafeAvatarObject(String objectName) {
         if (objectName == null || objectName.isBlank()) return false;
         if (!(objectName.startsWith("default/") || objectName.startsWith("user/"))) return false;
@@ -339,6 +355,25 @@ public class MinioUtils {
             return bucketAndObject[1];
         }
         return value;
+    }
+
+    public InputStream getSafeCoverStreamLegacy(String objectName) throws Exception {
+        String object = normalizeCoverObject(objectName);
+        if (!isSafeCoverObject(object)) {
+            throw new IllegalArgumentException("鏃犳晥鐨勫璞″悕: " + objectName);
+        }
+        return minioClient.getObject(GetObjectArgs.builder()
+                .bucket(bucketCover)
+                .object(object)
+                .build());
+    }
+
+    private boolean isSafeCoverObjectLegacy(String objectName) {
+        if (objectName == null || objectName.isBlank()) return false;
+        if (!(objectName.startsWith("user/") || objectName.startsWith("cover/"))) return false;
+        if (objectName.contains("..") || objectName.contains("\\") || objectName.startsWith("/")) return false;
+        if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
+        return true;
     }
 
     private void ensureBucketExists(String bucket) {

@@ -89,6 +89,8 @@ ffmpeg:
 video:
   search:
     enabled: true
+  cover:
+    fallback-delay-ms: 12000
 
 agent:
   service:
