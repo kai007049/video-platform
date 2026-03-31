@@ -29,6 +29,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+/**
+ * 视频写服务：
+ * 负责上传、更新、删除、播放统计等会修改状态的操作。
+ */
 public class VideoCommandService {
 
     private static final String PLAY_COUNT_KEY = RedisConstants.VIDEO_STATS_KEY_PREFIX;
@@ -43,6 +47,9 @@ public class VideoCommandService {
     private final MQService mqService;
     private final VideoViewAssembler videoViewAssembler;
 
+    /**
+     * 上传视频并创建视频记录
+     */
     public VideoVO upload(MultipartFile videoFile, MultipartFile coverFile, VideoUploadDTO dto, Long authorId) {
         if (videoFile == null || videoFile.isEmpty()) {
             throw new BizException(400, "视频文件不能为空");
@@ -87,12 +94,18 @@ public class VideoCommandService {
         return videoViewAssembler.toVideoVO(video, authorId);
     }
 
+    /**
+     * 更新视频信息，并统一失效缓存与同步搜索索引
+     */
     public void updateVideo(Video video) {
         videoMapper.updateById(video);
         videoCacheService.invalidateVideo(video.getId());
         mqService.sendSearchSync(new SearchSyncMessage("video", video.getId(), "update"));
     }
 
+    /**
+     * 记录视频播放量
+     */
     public void recordPlayCount(Long videoId) {
         String key = PLAY_COUNT_KEY + videoId;
         redisTemplate.opsForHash().increment(key, RedisConstants.VIDEO_STAT_PLAY, 1);
@@ -100,6 +113,9 @@ public class VideoCommandService {
         incrHotScore(videoId, Constants.HOT_WEIGHT_PLAY);
     }
 
+    /**
+     * 设置视频推荐状态
+     */
     public void setRecommended(Long videoId, boolean recommended) {
         Video video = videoMapper.selectById(videoId);
         if (video != null) {
@@ -109,6 +125,9 @@ public class VideoCommandService {
         }
     }
 
+    /**
+     * 删除视频，并清理缓存、对象存储和搜索索引
+     */
     @Transactional
     public void deleteVideo(Long videoId, Long userId) {
         Video video = videoMapper.selectById(videoId);
@@ -132,6 +151,9 @@ public class VideoCommandService {
         mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "delete"));
     }
 
+    /**
+     * 保存视频标签关联
+     */
     private void saveTags(Long videoId, java.util.List<Long> tagIds) {
         if (tagIds == null || tagIds.isEmpty()) {
             return;
@@ -149,12 +171,18 @@ public class VideoCommandService {
         }
     }
 
+    /**
+     * 累加热门榜分数
+     */
     private void incrHotScore(Long videoId, double delta) {
         String key = Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h";
         redisTemplate.opsForZSet().incrementScore(key, videoId.toString(), delta);
         redisTemplate.expire(key, Constants.HOT_WINDOW_HOURS, TimeUnit.HOURS);
     }
 
+    /**
+     * 校验上传视频文件格式
+     */
     private void validateVideoFile(MultipartFile videoFile) {
         String name = videoFile.getOriginalFilename();
         String ext = "";

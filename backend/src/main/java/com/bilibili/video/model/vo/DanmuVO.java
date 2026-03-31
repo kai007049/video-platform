@@ -13,4 +13,5 @@ public class DanmuVO {
     private String username;
     private String content;
     private Integer timePoint;
+    private String clientMessageId;
 }

@@ -2,50 +2,67 @@
   <div class="search-page">
     <div class="search-header">
       <h1>搜索结果</h1>
+      <p v-if="keyword" class="search-keyword">关键词：{{ keyword }}</p>
     </div>
+
     <div class="search-content">
       <div class="search-filters">
         <div class="filter-tabs">
-          <button 
-            v-for="tab in filterTabs" 
+          <button
+            v-for="tab in filterTabs"
             :key="tab.key"
             :class="{ active: activeTab === tab.key }"
-            @click="activeTab = tab.key"
+            @click="switchTab(tab.key)"
           >
             {{ tab.label }}
           </button>
         </div>
-        <div class="sort-options">
+        <div class="sort-options" v-if="activeTab === 'video'">
           <span>排序：</span>
-          <button 
-            v-for="sort in sortOptions" 
+          <button
+            v-for="sort in sortOptions"
             :key="sort.key"
             :class="{ active: activeSort === sort.key }"
-            @click="activeSort = sort.key"
+            @click="switchSort(sort.key)"
           >
             {{ sort.label }}
           </button>
         </div>
       </div>
+
       <div class="search-results">
         <div v-if="loading" class="loading">加载中...</div>
+        <div v-else-if="!keyword" class="no-results">
+          <p>请输入关键词后再搜索</p>
+        </div>
         <div v-else-if="noResults" class="no-results">
           <p>未找到相关内容</p>
           <p>请尝试其他关键词</p>
         </div>
-        <div v-else class="video-list">
-          <div v-for="video in videos" :key="video.id" class="video-item">
+
+        <div v-else-if="activeTab === 'video'" class="video-list">
+          <div v-for="video in videos" :key="video.id" class="video-item" @click="goVideo(video.id)">
             <div class="video-cover">
-              <img :src="video.cover" alt="视频封面" />
-              <span class="video-duration">{{ formatDuration(video.duration) }}</span>
+              <img :src="resolveCover(video)" alt="视频封面" />
+              <span class="video-duration">{{ formatDuration(video.durationSeconds) }}</span>
             </div>
             <div class="video-info">
               <h3 class="video-title">{{ video.title }}</h3>
               <div class="video-meta">
-                <span class="video-up">{{ video.username }}</span>
-                <span class="video-views">{{ formatNumber(video.viewCount) }} 播放</span>
+                <span class="video-up">{{ video.authorName || '未知作者' }}</span>
+                <span class="video-views">{{ formatNumber(video.playCount || 0) }} 播放</span>
                 <span class="video-date">{{ formatDate(video.createTime) }}</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="user-list">
+          <div v-for="user in users" :key="user.id" class="user-item" @click="goUser(user.id)">
+            <img :src="resolveAvatar(user.avatar)" alt="头像" class="user-avatar" />
+            <div class="user-info">
+              <div class="user-name">{{ user.username }}</div>
+              <div class="user-extra">{{ user.signature || '这个用户还没有简介' }}</div>
             </div>
           </div>
         </div>
@@ -55,20 +72,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { searchVideos } from '../api/video'
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { searchUsers, searchVideos } from '../api/video'
 
 const route = useRoute()
+const router = useRouter()
+
 const keyword = ref('')
 const loading = ref(false)
 const videos = ref([])
+const users = ref([])
 const noResults = ref(false)
-const activeTab = ref('comprehensive')
+const activeTab = ref('video')
 const activeSort = ref('comprehensive')
 
+const defaultCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
+const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
+
 const filterTabs = [
-  { key: 'comprehensive', label: '综合' },
   { key: 'video', label: '视频' },
   { key: 'user', label: '用户' }
 ]
@@ -79,39 +101,111 @@ const sortOptions = [
   { key: 'createTime', label: '最新发布' }
 ]
 
-onMounted(() => {
-  const query = route.query.keyword
-  if (query) {
-    keyword.value = query
-    performSearch()
-  }
-})
+/**
+ * 监听路由变化，保证从顶部搜索框再次搜索时能重新拉取数据。
+ */
+watch(
+  () => route.query,
+  async (query) => {
+    keyword.value = typeof query.keyword === 'string' ? query.keyword.trim() : ''
+    activeTab.value = query.type === 'user' ? 'user' : 'video'
+    activeSort.value = typeof query.sortBy === 'string' ? query.sortBy : 'comprehensive'
+
+    if (!keyword.value) {
+      videos.value = []
+      users.value = []
+      noResults.value = false
+      return
+    }
+
+    await performSearch()
+  },
+  { immediate: true }
+)
 
 async function performSearch() {
-  if (!keyword.value) return
-  
+  if (!keyword.value) {
+    return
+  }
+
   loading.value = true
   try {
-    const result = await searchVideos({
-      keyword: keyword.value,
-      type: activeTab.value,
-      sortBy: activeSort.value,
-      page: 1,
-      size: 20
-    })
-    
-    videos.value = result.data || []
+    if (activeTab.value === 'user') {
+      const result = await searchUsers(keyword.value, 1, 20)
+      users.value = Array.isArray(result) ? result : []
+      videos.value = []
+      noResults.value = users.value.length === 0
+      return
+    }
+
+    const result = await searchVideos(keyword.value, 1, 20, activeSort.value)
+    videos.value = Array.isArray(result?.records) ? result.records : []
+    users.value = []
     noResults.value = videos.value.length === 0
   } catch (error) {
     console.error('搜索失败:', error)
+    videos.value = []
+    users.value = []
     noResults.value = true
   } finally {
     loading.value = false
   }
 }
 
+function switchTab(tabKey) {
+  router.replace({
+    path: '/search',
+    query: {
+      keyword: keyword.value,
+      type: tabKey,
+      sortBy: activeSort.value
+    }
+  })
+}
+
+function switchSort(sortKey) {
+  router.replace({
+    path: '/search',
+    query: {
+      keyword: keyword.value,
+      type: activeTab.value,
+      sortBy: sortKey
+    }
+  })
+}
+
+function goVideo(id) {
+  router.push(`/video/${id}`)
+}
+
+function goUser(id) {
+  router.push(`/user/${id}`)
+}
+
+function resolveCover(video) {
+  if (video.previewUrl) {
+    return video.previewUrl
+  }
+  if (video.coverUrl) {
+    return `/api/file/cover?url=${encodeURIComponent(video.coverUrl)}`
+  }
+  return defaultCover
+}
+
+function resolveAvatar(avatar) {
+  if (!avatar) {
+    return avatarPlaceholder
+  }
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
 function formatDuration(seconds) {
-  if (!seconds) return '0:00'
+  if (!seconds) {
+    return '0:00'
+  }
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins}:${secs.toString().padStart(2, '0')}`
@@ -119,14 +213,16 @@ function formatDuration(seconds) {
 
 function formatNumber(num) {
   if (num < 1000) return num
-  if (num < 10000) return (num / 1000).toFixed(1) + 'k'
-  return (num / 10000).toFixed(1) + 'w'
+  if (num < 10000) return `${(num / 1000).toFixed(1)}k`
+  return `${(num / 10000).toFixed(1)}w`
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return ''
+  if (!dateStr) {
+    return ''
+  }
   const date = new Date(dateStr)
-  return date.toLocaleDateString()
+  return Number.isNaN(date.getTime()) ? String(dateStr) : date.toLocaleDateString()
 }
 </script>
 
@@ -145,6 +241,12 @@ function formatDate(dateStr) {
   color: #18191c;
 }
 
+.search-keyword {
+  margin-top: 8px;
+  color: #61666d;
+  font-size: 14px;
+}
+
 .search-filters {
   display: flex;
   justify-content: space-between;
@@ -152,6 +254,7 @@ function formatDate(dateStr) {
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 1px solid #e3e5e7;
+  gap: 16px;
 }
 
 .filter-tabs {
@@ -159,7 +262,8 @@ function formatDate(dateStr) {
   gap: 16px;
 }
 
-.filter-tabs button {
+.filter-tabs button,
+.sort-options button {
   padding: 6px 12px;
   border: none;
   background: transparent;
@@ -170,11 +274,13 @@ function formatDate(dateStr) {
   transition: all 0.2s;
 }
 
-.filter-tabs button:hover {
+.filter-tabs button:hover,
+.sort-options button:hover {
   color: #fb7299;
 }
 
-.filter-tabs button.active {
+.filter-tabs button.active,
+.sort-options button.active {
   color: #fb7299;
   font-weight: 600;
   background: #fff0f4;
@@ -188,39 +294,11 @@ function formatDate(dateStr) {
   color: #61666d;
 }
 
-.sort-options button {
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
-  color: #61666d;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.sort-options button:hover {
-  color: #fb7299;
-}
-
-.sort-options button.active {
-  color: #fb7299;
-  font-weight: 600;
-}
-
 .search-results {
   min-height: 400px;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-  font-size: 16px;
-  color: #9499a0;
-}
-
+.loading,
 .no-results {
   display: flex;
   flex-direction: column;
@@ -229,11 +307,6 @@ function formatDate(dateStr) {
   height: 400px;
   text-align: center;
   color: #9499a0;
-}
-
-.no-results p:first-child {
-  font-size: 18px;
-  margin-bottom: 8px;
 }
 
 .video-list {
@@ -257,9 +330,10 @@ function formatDate(dateStr) {
 .video-cover {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
+  aspect-ratio: 16 / 9;
   border-radius: 8px;
   overflow: hidden;
+  background: #f4f5f7;
 }
 
 .video-cover img {
@@ -303,15 +377,56 @@ function formatDate(dateStr) {
   gap: 12px;
   font-size: 12px;
   color: #9499a0;
+  flex-wrap: wrap;
+}
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.user-item {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e3e5e7;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f4f5f7;
+}
+
+.user-info {
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #18191c;
+}
+
+.user-extra {
+  margin-top: 6px;
+  color: #9499a0;
+  font-size: 13px;
 }
 
 @media (max-width: 768px) {
   .search-filters {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
   }
-  
+
   .video-list {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }

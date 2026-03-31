@@ -34,6 +34,10 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * 视频视图组装器：
+ * 负责将 Video 实体批量转换为 VideoVO，并集中处理作者、评论数、用户状态、统计值聚合。
+ */
 public class VideoViewAssembler {
 
     private final CommentMapper commentMapper;
@@ -43,6 +47,9 @@ public class VideoViewAssembler {
     private final WatchHistoryMapper watchHistoryMapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 组装单个视频展示对象
+     */
     public VideoVO toVideoVO(Video video, Long userId) {
         if (video == null) {
             return null;
@@ -51,6 +58,10 @@ public class VideoViewAssembler {
         return records.isEmpty() ? null : records.get(0);
     }
 
+    /**
+     * 批量组装视频展示对象。
+     * 这里统一批量查询作者、评论数、点赞/收藏状态和观看进度，避免列表场景的 N+1 查询。
+     */
     public List<VideoVO> toVideoVOList(List<Video> videos, Long userId) {
         if (videos == null || videos.isEmpty()) {
             return Collections.emptyList();
@@ -60,17 +71,18 @@ public class VideoViewAssembler {
                 .map(Video::getId)
                 .filter(Objects::nonNull)
                 .toList();
+
         Set<Long> authorIds = videos.stream()
                 .map(Video::getAuthorId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        Map<Long, User> authorMap = loadAuthors(authorIds);
-        Map<Long, Long> commentCountMap = loadCommentCounts(videoIds);
-        Map<Long, Boolean> likedMap = loadLikedState(userId, videoIds);
-        Map<Long, Boolean> favoritedMap = loadFavoritedState(userId, videoIds);
-        Map<Long, Integer> watchProgressMap = loadWatchProgress(userId, videoIds);
-        Map<Long, VideoStats> statsMap = loadStats(videos);
+        Map<Long, User> authorMap = loadAuthors(authorIds);//批量加载作者信息
+        Map<Long, Long> commentCountMap = loadCommentCounts(videoIds);//批量加载评论数
+        Map<Long, Boolean> likedMap = loadLikedState(userId, videoIds);//批量加载点赞状态
+        Map<Long, Boolean> favoritedMap = loadFavoritedState(userId, videoIds);//批量加载收藏状态
+        Map<Long, Integer> watchProgressMap = loadWatchProgress(userId, videoIds);//批量加载观看进度
+        Map<Long, VideoStats> statsMap = loadStats(videos);//批量加载统计值
 
         List<VideoVO> result = new ArrayList<>(videos.size());
         for (Video video : videos) {
@@ -104,6 +116,9 @@ public class VideoViewAssembler {
         return result;
     }
 
+    /**
+     * 在已有 VideoVO 基础上补充当前用户相关状态。
+     */
     public VideoVO enrichUserState(VideoVO source, Long userId) {
         if (source == null || userId == null) {
             return source;
@@ -123,6 +138,9 @@ public class VideoViewAssembler {
         return copy;
     }
 
+    /**
+     * 批量加载作者信息
+     */
     private Map<Long, User> loadAuthors(Collection<Long> authorIds) {
         if (authorIds == null || authorIds.isEmpty()) {
             return Collections.emptyMap();
@@ -131,6 +149,9 @@ public class VideoViewAssembler {
                 .collect(Collectors.toMap(User::getId, user -> user, (left, right) -> left, HashMap::new));
     }
 
+    /**
+     * 批量统计评论数
+     */
     private Map<Long, Long> loadCommentCounts(List<Long> videoIds) {
         if (videoIds == null || videoIds.isEmpty()) {
             return Collections.emptyMap();
@@ -152,6 +173,9 @@ public class VideoViewAssembler {
         return result;
     }
 
+    /**
+     * 批量加载点赞状态
+     */
     private Map<Long, Boolean> loadLikedState(Long userId, List<Long> videoIds) {
         if (userId == null || videoIds == null || videoIds.isEmpty()) {
             return Collections.emptyMap();
@@ -166,6 +190,9 @@ public class VideoViewAssembler {
                 .collect(Collectors.toMap(videoId -> videoId, videoId -> true, (left, right) -> left, HashMap::new));
     }
 
+    /**
+     * 批量加载收藏状态
+     */
     private Map<Long, Boolean> loadFavoritedState(Long userId, List<Long> videoIds) {
         if (userId == null || videoIds == null || videoIds.isEmpty()) {
             return Collections.emptyMap();
@@ -180,6 +207,9 @@ public class VideoViewAssembler {
                 .collect(Collectors.toMap(videoId -> videoId, videoId -> true, (left, right) -> left, HashMap::new));
     }
 
+    /**
+     * 批量加载观看进度
+     */
     private Map<Long, Integer> loadWatchProgress(Long userId, List<Long> videoIds) {
         if (userId == null || videoIds == null || videoIds.isEmpty()) {
             return Collections.emptyMap();
@@ -198,6 +228,11 @@ public class VideoViewAssembler {
                 ));
     }
 
+    /**
+     * 读取视频统计值。
+     * 当前仍按视频逐条读取 Redis Hash，但读取逻辑已集中，后续如果要改成 pipeline 或独立统计服务，
+     * 只需要调整这里。
+     */
     private Map<Long, VideoStats> loadStats(List<Video> videos) {
         if (videos == null || videos.isEmpty()) {
             return Collections.emptyMap();

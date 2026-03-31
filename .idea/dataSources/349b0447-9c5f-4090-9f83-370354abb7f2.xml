@@ -942,7 +942,7 @@
     <schema id="299" parent="1" name="bilibili">
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-03-26.09:51:13</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-03-30.07:28:07</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="300" parent="1" name="mysql.infoschema">
@@ -1048,7 +1048,7 @@
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
     <column id="318" parent="304" name="id">
-      <AutoIncrement>25</AutoIncrement>
+      <AutoIncrement>24</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1082,7 +1082,7 @@
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="324" parent="305" name="id">
-      <AutoIncrement>5</AutoIncrement>
+      <AutoIncrement>4</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1143,7 +1143,7 @@
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="335" parent="306" name="id">
-      <AutoIncrement>27</AutoIncrement>
+      <AutoIncrement>26</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1195,7 +1195,7 @@
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="344" parent="307" name="id">
-      <AutoIncrement>28</AutoIncrement>
+      <AutoIncrement>27</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1240,7 +1240,7 @@ video_id</ColNames>
       <UnderlyingIndexName>uk_fav</UnderlyingIndexName>
     </key>
     <column id="353" parent="308" name="id">
-      <AutoIncrement>7</AutoIncrement>
+      <AutoIncrement>6</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1395,7 +1395,7 @@ following_id</ColNames>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="381" parent="311" name="id">
-      <AutoIncrement>17</AutoIncrement>
+      <AutoIncrement>16</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1432,7 +1432,7 @@ following_id</ColNames>
       <UnderlyingIndexName>uk_tag_name</UnderlyingIndexName>
     </key>
     <column id="388" parent="312" name="id">
-      <AutoIncrement>10</AutoIncrement>
+      <AutoIncrement>9</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1497,7 +1497,7 @@ following_id</ColNames>
       <UnderlyingIndexName>username</UnderlyingIndexName>
     </key>
     <column id="400" parent="313" name="id">
-      <AutoIncrement>58</AutoIncrement>
+      <AutoIncrement>57</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1642,7 +1642,7 @@ category_id</ColNames>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="425" parent="315" name="id">
-      <AutoIncrement>28</AutoIncrement>
+      <AutoIncrement>27</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1690,7 +1690,7 @@ user_id</ColNames>
       <UnderlyingIndexName>uk_video_user</UnderlyingIndexName>
     </key>
     <column id="434" parent="316" name="id">
-      <AutoIncrement>7</AutoIncrement>
+      <AutoIncrement>6</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1742,7 +1742,7 @@ tag_id</ColNames>
       <UnderlyingIndexName>uk_video_tag</UnderlyingIndexName>
     </key>
     <column id="444" parent="317" name="id">
-      <AutoIncrement>14</AutoIncrement>
+      <AutoIncrement>13</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>

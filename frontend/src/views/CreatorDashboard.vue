@@ -1,242 +1,133 @@
 <template>
   <div class="creator-dashboard">
-    <!-- 顶部横幅 -->
-    <div class="banner">
-      <div class="banner-bg"></div>
-    </div>
-    
-    <!-- 用户信息区域 -->
-    <div class="user-section" v-if="userInfo">
-      <div class="user-wrapper">
-        <div class="avatar-box">
-          <img :src="resolveAvatar(userInfo.avatar)" class="avatar" alt="用户头像" @error="onAvatarError" />
-        </div>
-        <div class="user-main">
-          <div class="user-top">
-            <div class="name-box">
-              <h2 class="username">{{ userInfo.username }}</h2>
-              <span class="level-badge">Lv.6</span>
-              <span class="verify-badge">大会员</span>
-            </div>
+    <section class="profile-card" v-if="userInfo">
+      <img :src="resolveAvatar(userInfo.avatar)" class="avatar" alt="avatar" @error="onAvatarError" />
+      <div class="profile-main">
+        <h1>{{ userInfo.username }}</h1>
+        <p class="profile-sign">{{ userInfo.sign || '这个人很神秘，什么都没有留下。' }}</p>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{ formatCount(stats.videoCount) }}</span>
+            <span class="stat-label">作品</span>
           </div>
-          <div class="user-coins">
-            <span>B币: 0</span>
-            <span>硬币: 93</span>
+          <div class="stat-item">
+            <span class="stat-value">{{ formatCount(followingCount) }}</span>
+            <span class="stat-label">关注</span>
           </div>
-          <div class="user-stats">
-            <div class="stat-item">
-              <span class="stat-value">1</span>
-              <span class="stat-label">动态</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-value">10</span>
-              <span class="stat-label">关注</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-value">0</span>
-              <span class="stat-label">粉丝</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item space-btn">
-              <span class="stat-label">空间 &gt;</span>
-            </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ formatCount(stats.fanCount) }}</span>
+            <span class="stat-label">粉丝</span>
           </div>
-          <div class="user-sign">
-            <span>{{ userSign || '这个人很神秘，什么都没有写' }}</span>
-            <button class="btn-modify" @click="openModifySign">修改</button>
+          <div class="stat-item">
+            <span class="stat-value">{{ formatCount(stats.totalPlayCount) }}</span>
+            <span class="stat-label">总播放</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ formatCount(stats.totalLikeCount) }}</span>
+            <span class="stat-label">总点赞</span>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- 选项卡区域 -->
-    <div class="tabs-section">
-      <div class="tabs-wrapper">
-        <button
-          v-for="item in tabs"
-          :key="item.key"
-          :class="['tab-item', { active: activeTab === item.key }]"
-          @click="switchTab(item.key)"
-        >
-          {{ item.label }}
-        </button>
-      </div>
-    </div>
-    
-    <!-- 内容区域 -->
-    <div class="content-section">
-      <div v-if="loading" class="loading">加载中...</div>
-      <div v-else class="tab-content">
-        <div v-if="currentList.length === 0" class="empty-state">
-          <div class="empty-illustration">
-            <img src="https://s1.hdslb.com/bfs/static/jinkela/space/assets/nodata.png" alt="empty" />
-          </div>
-          <div class="empty-text">今天真寂寞，如往常~</div>
-        </div>
+    </section>
 
-        <!-- 视频相关列表 -->
-        <div v-else-if="['works', 'liked', 'favorite', 'history'].includes(activeTab)" class="video-grid">
-          <div v-for="video in currentList" :key="video.id" class="video-card">
-            <div class="cover-wrap" @click="goVideo(video.id)">
-              <img :src="resolveCover(video)" :alt="video.title" class="cover" @error="onCoverError" />
-              <span class="duration">{{ formatDuration(video.durationSeconds) }}</span>
-            </div>
-            <div class="card-info">
-              <div class="title" :title="video.title" @click="goVideo(video.id)">{{ video.title }}</div>
-              <div class="meta">
-                <span>▶ {{ formatCount(video.playCount) }}</span>
-                <span>💬 {{ formatCount(video.commentCount) }}</span>
-                <span>👍 {{ formatCount(video.likeCount) }}</span>
-              </div>
-              <div class="actions" v-if="activeTab === 'works'">
-                <div class="more-options" @click.stop="showVideoOptions(video.id, $event)">
-                  <span class="dot"></span>
-                  <span class="dot"></span>
-                  <span class="dot"></span>
-                  <div v-if="videoOptions.id === video.id" class="options-menu">
-                    <button @click.stop="goVideo(video.id)">查看详情</button>
-                    <button @click.stop="confirmDelete(video.id)" class="delete-btn">删除记录</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <section class="tabs-section">
+      <button
+        v-for="item in tabs"
+        :key="item.key"
+        :class="['tab-item', { active: activeTab === item.key }]"
+        @click="switchTab(item.key)"
+      >
+        {{ item.label }}
+      </button>
+    </section>
 
-        <!-- 关注/粉丝列表 -->
-        <div v-else class="user-list">
-          <div v-for="user in currentList" :key="user.id" class="user-card">
-            <img :src="resolveAvatar(user.avatar)" class="user-avatar" alt="" @error="onAvatarError" />
-            <div class="user-info">
-              <div class="user-name">{{ user.username }}</div>
-              <div class="user-meta">
-                <span v-if="user.followed">已关注</span>
-                <span v-else>未关注</span>
-              </div>
-            </div>
-            <div class="user-actions">
-              <button class="btn-message" @click="goMessage(user)">私信</button>
-              <button class="btn-profile" @click="router.push(`/user/${user.id}`)">主页</button>
-            </div>
+    <section class="content-section">
+      <div v-if="loading" class="state-panel">加载中...</div>
+      <div v-else-if="errorMessage" class="state-panel error">{{ errorMessage }}</div>
+      <div v-else-if="currentList.length === 0" class="state-panel">当前还没有内容</div>
+
+      <div v-else-if="isVideoTab" class="video-grid">
+        <article v-for="video in currentList" :key="video.id" class="video-card">
+          <div class="cover-wrap" @click="goVideo(video.id)">
+            <img :src="resolveCover(video)" :alt="video.title" class="cover" @error="onCoverError" />
+            <span class="duration">{{ formatDuration(video.durationSeconds) }}</span>
           </div>
-        </div>
+          <div class="card-body">
+            <h3 class="video-title" @click="goVideo(video.id)">{{ video.title }}</h3>
+            <div class="video-meta">
+              <span>播放 {{ formatCount(video.playCount) }}</span>
+              <span>评论 {{ formatCount(video.commentCount) }}</span>
+              <span>点赞 {{ formatCount(video.likeCount) }}</span>
+            </div>
+            <button
+              v-if="activeTab === 'works'"
+              class="delete-btn"
+              @click="confirmDelete(video.id)"
+            >
+              删除视频
+            </button>
+          </div>
+        </article>
       </div>
-    </div>
-    
-    <!-- 修改名言对话框 -->
-    <div v-if="showModifySignDialog" class="sign-dialog-overlay" @click="showModifySignDialog = false">
-      <div class="sign-dialog" @click.stop>
-        <div class="dialog-header">
-          <h3>修改名言</h3>
-          <button class="dialog-close" @click="showModifySignDialog = false">×</button>
-        </div>
-        <div class="dialog-body">
-          <textarea v-model="newSign" placeholder="请输入你的名言" rows="3"></textarea>
-        </div>
-        <div class="dialog-footer">
-          <button class="btn-cancel" @click="showModifySignDialog = false">取消</button>
-          <button class="btn-save" @click="saveModifySign">保存</button>
-        </div>
+
+      <div v-else class="user-list">
+        <article v-for="user in currentList" :key="user.id" class="user-card">
+          <img :src="resolveAvatar(user.avatar)" class="user-avatar" alt="avatar" @error="onAvatarError" />
+          <div class="user-card-main">
+            <div class="user-name">{{ user.username }}</div>
+            <div class="user-signature">{{ user.sign || '这个用户还没有个性签名' }}</div>
+          </div>
+          <div class="user-actions">
+            <button class="action-btn primary" @click="goMessage(user)">私信</button>
+            <button class="action-btn" @click="router.push(`/user/${user.id}`)">主页</button>
+          </div>
+        </article>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCreatorStats } from '../api/user'
+import { getFanList, getFollowingList } from '../api/follow'
 import {
+  deleteVideo,
   getCreatorVideos,
-  getLikedVideos,
   getFavoriteVideos,
   getHistoryVideos,
-  deleteVideo
+  getLikedVideos
 } from '../api/video'
-import { getFollowingList, getFanList } from '../api/follow'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const stats = ref(null)
-const loading = ref(true)
 const activeTab = ref('works')
-// 模拟视频数据
-const mockVideos = [
-  {
-    id: 1,
-    title: '从夯到锐！锐评2026年计算机学生就业形势',
-    cover: 'https://i0.hdslb.com/bfs/archive/8a2718d1c7081c990c436b02d357a3704684751e.jpg',
-    durationSeconds: 2265,
-    playCount: 123456,
-    commentCount: 1234,
-    likeCount: 5678
-  },
-  {
-    id: 2,
-    title: '26年计算机学生就业形势分析',
-    cover: 'https://i0.hdslb.com/bfs/archive/8a2718d1c7081c990c436b02d357a3704684751e.jpg',
-    durationSeconds: 1800,
-    playCount: 98765,
-    commentCount: 987,
-    likeCount: 4321
-  },
-  {
-    id: 3,
-    title: '当前前程的岗位千万別碰！不然就即失...',
-    cover: 'https://i0.hdslb.com/bfs/archive/8a2718d1c7081c990c436b02d357a3704684751e.jpg',
-    durationSeconds: 1500,
-    playCount: 65432,
-    commentCount: 765,
-    likeCount: 3210
-  },
-  {
-    id: 4,
-    title: '26年计算机专业就业前景分析',
-    cover: 'https://i0.hdslb.com/bfs/archive/8a2718d1c7081c990c436b02d357a3704684751e.jpg',
-    durationSeconds: 2000,
-    playCount: 43210,
-    commentCount: 543,
-    likeCount: 2109
-  },
-  {
-    id: 5,
-    title: '计算机专业学生如何提高就业竞争力',
-    cover: 'https://i0.hdslb.com/bfs/archive/8a2718d1c7081c990c436b02d357a3704684751e.jpg',
-    durationSeconds: 1800,
-    playCount: 32109,
-    commentCount: 432,
-    likeCount: 1098
-  },
-  {
-    id: 6,
-    title: '2026年IT行业招聘趋势分析',
-    cover: 'https://i0.hdslb.com/bfs/archive/8a2718d1c7081c990c436b02d357a3704684751e.jpg',
-    durationSeconds: 2100,
-    playCount: 21098,
-    commentCount: 321,
-    likeCount: 987
-  }
-]
-
+const loading = ref(true)
+const errorMessage = ref('')
+const followingCount = ref(0)
 const listMap = ref({
-  works: mockVideos,
-  liked: mockVideos.slice(0, 4),
-  favorite: mockVideos.slice(0, 3),
-  history: mockVideos.slice(0, 5),
+  works: [],
+  liked: [],
+  favorite: [],
+  history: [],
   following: [],
   fans: []
 })
-const followingCount = ref(0)
+const stats = ref({
+  totalPlayCount: 0,
+  totalLikeCount: 0,
+  videoCount: 0,
+  fanCount: 0
+})
 
 const tabs = [
   { key: 'works', label: '我的作品' },
   { key: 'liked', label: '点赞记录' },
   { key: 'favorite', label: '收藏记录' },
-  { key: 'history', label: '历史观看' },
+  { key: 'history', label: '观看历史' },
   { key: 'following', label: '关注列表' },
   { key: 'fans', label: '粉丝列表' }
 ]
@@ -244,166 +135,135 @@ const tabs = [
 const defaultCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 
-// 名言相关
-const userSign = ref(userStore.userInfo?.sign || '')
-const showModifySignDialog = ref(false)
-const newSign = ref('')
-
-// 视频选项菜单
-const videoOptions = ref({ id: null, style: {} })
-
-const currentList = computed(() => listMap.value[activeTab.value] || [])
 const userInfo = computed(() => userStore.userInfo)
+const currentList = computed(() => listMap.value[activeTab.value] || [])
+const isVideoTab = computed(() => ['works', 'liked', 'favorite', 'history'].includes(activeTab.value))
 
-// 打开修改名言对话框
-function openModifySign() {
-  newSign.value = userSign.value || ''
-  showModifySignDialog.value = true
-}
+/**
+ * 加载创作者统计信息和当前页签列表。
+ */
+async function loadDashboard() {
+  loading.value = true
+  errorMessage.value = ''
 
-// 保存修改的名言
-function saveModifySign() {
-  userSign.value = newSign.value
-  showModifySignDialog.value = false
-  // 这里可以添加保存到服务器的逻辑
-  console.log('修改后的名言:', userSign.value)
-}
-
-// 显示视频选项菜单
-function showVideoOptions(videoId, event) {
-  console.log('showVideoOptions called with videoId:', videoId)
-  // 计算菜单位置
-  const actionsElement = event.currentTarget.closest('.actions')
-  const cardRect = event.currentTarget.closest('.video-card').getBoundingClientRect()
-  
-  videoOptions.value = {
-    id: videoId,
-    style: {
-      position: 'absolute',
-      top: '100%',
-      right: '0',
-      marginTop: '5px'
-    }
-  }
-  console.log('videoOptions:', videoOptions.value)
-}
-
-// 点击页面其他地方关闭选项菜单
-function closeVideoOptions(e) {
-  // 检查点击的目标是否在选项菜单或小圆点按钮内
-  const moreOptionsElements = document.querySelectorAll('.more-options')
-  const optionsMenuElements = document.querySelectorAll('.options-menu')
-  let isClickInside = false
-  
-  moreOptionsElements.forEach(element => {
-    if (element.contains(e.target)) {
-      isClickInside = true
-    }
-  })
-  
-  optionsMenuElements.forEach(element => {
-    if (element.contains(e.target)) {
-      isClickInside = true
-    }
-  })
-  
-  // 如果点击的是外部，关闭选项菜单
-  if (!isClickInside) {
-    videoOptions.value.id = null
-  }
-}
-
-async function loadStats() {
   try {
-    const data = await getCreatorStats()
-    stats.value = data || {
-      totalPlayCount: 1234567,
-      totalLikeCount: 123456,
-      videoCount: 123,
-      fanCount: 12345
+    if (userStore.isLoggedIn && !userStore.userInfo) {
+      await userStore.fetchUserInfo()
     }
-  } catch (e) {
-    console.error(e)
-    stats.value = {
-      totalPlayCount: 1234567,
-      totalLikeCount: 123456,
-      videoCount: 123,
-      fanCount: 12345
-    }
-  }
-}
-
-async function loadFollowingCount() {
-  try {
-    const uid = userStore.userInfo?.id
-    if (!uid) {
-      followingCount.value = 1234
-      return
-    }
-    const followingList = await getFollowingList(uid)
-    followingCount.value = followingList?.length || 1234
-  } catch (e) {
-    console.error(e)
-    followingCount.value = 1234
-  }
-}
-
-async function loadList(key) {
-  if (key === 'works') {
-    listMap.value.works = (await getCreatorVideos()).records || []
-  } else if (key === 'liked') {
-    listMap.value.liked = (await getLikedVideos()).records || []
-  } else if (key === 'favorite') {
-    listMap.value.favorite = (await getFavoriteVideos()).records || []
-  } else if (key === 'history') {
-    listMap.value.history = (await getHistoryVideos()).records || []
-  } else if (key === 'following') {
-    listMap.value.following = await getFollowingListUser()
-  } else if (key === 'fans') {
-    listMap.value.fans = await getFanListUser()
-  }
-}
-
-async function getFollowingListUser() {
-  const uid = userStore.userInfo?.id
-  if (!uid) return []
-  return await getFollowingList(uid)
-}
-
-async function getFanListUser() {
-  const uid = userStore.userInfo?.id
-  if (!uid) return []
-  return await getFanList(uid)
-}
-
-async function switchTab(key) {
-  activeTab.value = key
-  await loadList(key)
-}
-
-async function confirmDelete(id) {
-  if (!confirm('确认删除该视频吗？')) return
-  await deleteVideo(id)
-  await loadList('works')
-}
-
-async function load() {
-  try {
-    // 暂时注释掉loadList，使用模拟数据
-    await Promise.all([loadStats(), loadFollowingCount()])
-  } catch (e) {
-    console.error(e)
-    // 模拟数据，确保页面能正常显示
-    stats.value = {
-      totalPlayCount: 1234567,
-      totalLikeCount: 123456,
-      videoCount: 123,
-      fanCount: 12345
-    }
-    followingCount.value = 1234
+    await Promise.all([loadStats(), loadFollowingCount(), loadList(activeTab.value)])
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = '加载创作者中心失败，请稍后重试'
   } finally {
     loading.value = false
   }
+}
+
+/**
+ * 获取创作者统计数据。
+ */
+async function loadStats() {
+  const data = await getCreatorStats()
+  stats.value = {
+    totalPlayCount: data?.totalPlayCount || 0,
+    totalLikeCount: data?.totalLikeCount || 0,
+    videoCount: data?.videoCount || 0,
+    fanCount: data?.fanCount || 0
+  }
+}
+
+/**
+ * 获取关注数，用于个人中心顶部统计。
+ */
+async function loadFollowingCount() {
+  const uid = userStore.userInfo?.id
+  if (!uid) {
+    followingCount.value = 0
+    return
+  }
+  const list = await getFollowingList(uid)
+  followingCount.value = Array.isArray(list) ? list.length : 0
+}
+
+/**
+ * 根据页签加载对应列表数据。
+ */
+async function loadList(key) {
+  if (key === 'works') {
+    listMap.value.works = normalizePageRecords(await getCreatorVideos())
+    return
+  }
+  if (key === 'liked') {
+    listMap.value.liked = normalizePageRecords(await getLikedVideos())
+    return
+  }
+  if (key === 'favorite') {
+    listMap.value.favorite = normalizePageRecords(await getFavoriteVideos())
+    return
+  }
+  if (key === 'history') {
+    listMap.value.history = normalizePageRecords(await getHistoryVideos())
+    return
+  }
+
+  const uid = userStore.userInfo?.id
+  if (!uid) {
+    listMap.value[key] = []
+    return
+  }
+
+  if (key === 'following') {
+    const list = await getFollowingList(uid)
+    listMap.value.following = Array.isArray(list) ? list : []
+    return
+  }
+
+  if (key === 'fans') {
+    const list = await getFanList(uid)
+    listMap.value.fans = Array.isArray(list) ? list : []
+  }
+}
+
+/**
+ * 切换页签后只刷新当前列表。
+ */
+async function switchTab(key) {
+  activeTab.value = key
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    await loadList(key)
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = '加载列表失败，请稍后重试'
+  } finally {
+    loading.value = false
+  }
+}
+
+/**
+ * 删除自己的视频并刷新作品列表。
+ */
+async function confirmDelete(videoId) {
+  if (!window.confirm('确认删除这个视频吗？')) {
+    return
+  }
+  await deleteVideo(videoId)
+  if (activeTab.value === 'works') {
+    await switchTab('works')
+    await loadStats()
+  }
+}
+
+function normalizePageRecords(pageData) {
+  if (!pageData) {
+    return []
+  }
+  return Array.isArray(pageData.records) ? pageData.records : []
+}
+
+function goVideo(id) {
+  router.push(`/video/${id}`)
 }
 
 function goMessage(user) {
@@ -416,25 +276,29 @@ function goMessage(user) {
   })
 }
 
-function goVideo(id) {
-  router.push(`/video/${id}`)
-}
-
-function formatCount(n) {
-  if (!n) return '0'
-  if (n >= 10000) return (n / 10000).toFixed(1) + '万'
-  return String(n)
+function formatCount(value) {
+  if (!value) {
+    return '0'
+  }
+  if (value >= 10000) {
+    return `${(value / 10000).toFixed(1)}万`
+  }
+  return String(value)
 }
 
 function formatDuration(seconds) {
-  if (!seconds && seconds !== 0) return '00:00'
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  if (seconds === null || seconds === undefined) {
+    return '00:00'
+  }
+  const minutes = Math.floor(seconds / 60)
+  const remainSeconds = seconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(remainSeconds).padStart(2, '0')}`
 }
 
 function resolveCover(video) {
-  if (video.previewUrl) return video.previewUrl
+  if (video.previewUrl) {
+    return video.previewUrl
+  }
   if (video.coverUrl) {
     return `/api/file/cover?url=${encodeURIComponent(video.coverUrl)}`
   }
@@ -442,8 +306,12 @@ function resolveCover(video) {
 }
 
 function resolveAvatar(avatar) {
-  if (!avatar) return avatarPlaceholder
-  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  if (!avatar) {
+    return avatarPlaceholder
+  }
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
   return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
 }
 
@@ -455,68 +323,35 @@ function onCoverError(event) {
   event.target.src = defaultCover
 }
 
-onMounted(async () => {
-  // 强制模拟登录状态，确保用户信息存在
-  userStore.mockLogin()
-  // 加载页面数据
-  await load()
-  // 监听点击事件，关闭选项菜单
-  document.addEventListener('click', closeVideoOptions)
-})
+watch(
+  () => userStore.userInfo?.id,
+  (id) => {
+    if (id) {
+      loadDashboard()
+    }
+  }
+)
 
-onUnmounted(() => {
-  document.removeEventListener('click', closeVideoOptions)
+onMounted(() => {
+  loadDashboard()
 })
 </script>
 
 <style scoped>
 .creator-dashboard {
-  min-height: calc(100vh - 60px);
-  background: #f4f4f4;
-}
-
-/* 顶部横幅 */
-.banner {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-}
-
-.banner-bg {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-  position: relative;
-}
-
-.banner-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url('https://s1.hdslb.com/bfs/static/jinkela/space/assets/top-banner.jpg');
-  background-size: cover;
-  background-position: center;
-  opacity: 0.8;
-}
-
-/* 用户信息区域 */
-.user-section {
-  background: #fff;
-  padding-bottom: 20px;
-}
-
-.user-wrapper {
-  max-width: 1100px;
+  max-width: 1120px;
   margin: 0 auto;
-  display: flex;
-  align-items: flex-start;
-  position: relative;
-  top: -40px;
+  padding: 24px 0 40px;
 }
 
-.avatar-box {
-  flex-shrink: 0;
-  margin-right: 20px;
+.profile-card {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 28px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff8f4, #ffffff);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
 }
 
 .avatar {
@@ -525,321 +360,113 @@ onUnmounted(() => {
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #fff;
-  background: #f4f4f4;
+  background: #f3f4f6;
 }
 
-.user-main {
+.profile-main {
   flex: 1;
-  padding-top: 40px;
 }
 
-.user-top {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.name-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.username {
-  font-size: 20px;
-  font-weight: 600;
-  color: #18191c;
+.profile-main h1 {
   margin: 0;
+  font-size: 30px;
+  color: #111827;
 }
 
-.level-badge {
-  padding: 2px 6px;
-  background: linear-gradient(135deg, #fb7299, #ff92af);
-  color: #fff;
-  border-radius: 4px;
-  font-size: 11px;
+.profile-sign {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 14px;
 }
 
-.verify-badge {
-  padding: 2px 6px;
-  background: #fb7299;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 11px;
-}
-
-.user-coins {
-  display: flex;
-  gap: 16px;
-  font-size: 13px;
-  color: #9499a0;
-  margin-bottom: 8px;
-}
-
-.user-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+  gap: 14px;
+  margin-top: 22px;
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
 }
 
 .stat-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: #18191c;
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: #9499a0;
+  margin-top: 6px;
+  display: block;
+  color: #6b7280;
+  font-size: 13px;
 }
 
-.stat-divider {
-  width: 1px;
-  height: 20px;
-  background: #e3e5e7;
-}
-
-.space-btn {
-  cursor: pointer;
-}
-
-.space-btn .stat-label {
-  color: #18191c;
-  font-weight: 500;
-}
-
-.user-sign {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #61666d;
-  margin-bottom: 16px;
-}
-
-.btn-modify {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  background: #f0f0f0;
-  border: 1px solid #e0e0e0;
-  color: #333;
-  transition: all 0.2s;
-}
-
-.btn-modify:hover {
-  background: #e0e0e0;
-}
-
-/* 修改名言对话框样式 */
-.sign-dialog-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.sign-dialog {
-  background: #fff;
-  border-radius: 8px;
-  width: 400px;
-  max-width: 90vw;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.dialog-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.dialog-close {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #999;
-}
-
-.dialog-close:hover {
-  color: #333;
-}
-
-.dialog-body {
-  padding: 16px;
-}
-
-.dialog-body textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  font-size: 14px;
-  resize: none;
-}
-
-.dialog-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.btn-cancel, .btn-save {
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
-
-.btn-cancel {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.btn-save {
-  background: #fb7299;
-  color: #fff;
-}
-
-.btn-cancel:hover {
-  background: #e0e0e0;
-}
-
-.btn-save:hover {
-  background: #ff85ad;
-}
-
-/* 选项卡区域 */
 .tabs-section {
-  background: #fff;
-  border-bottom: 1px solid #e3e5e7;
-  margin-top: 12px;
-}
-
-.tabs-wrapper {
-  max-width: 1100px;
-  margin: 0 auto;
   display: flex;
-  gap: 24px;
-  padding: 0 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0 18px;
 }
 
 .tab-item {
-  padding: 14px 0;
-  background: none;
-  font-size: 15px;
-  color: #61666d;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s;
-}
-
-.tab-item:hover {
-  color: #18191c;
-}
-
-.tab-item.active {
-  color: #fb7299;
-  font-weight: 600;
-}
-
-.tab-item.active::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 3px;
-  background: #fb7299;
-}
-
-/* 内容区域 */
-.content-section {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px 20px;
-}
-
-.loading {
-  text-align: center;
-  padding: 60px 0;
-  color: #9499a0;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 0;
-}
-
-.empty-illustration {
-  margin-bottom: 20px;
-}
-
-.empty-illustration img {
-  width: 160px;
-  height: auto;
-}
-
-.empty-text {
-  color: #9499a0;
+  padding: 10px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #fff;
+  color: #4b5563;
   font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-item.active,
+.tab-item:hover {
+  border-color: #fb7185;
+  color: #e11d48;
+  background: #fff1f2;
+}
+
+.content-section {
+  min-height: 320px;
+}
+
+.state-panel {
+  padding: 80px 20px;
+  text-align: center;
+  border-radius: 18px;
+  background: #fff;
+  color: #6b7280;
+}
+
+.state-panel.error {
+  color: #dc2626;
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
 }
 
-.video-card {
-  cursor: pointer;
-  border-radius: 4px;
-  overflow: visible;
+.video-card,
+.user-card {
   background: #fff;
-  transition: all 0.2s;
-  transform-origin: center;
-  position: relative;
-}
-
-.video-card:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .cover-wrap {
   position: relative;
-  aspect-ratio: 16/9;
-  background: #f4f5f7;
-  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #f3f4f6;
+  cursor: pointer;
 }
 
 .cover {
@@ -850,244 +477,129 @@ onUnmounted(() => {
 
 .duration {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
-  padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.7);
+  right: 10px;
+  bottom: 10px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.78);
   color: #fff;
   font-size: 12px;
-  border-radius: 2px;
 }
 
-.card-info {
-  padding: 8px;
+.card-body {
+  padding: 16px;
 }
 
-.title {
+.video-title {
+  margin: 0;
+  color: #111827;
+  font-size: 15px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.video-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  color: #6b7280;
   font-size: 13px;
-  font-weight: 500;
-  line-height: 1.3;
-  height: 36px;
-  overflow: hidden;
-  margin-bottom: 8px;
-  color: #18191c;
 }
 
-.meta {
-  display: flex;
-  gap: 8px;
-  color: #9499a0;
-  font-size: 11px;
-  margin-bottom: 6px;
-}
-
-.actions {
-  margin-top: 6px;
-  display: flex;
-  justify-content: flex-end;
-  position: relative;
+.delete-btn {
+  margin-top: 14px;
   width: 100%;
-  padding-right: 8px;
-}
-
-.more-options {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 2px;
-  transition: background 0.2s;
-  position: relative;
-  align-self: flex-end;
-}
-
-.more-options:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #9499a0;
-}
-
-.options-menu {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  margin-bottom: 5px;
-  background: #fff;
-  border: 1px solid #e3e5e7;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10000;
-  min-width: 120px;
-  padding: 8px 0;
-  display: block !important;
-}
-
-.options-menu button {
-  display: block;
-  width: 100%;
-  padding: 8px 16px;
-  text-align: left;
+  padding: 10px 0;
   border: none;
-  background: none;
-  font-size: 12px;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #e11d48;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.options-menu button:hover {
-  background: #ffb7c5;
-}
-
-.options-menu .delete-btn {
-  color: #000 !important;
-}
-
-.options-menu button:first-child {
-  border-bottom: 1px solid #e3e5e7;
-  border-radius: 4px 4px 0 0;
-}
-
-.options-menu button:last-child {
-  border-radius: 0 0 4px 4px;
-}
-
-.options-menu button:last-child:hover {
-  background: #fff0f4;
 }
 
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .user-card {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #e3e5e7;
-  background: #fff;
-  transition: all 0.2s;
-}
-
-.user-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  gap: 16px;
+  padding: 18px;
 }
 
 .user-avatar {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 16px;
+  background: #f3f4f6;
 }
 
-.user-info {
+.user-card-main {
   flex: 1;
+  min-width: 0;
 }
 
 .user-name {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  color: #18191c;
+  color: #111827;
+  font-weight: 600;
 }
 
-.user-meta {
-  font-size: 14px;
-  color: #9499a0;
+.user-signature {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
-.btn-message,
-.btn-profile {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  border: none;
+.action-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.btn-message {
-  background: #fb7299;
+.action-btn.primary {
+  border-color: #fb7185;
+  background: #fb7185;
   color: #fff;
 }
 
-.btn-message:hover {
-  background: #ff85ad;
-}
-
-.btn-profile {
-  background: #fff;
-  border: 1px solid #e3e5e7;
-  color: #61666d;
-}
-
-.btn-profile:hover {
-  background: #f5f5f5;
-}
-
-@media (max-width: 1024px) {
-  .stats-wrapper {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .video-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-  
-  .tabs-wrapper {
-    gap: 16px;
-  }
-  
-  .tab-item {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-}
-
 @media (max-width: 768px) {
-  .user-wrapper {
+  .creator-dashboard {
+    padding-top: 12px;
+  }
+
+  .profile-card {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    padding: 20px;
   }
-  
-  .avatar-box {
-    margin-right: 0;
-    margin-bottom: 16px;
+
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  
-  .user-main {
-    padding-top: 0;
+
+  .user-actions {
+    width: 100%;
   }
-  
-  .user-top {
-    justify-content: center;
-  }
-  
-  .user-stats {
-    justify-content: center;
-  }
-  
-  .video-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-  
-  .tabs-wrapper {
-    gap: 12px;
+
+  .action-btn {
+    flex: 1;
   }
 }
 </style>

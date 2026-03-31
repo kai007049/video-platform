@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '../views/Layout.vue'
+import { useUserStore } from '../stores/user'
 
 const routes = [
   {
@@ -25,7 +26,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - 哔哩哔哩` : '哔哩哔哩'
-  // 不再检查登录状态，直接允许访问所有路由
+  const userStore = useUserStore()
+  if (to.meta.auth && !userStore.isLoggedIn) {
+    next({ path: '/', query: { ...to.query, login: '1' } })
+    return
+  }
   next()
 })
 

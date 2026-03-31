@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * 视频查询服务：
+ * 负责列表、详情以及与展示相关的聚合查询逻辑。
+ */
 public class VideoQueryService {
 
     private final VideoMapper videoMapper;
@@ -39,6 +43,9 @@ public class VideoQueryService {
     private final VideoViewAssembler videoViewAssembler;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 查询最新视频列表
+     */
     public IPage<VideoVO> list(int page, int size, Long userId) {
         Page<Video> pageParam = new Page<>(page, size);
         Page<Video> result = videoMapper.selectPage(pageParam,
@@ -46,6 +53,9 @@ public class VideoQueryService {
         return convertVideoPage(result, result.getRecords(), userId);
     }
 
+    /**
+     * 查询推荐视频列表
+     */
     public IPage<VideoVO> listRecommended(int page, int size, Long userId) {
         Page<Video> pageParam = new Page<>(page, size);
         QueryWrapper<Video> queryWrapper = new QueryWrapper<>();
@@ -54,6 +64,9 @@ public class VideoQueryService {
         return convertVideoPage(result, result.getRecords(), userId);
     }
 
+    /**
+     * 查询热门视频列表
+     */
     public IPage<VideoVO> listHot(int page, int size, Long userId) {
         String key = Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h";
         int start = (page - 1) * size;
@@ -74,6 +87,9 @@ public class VideoQueryService {
         return result;
     }
 
+    /**
+     * 按作者查询视频列表
+     */
     public IPage<VideoVO> listByAuthor(Long authorId, int page, int size, Long currentUserId) {
         Page<Video> pageParam = new Page<>(page, size);
         Page<Video> result = videoMapper.selectPage(pageParam,
@@ -83,6 +99,9 @@ public class VideoQueryService {
         return convertVideoPage(result, result.getRecords(), currentUserId);
     }
 
+    /**
+     * 查询创作者自己的作品
+     */
     public IPage<VideoVO> listCreatorVideos(Long userId, int page, int size) {
         Page<Video> pageParam = new Page<>(page, size);
         Page<Video> result = videoMapper.selectPage(pageParam,
@@ -92,6 +111,9 @@ public class VideoQueryService {
         return convertVideoPage(result, result.getRecords(), userId);
     }
 
+    /**
+     * 查询点赞过的视频
+     */
     public IPage<VideoVO> listLikedVideos(Long userId, int page, int size) {
         Page<VideoLike> pageParam = new Page<>(page, size);
         Page<VideoLike> likes = videoLikeMapper.selectPage(pageParam,
@@ -102,6 +124,9 @@ public class VideoQueryService {
         return convertVideoPage(likes, loadVideosByIds(videoIds), userId);
     }
 
+    /**
+     * 查询收藏过的视频
+     */
     public IPage<VideoVO> listFavoriteVideos(Long userId, int page, int size) {
         Page<Favorite> pageParam = new Page<>(page, size);
         Page<Favorite> favorites = favoriteMapper.selectPage(pageParam,
@@ -112,6 +137,9 @@ public class VideoQueryService {
         return convertVideoPage(favorites, loadVideosByIds(videoIds), userId);
     }
 
+    /**
+     * 查询观看历史视频
+     */
     public IPage<VideoVO> listHistoryVideos(Long userId, int page, int size) {
         Page<WatchHistory> pageParam = new Page<>(page, size);
         Page<WatchHistory> history = watchHistoryMapper.selectPage(pageParam,
@@ -122,6 +150,9 @@ public class VideoQueryService {
         return convertVideoPage(history, loadVideosByIds(videoIds), userId);
     }
 
+    /**
+     * 查询视频详情，并补充当前用户状态
+     */
     public VideoVO getById(Long videoId, Long userId) {
         VideoVO video = getVideoById(videoId);
         if (video == null || userId == null) {
@@ -130,6 +161,9 @@ public class VideoQueryService {
         return videoViewAssembler.enrichUserState(video, userId);
     }
 
+    /**
+     * 查询视频基础详情，优先走缓存
+     */
     public VideoVO getVideoById(Long videoId) {
         return videoCacheService.getOrLoadVideo(videoId, () -> {
             Video video = videoMapper.selectById(videoId);
@@ -140,6 +174,9 @@ public class VideoQueryService {
         });
     }
 
+    /**
+     * 按给定 ID 顺序批量加载视频，避免 selectBatchIds 打乱顺序后影响前端展示。
+     */
     private List<Video> loadVideosByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
@@ -153,6 +190,9 @@ public class VideoQueryService {
                 .toList();
     }
 
+    /**
+     * 将视频实体分页结果转换为 VideoVO 分页结果。
+     */
     private IPage<VideoVO> convertVideoPage(IPage<?> sourcePage, List<Video> videos, Long userId) {
         Page<VideoVO> result = new Page<>(sourcePage.getCurrent(), sourcePage.getSize(), sourcePage.getTotal());
         result.setRecords(videoViewAssembler.toVideoVOList(videos, userId));

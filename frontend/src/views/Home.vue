@@ -7,10 +7,11 @@
     </div>
 
     <div class="ai-ask-box">
-      <input v-model="aiQuestion" type="text" placeholder="AI 问答搜索：例如 帮我找 SpringBoot 实战视频" @keyup.enter="runAiAsk" />
+      <input v-model="aiQuestion" type="text" placeholder="AI 问答搜索，例如：帮我找 SpringBoot 实战视频" @keyup.enter="runAiAsk" />
       <button :disabled="aiLoading || !aiQuestion.trim()" @click="runAiAsk">{{ aiLoading ? '分析中...' : 'AI 搜索' }}</button>
     </div>
     <div v-if="aiAnswer" class="ai-answer">{{ aiAnswer }}</div>
+    <div v-if="error" class="ai-answer error">{{ error }}</div>
 
     <div class="video-grid">
       <div v-for="item in videoList" :key="item.id" class="video-card" @click="goVideo(item.id)">
@@ -28,9 +29,7 @@
             <span class="author-name">{{ item.authorName || '用户' }}</span>
           </div>
           <div class="card-meta">
-            <span class="meta-tag">{{ item.categoryName || '视频' }}</span>
-            <span class="meta-dot">·</span>
-            <span class="meta-date">{{ item.createTime ? String(item.createTime).slice(5, 10) : '' }}</span>
+            <span class="meta-date">{{ formatDate(item.createTime) }}</span>
           </div>
         </div>
       </div>
@@ -43,8 +42,8 @@
     </div>
 
     <div v-else-if="!loading && !videoList.length" class="empty">
-      <div class="empty-icon">📺</div>
-      <div>暂无视频</div>
+      <div class="empty-icon">📵</div>
+      <div>{{ error || '暂无视频' }}</div>
     </div>
   </div>
 </template>
@@ -66,6 +65,7 @@ const pageSize = 16
 const aiQuestion = ref('')
 const aiAnswer = ref('')
 const aiLoading = ref(false)
+const error = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 
 const fetchApi = (p) => {
@@ -76,55 +76,20 @@ const fetchApi = (p) => {
 async function fetchList(isMore = false) {
   if (loading.value) return
   loading.value = true
+  if (!isMore) error.value = ''
   try {
     const res = await fetchApi(isMore ? page.value : 1)
-    let list = res.records || []
-    
-    console.log('API 返回数据:', res)
-    console.log('视频列表长度:', list.length)
-    
-    // 添加测试弹幕功能的模拟视频
-    if (!isMore) {
-      const testVideo = {
-        id: 9999,
-        title: '测试弹幕功能 - 点击进入',
-        coverUrl: 'https://placehold.co/640x360/ff6b6b/ffffff?text=弹幕测试',
-        playCount: 12345,
-        commentCount: 678,
-        durationSeconds: 120,
-        authorId: 1,
-        authorName: '测试账号',
-        categoryName: '测试',
-        createTime: new Date().toISOString()
-      }
-      list.unshift(testVideo)
-      console.log('添加测试视频:', testVideo)
-    }
-    
+    const list = res.records || []
     if (isMore) videoList.value.push(...list)
     else videoList.value = list
     hasMore.value = res.current < res.pages
     page.value = isMore ? page.value + 1 : 2
-    
-    console.log('最终视频列表长度:', videoList.value.length)
   } catch (e) {
     console.error(e)
-    // 即使 API 失败，也显示测试视频
     if (!isMore) {
-      videoList.value = [{
-        id: 9999,
-        title: '测试弹幕功能 - 点击进入',
-        coverUrl: 'https://placehold.co/640x360/ff6b6b/ffffff?text=弹幕测试',
-        playCount: 12345,
-        commentCount: 678,
-        durationSeconds: 120,
-        authorId: 1,
-        authorName: '测试账号',
-        categoryName: '测试',
-        createTime: new Date().toISOString()
-      }]
+      videoList.value = []
       hasMore.value = false
-      console.log('API 失败，使用测试视频')
+      error.value = e.message || '视频列表加载失败'
     }
   } finally {
     loading.value = false
@@ -139,9 +104,7 @@ function switchTab(tab) {
 
 function syncFromQuery() {
   const tab = route.query.tab ? String(route.query.tab) : ''
-  if (tab && ['recommend', 'latest', 'hot'].includes(tab)) {
-    activeTab.value = tab
-  }
+  if (tab && ['recommend', 'latest', 'hot'].includes(tab)) activeTab.value = tab
 }
 
 async function runAiAsk() {
@@ -150,8 +113,8 @@ async function runAiAsk() {
   aiAnswer.value = ''
   try {
     const question = aiQuestion.value.trim()
-    const { data } = await createAskTask({ question, page: 1, size: pageSize })
-    const done = await pollAgentTask(data.task_id)
+    const response = await createAskTask({ question, page: 1, size: pageSize })
+    const done = await pollAgentTask(response.data.task_id)
     if (done.status !== 'success' || !done.result) throw new Error(done.error || 'AI 搜索失败')
     aiAnswer.value = done.result.answer || ''
     router.push({ path: '/search', query: { keyword: question, type: 'video', sortBy: 'comprehensive' } })
@@ -163,20 +126,17 @@ async function runAiAsk() {
 }
 
 function loadMore() { fetchList(true) }
-function goVideo(id) {
-  console.log('点击视频，ID:', id)
-  router.push(`/video/${id}`)
-}
+function goVideo(id) { router.push(`/video/${id}`) }
 function goProfile(authorId) { if (authorId) router.push(`/user/${authorId}`) }
-
 function resolveCover(item) {
   if (item.previewUrl) return item.previewUrl
   if (item.coverUrl) return `/api/file/cover?url=${encodeURIComponent(item.coverUrl)}`
   return placeholderCover
 }
 function onCoverError(event) { event.target.src = placeholderCover }
-function formatCount(n) { if (!n) return '0'; if (n >= 10000) return (n / 10000).toFixed(1) + '万'; return String(n) }
-function formatDuration(sec) { if (!sec) return '--:--'; const m = Math.floor(sec / 60); const s = sec % 60; return `${m}:${String(s).padStart(2, '0')}` }
+function formatCount(n) { if (!n) return '0'; if (n >= 10000) return `${(n / 10000).toFixed(1)}万`; return String(n) }
+function formatDuration(sec) { if (sec == null) return '--:--'; const m = Math.floor(sec / 60); const s = sec % 60; return `${m}:${String(s).padStart(2, '0')}` }
+function formatDate(value) { return value ? String(value).slice(5, 10) : '' }
 
 watch(() => route.query, () => {
   syncFromQuery()
@@ -191,6 +151,7 @@ watch(() => route.query, () => {
 .ai-ask-box input { flex: 1; padding: 10px 12px; border: 1px solid #e3e5e7; border-radius: 8px; }
 .ai-ask-box button { padding: 10px 14px; border: 1px solid #fb7299; color: #fb7299; background: #fff; border-radius: 8px; }
 .ai-answer { margin-bottom: 14px; padding: 10px 12px; border-radius: 8px; background: #fff3f7; color: #61666d; border: 1px solid #ffd1df; font-size: 13px; }
+.ai-answer.error { background: #fff5f5; border-color: #ffd7d7; color: #c0392b; }
 .tabs { display: flex; align-items: center; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #e3e5e7; }
 .tab { position: relative; padding: 10px 16px; font-size: 15px; color: #61666d; background: transparent; border: none; cursor: pointer; }
 .tab.active { color: #fb7299; font-weight: 700; }

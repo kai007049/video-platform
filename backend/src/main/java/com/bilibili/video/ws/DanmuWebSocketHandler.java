@@ -1,13 +1,15 @@
 package com.bilibili.video.ws;
 
-import com.bilibili.video.model.dto.DanmuDTO;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.mapper.UserMapper;
+import com.bilibili.video.model.dto.DanmuDTO;
 import com.bilibili.video.service.DanmuService;
 import com.bilibili.video.utils.JwtUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -17,23 +19,28 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
- * 弹幕 WebSocket 处理器
+ * 弹幕 WebSocket 处理器。
  * 连接路径: /ws/danmu/{videoId}
- * 客户端连接后可发送弹幕 JSON，服务器广播给同视频房间用户
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DanmuWebSocketHandler extends TextWebSocketHandler {
 
+    private static final String RATE_LIMIT_KEY_PREFIX = "danmu:rate:";
+    private static final String DUPLICATE_KEY_PREFIX = "danmu:dup:";
+    private static final int MAX_MESSAGES_PER_SECOND = 3;
+    private static final long DUPLICATE_WINDOW_SECONDS = 2L;
+
     private final DanmuService danmuService;
     private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
     private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    // videoId -> sessions
     private final Map<Long, Map<String, WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
 
     @Override
@@ -43,29 +50,30 @@ public class DanmuWebSocketHandler extends TextWebSocketHandler {
             session.close(CloseStatus.BAD_DATA);
             return;
         }
-        roomSessions.computeIfAbsent(videoId, k -> new ConcurrentHashMap<>()).put(session.getId(), session);
-        log.debug("WebSocket connected: videoId={}, sessionId={}", videoId, session.getId());
+        roomSessions.computeIfAbsent(videoId, key -> new ConcurrentHashMap<>()).put(session.getId(), session);
+        log.debug("Danmu websocket connected: videoId={}, sessionId={}", videoId, session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         Long videoId = getVideoIdFromUri(session);
         if (videoId == null) {
+            sendError(session, "视频房间不存在");
             return;
         }
 
         try {
             DanmuDTO dto = objectMapper.readValue(message.getPayload(), DanmuDTO.class);
-            dto.setVideoId(videoId);
-
             Long userId = getUserIdFromSession(session);
             if (userId == null) {
-                sendError(session, "未登录");
+                sendError(session, "未登录或登录已失效");
                 return;
             }
-            dto.setUserId(userId);
 
-            if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            dto.setVideoId(videoId);
+            dto.setUserId(userId);
+            dto.setContent(dto.getContent() == null ? null : dto.getContent().trim());
+            if (dto.getContent() == null || dto.getContent().isEmpty()) {
                 sendError(session, "弹幕内容不能为空");
                 return;
             }
@@ -73,33 +81,48 @@ public class DanmuWebSocketHandler extends TextWebSocketHandler {
                 sendError(session, "弹幕内容过长");
                 return;
             }
-            if (dto.getTimePoint() == null) {
+            if (dto.getTimePoint() == null || dto.getTimePoint() < 0) {
                 dto.setTimePoint(0);
+            }
+
+            if (!allowSend(userId)) {
+                sendError(session, "发送过于频繁，请稍后再试");
+                return;
+            }
+            if (isDuplicateDanmu(userId, videoId, dto)) {
+                sendError(session, "请勿短时间重复发送相同弹幕");
+                return;
             }
 
             User user = userMapper.selectById(userId);
             if (user != null) {
                 dto.setUsername(user.getUsername());
             }
+
             danmuService.saveDanmu(dto);
             broadcastToRoom(videoId, dto, session.getId());
+        } catch (JsonProcessingException e) {
+            log.warn("Danmu payload parse failed: {}", e.getMessage());
+            sendError(session, "弹幕消息格式错误");
         } catch (Exception e) {
-            log.warn("Handle danmu message error: {}", e.getMessage());
-            sendError(session, "消息格式错误");
+            log.warn("Handle danmu message error", e);
+            sendError(session, "弹幕发送失败，请稍后重试");
         }
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Long videoId = getVideoIdFromUri(session);
-        if (videoId != null) {
-            Map<String, WebSocketSession> room = roomSessions.get(videoId);
-            if (room != null) {
-                room.remove(session.getId());
-                if (room.isEmpty()) {
-                    roomSessions.remove(videoId);
-                }
-            }
+        if (videoId == null) {
+            return;
+        }
+        Map<String, WebSocketSession> room = roomSessions.get(videoId);
+        if (room == null) {
+            return;
+        }
+        room.remove(session.getId());
+        if (room.isEmpty()) {
+            roomSessions.remove(videoId);
         }
     }
 
@@ -140,18 +163,23 @@ public class DanmuWebSocketHandler extends TextWebSocketHandler {
         }
         try {
             String json = objectMapper.writeValueAsString(dto);
-            TextMessage msg = new TextMessage(json);
+            TextMessage textMessage = new TextMessage(json);
             for (Map.Entry<String, WebSocketSession> entry : room.entrySet()) {
-                if (!entry.getKey().equals(excludeSessionId) && entry.getValue().isOpen()) {
-                    try {
-                        entry.getValue().sendMessage(msg);
-                    } catch (IOException e) {
-                        log.warn("Send danmu failed: {}", e.getMessage());
-                    }
+                if (entry.getKey().equals(excludeSessionId)) {
+                    continue;
+                }
+                WebSocketSession target = entry.getValue();
+                if (!target.isOpen()) {
+                    continue;
+                }
+                try {
+                    target.sendMessage(textMessage);
+                } catch (IOException e) {
+                    log.warn("Send danmu failed: {}", e.getMessage());
                 }
             }
         } catch (Exception e) {
-            log.warn("Broadcast danmu failed: {}", e.getMessage());
+            log.warn("Broadcast danmu failed", e);
         }
     }
 
@@ -163,5 +191,26 @@ public class DanmuWebSocketHandler extends TextWebSocketHandler {
         } catch (IOException e) {
             log.warn("Send error failed: {}", e.getMessage());
         }
+    }
+
+    private boolean allowSend(Long userId) {
+        String key = RATE_LIMIT_KEY_PREFIX + userId;
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1L) {
+            redisTemplate.expire(key, 1, TimeUnit.SECONDS);
+        }
+        return count == null || count <= MAX_MESSAGES_PER_SECOND;
+    }
+
+    private boolean isDuplicateDanmu(Long userId, Long videoId, DanmuDTO dto) {
+        String payload = dto.getContent() + "|" + dto.getTimePoint();
+        String key = DUPLICATE_KEY_PREFIX + userId + ":" + videoId + ":" + payload.hashCode();
+        Boolean accepted = redisTemplate.opsForValue().setIfAbsent(
+                key,
+                dto.getClientMessageId() == null ? "1" : dto.getClientMessageId(),
+                DUPLICATE_WINDOW_SECONDS,
+                TimeUnit.SECONDS
+        );
+        return !Boolean.TRUE.equals(accepted);
     }
 }

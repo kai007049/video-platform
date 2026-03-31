@@ -8,9 +8,11 @@ import lombok.Data;
 @Data
 public class DanmuDTO {
 
+    private Long id;
     private Long videoId;
     private Long userId;
     private String username;
     private String content;
     private Integer timePoint;
+    private String clientMessageId;
 }

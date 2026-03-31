@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MQServiceImpl implements MQService {
 
+    private static final String LOG_TEMPLATE = "[MQ] {} 消息发送失败，topic={}, payload={}";
+
     @PostConstruct
     public void logRocketMQTemplateStatus() {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
@@ -43,7 +45,7 @@ public class MQServiceImpl implements MQService {
     public void sendVideoProcess(VideoProcessMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.VIDEO_PROCESS, message);
+        sendSafely(template, MqTopics.VIDEO_PROCESS, message, "视频处理");
     }
 
     /**
@@ -53,7 +55,7 @@ public class MQServiceImpl implements MQService {
     public void sendVideoCoverProcess(VideoProcessMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.VIDEO_COVER_PROCESS, message);
+        sendSafely(template, MqTopics.VIDEO_COVER_PROCESS, message, "视频封面处理");
     }
 
     /**
@@ -63,7 +65,7 @@ public class MQServiceImpl implements MQService {
     public void sendDanmu(DanmuMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.DANMU_PROCESS, message);
+        sendSafely(template, MqTopics.DANMU_PROCESS, message, "弹幕处理");
     }
 
     /**
@@ -73,7 +75,7 @@ public class MQServiceImpl implements MQService {
     public void sendNotify(NotifyMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.NOTIFY_EVENT, message);
+        sendSafely(template, MqTopics.NOTIFY_EVENT, message, "通知事件");
     }
 
     /**
@@ -83,7 +85,7 @@ public class MQServiceImpl implements MQService {
     public void sendSearchSync(SearchSyncMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.SEARCH_SYNC, message);
+        sendSafely(template, MqTopics.SEARCH_SYNC, message, "搜索同步");
     }
 
     /**
@@ -93,7 +95,7 @@ public class MQServiceImpl implements MQService {
     public void sendVideoDelete(VideoDeleteMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.VIDEO_DELETE, message);
+        sendSafely(template, MqTopics.VIDEO_DELETE, message, "视频删除");
     }
 
     /**
@@ -103,6 +105,17 @@ public class MQServiceImpl implements MQService {
     public void sendMessageNotify(MessageNotifyMessage message) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) return;
-        template.convertAndSend(MqTopics.MESSAGE_NOTIFY, message);
+        sendSafely(template, MqTopics.MESSAGE_NOTIFY, message, "站内消息通知");
+    }
+
+    /**
+     * MQ 在本项目中主要承担异步增强能力，不应因为消息发送失败而直接打断核心业务。
+     */
+    private void sendSafely(RocketMQTemplate template, String topic, Object payload, String scene) {
+        try {
+            template.convertAndSend(topic, payload);
+        } catch (Exception e) {
+            log.error(LOG_TEMPLATE, scene, topic, payload, e);
+        }
     }
 }

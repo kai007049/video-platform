@@ -6,6 +6,7 @@ import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.mapper.WatchHistoryMapper;
 import com.bilibili.video.service.WatchHistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -22,19 +23,19 @@ public class WatchHistoryServiceImpl implements WatchHistoryService {
     @Override
     public void saveProgress(Long userId, Long videoId, int watchSeconds) {
         if (userId == null) return;
-        WatchHistory existing = watchHistoryMapper.selectOne(
-                new LambdaQueryWrapper<WatchHistory>()
-                        .eq(WatchHistory::getUserId, userId)
-                        .eq(WatchHistory::getVideoId, videoId));
-        if (existing != null) {
-            existing.setWatchSeconds(watchSeconds);
-            watchHistoryMapper.updateById(existing);
-        } else {
-            WatchHistory h = new WatchHistory();
-            h.setUserId(userId);
-            h.setVideoId(videoId);
-            h.setWatchSeconds(watchSeconds);
-            watchHistoryMapper.insert(h);
+        // 先尝试按唯一键更新，避免并发场景下“先查再插”触发重复插入。
+        int updated = updateExistingProgress(userId, videoId, watchSeconds);
+        if (updated == 0) {
+            try {
+                WatchHistory history = new WatchHistory();
+                history.setUserId(userId);
+                history.setVideoId(videoId);
+                history.setWatchSeconds(watchSeconds);
+                watchHistoryMapper.insert(history);
+            } catch (DuplicateKeyException ex) {
+                // 并发下可能有别的请求已插入成功，这里回退为更新即可。
+                updateExistingProgress(userId, videoId, watchSeconds);
+            }
         }
 
         String key = WATCH_PROGRESS_KEY_PREFIX + userId;
@@ -72,5 +73,16 @@ public class WatchHistoryServiceImpl implements WatchHistoryService {
     @Override
     public void recordWatch(Long userId, Long videoId, int watchSeconds) {
         saveProgress(userId, videoId, watchSeconds);
+    }
+
+    private int updateExistingProgress(Long userId, Long videoId, int watchSeconds) {
+        WatchHistory update = new WatchHistory();
+        update.setWatchSeconds(watchSeconds);
+        return watchHistoryMapper.update(
+                update,
+                new LambdaQueryWrapper<WatchHistory>()
+                        .eq(WatchHistory::getUserId, userId)
+                        .eq(WatchHistory::getVideoId, videoId)
+        );
     }
 }

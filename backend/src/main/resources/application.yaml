@@ -45,7 +45,7 @@ mybatis-plus:
   type-aliases-package: com.bilibili.video.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       id-type: auto
@@ -78,8 +78,8 @@ play-count:
 logging:
   level:
     root: warn
-    com.bilibili.video: INFO
-    org.springframework.web: INFO
+    com.bilibili.video: warn
+    org.springframework.web: warn
 
 
 # ffmpeg下载路径

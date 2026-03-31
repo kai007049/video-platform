@@ -37,6 +37,7 @@ public class DanmuServiceImpl implements DanmuService {
         danmu.setContent(dto.getContent());
         danmu.setTimePoint(dto.getTimePoint() != null ? dto.getTimePoint() : 0);
         danmuMapper.insert(danmu);
+        dto.setId(danmu.getId());
 
         mqService.sendDanmu(new DanmuMessage(danmu.getVideoId(), danmu.getUserId(), danmu.getContent(), danmu.getTimePoint()));
         mqService.sendNotify(new NotifyMessage("danmu", danmu.getUserId(), danmu.getVideoId(), danmu.getContent()));
