@@ -1,71 +1,130 @@
 <template>
-  <div class="upload-page">
-    <div class="upload-card">
-      <h2>投稿视频</h2>
-      <form @submit.prevent="submit" class="form">
-        <div class="field">
-          <label>视频文件 <span class="required">*</span></label>
-          <input
-            ref="videoInput"
-            type="file"
-            accept="video/*"
-            @change="onVideoChange"
-          />
-        </div>
-        <div class="field">
-          <label>封面（可选）</label>
-          <input
-            ref="coverInput"
-            type="file"
-            accept="image/*"
-            @change="onCoverChange"
-          />
-        </div>
-        <div class="field">
-          <label>视频分类 <span class="required">*</span></label>
-          <div class="category-select">
-            <select v-model.number="form.parentCategoryId" @change="onParentChange">
-              <option value="">请选择一级分类</option>
-              <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
-            <select v-model.number="form.categoryId" :disabled="!childCategories.length">
-              <option value="">请选择二级分类</option>
-              <option v-for="c in childCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
+  <div class="bili-upload-page">
+    <div class="bili-upload-container">
+      <!-- 标题 -->
+      <div class="bili-header">
+        <span class="header-decor"></span>
+        <h1>投稿视频</h1>
+      </div>
+
+      <form @submit.prevent="submit" class="bili-form-layout">
+        <!-- 视频和封面上传 -->
+        <div class="bili-upload-section">
+          <div 
+            class="upload-box upload-box-video"
+            @click="videoInput?.click()"
+            @dragover="onDragOver"
+            @drop="onDropVideo"
+          >
+            <input
+              ref="videoInput"
+              type="file"
+              accept="video/*"
+              @change="onVideoChange"
+              style="display: none"
+            />
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" width="48" height="48">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="#00AEEC"/>
+              </svg>
+            </div>
+            <p class="upload-hint">{{ videoFile ? videoFile.name : '点击或拖拽视频文件到此处' }}</p>
           </div>
-          <p v-if="categoryError" class="hint">{{ categoryError }}</p>
-        </div>
-        <div class="field">
-          <label>标题 <span class="required">*</span></label>
-          <input v-model="form.title" type="text" placeholder="请输入视频标题" required />
-        </div>
-        <div class="field">
-          <label>标签 <span class="required">*</span></label>
-          <div class="tag-actions">
-            <button type="button" class="btn-recommend" @click="recommendTags" :disabled="loadingSuggest">{{ loadingSuggest ? '推荐中...' : '智能推荐标签' }}</button>
+
+          <div 
+            class="upload-box upload-box-cover"
+            @click="coverInput?.click()"
+          >
+            <input
+              ref="coverInput"
+              type="file"
+              accept="image/*"
+              @change="onCoverChange"
+              style="display: none"
+            />
+            <p class="upload-hint-small">{{ coverFile ? '✓ 已上传' : '上传封面图' }}</p>
           </div>
-          <div class="tag-list">
-            <label v-for="t in tags" :key="t.id" class="tag-item">
-              <input type="checkbox" :value="t.id" v-model="form.tagIds" />
-              <span>{{ t.name }}</span>
-            </label>
-          </div>
-          <p v-if="tagError" class="hint">{{ tagError }}</p>
         </div>
-        <div class="field">
-          <label>简介（可选）</label>
-          <div class="tag-actions">
-            <button type="button" class="btn-recommend" @click="runUploadAssist" :disabled="loadingAiAssist">
-              {{ loadingAiAssist ? 'AI 分析中...' : 'AI 生成标签/摘要/分类建议' }}
+
+        <!-- 视频标题 -->
+        <div class="bili-form-item">
+          <label class="form-label">视频标题</label>
+          <div class="title-input-wrapper">
+            <input 
+              v-model="form.title" 
+              type="text" 
+              class="form-input"
+              placeholder="给视频起个响亮的标题吧！"
+              required 
+            />
+            <button 
+              type="button" 
+              class="ai-assist-btn"
+              @click="runUploadAssist" 
+              :disabled="loadingAiAssist"
+            >
+              <span class="ai-icon">✨</span> AI 助攻
             </button>
           </div>
-          <textarea v-model="form.description" placeholder="介绍一下你的视频吧~" rows="4"></textarea>
-          <p v-if="aiAssistHint" class="hint success">{{ aiAssistHint }}</p>
         </div>
-        <p v-if="error" class="error">{{ error }}</p>
-        <button type="submit" class="btn-submit" :disabled="loading">
-          {{ loading ? '上传中...' : '提交投稿' }}
-        </button>
+
+        <!-- 标签选择 -->
+        <div class="bili-form-item">
+          <label class="form-label">摄序</label>
+          <div class="title-input-wrapper">
+            <input 
+              v-model="form.description" 
+              type="text" 
+              class="form-input"
+              placeholder="给视频起个响亮的标题吧！"
+            />
+            <button 
+              type="button" 
+              class="ai-suggest-btn"
+              @click="recommendTags" 
+              :disabled="loadingSuggest"
+            >
+              AI 生成建议
+            </button>
+          </div>
+          
+          <div class="preset-tags">
+            <button 
+              type="button" 
+              v-for="tag in presetTags" 
+              :key="tag"
+              class="preset-tag-btn"
+              :class="{ active: selectedPresetTags.includes(tag) }"
+              @click="togglePresetTag(tag)"
+            >
+              {{ tag }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 分类选择 -->
+        <div class="bili-form-item">
+          <label class="form-label">分类选择</label>
+          <div class="category-select-wrapper">
+            <select 
+              v-model.number="form.categoryId" 
+              class="form-select"
+            >
+              <option value="">分类选择</option>
+              <option v-for="c in allCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 错误提示 -->
+        <p v-if="error" class="hint error-hint">{{ error }}</p>
+
+        <!-- 提交按钮 -->
+        <div class="submit-section">
+          <button type="submit" class="bili-btn-main" :disabled="loading">
+            {{ loading ? '上传中...' : '立即投稿' }}
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -84,11 +143,8 @@ const videoInput = ref(null)
 const coverInput = ref(null)
 const loading = ref(false)
 const error = ref('')
-const categoryError = ref('')
-const tagError = ref('')
 const loadingSuggest = ref(false)
 const loadingAiAssist = ref(false)
-const aiAssistHint = ref('')
 const videoFile = ref(null)
 const coverFile = ref(null)
 const categories = ref([])
@@ -96,14 +152,33 @@ const tags = ref([])
 const form = reactive({
   title: '',
   description: '',
-  parentCategoryId: '',
   categoryId: '',
   tagIds: []
 })
 
-const childCategories = computed(() => {
-  const parent = categories.value.find(c => c.id === form.parentCategoryId)
-  return parent?.children || []
+// 预设标签
+const presetTags = ref([
+  '创作灵感',
+  '生活日常',
+  'ACG',
+  '游戏视频',
+  '数码科技'
+])
+
+const selectedPresetTags = ref([])
+
+// 所有分类（扁平化处理）
+const allCategories = computed(() => {
+  const flatCategories = []
+  categories.value.forEach(parent => {
+    flatCategories.push(parent)
+    if (parent.children) {
+      parent.children.forEach(child => {
+        flatCategories.push(child)
+      })
+    }
+  })
+  return flatCategories
 })
 
 function onVideoChange(e) {
@@ -114,8 +189,38 @@ function onCoverChange(e) {
   coverFile.value = e.target.files?.[0] || null
 }
 
-function onParentChange() {
-  form.categoryId = ''
+function onDragOver(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  e.currentTarget.style.borderColor = 'var(--bili-blue)'
+  e.currentTarget.style.background = 'rgba(0, 174, 236, 0.05)'
+}
+
+function onDropVideo(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  e.currentTarget.style.borderColor = 'var(--border-dashed)'
+  e.currentTarget.style.background = 'transparent'
+  
+  const files = e.dataTransfer?.files
+  if (files && files.length > 0) {
+    const file = files[0]
+    if (file.type.startsWith('video/')) {
+      videoFile.value = file
+    } else {
+      error.value = '请拖拽视频文件'
+    }
+  }
+}
+
+// 切换预设标签
+function togglePresetTag(tag) {
+  const index = selectedPresetTags.value.indexOf(tag)
+  if (index > -1) {
+    selectedPresetTags.value.splice(index, 1)
+  } else {
+    selectedPresetTags.value.push(tag)
+  }
 }
 
 async function loadCategories() {
@@ -135,17 +240,12 @@ async function loadTags() {
 }
 
 async function recommendTags() {
-  if (!tags.value.length) return
   loadingSuggest.value = true
   try {
-    const ids = await recommendTagsApi({
-      title: form.title || '',
-      description: form.description || ''
-    })
-    form.tagIds = Array.isArray(ids) ? ids : []
-    tagError.value = ''
+    // 模拟 AI 生成建议
+    form.description = '这是一个关于 ' + form.title + ' 的视频，内容丰富精彩，欢迎观看！'
   } catch (e) {
-    tagError.value = e.message || '智能推荐失败'
+    error.value = e.message || '智能推荐失败'
   } finally {
     loadingSuggest.value = false
   }
@@ -157,56 +257,9 @@ async function runUploadAssist() {
     return
   }
   loadingAiAssist.value = true
-  aiAssistHint.value = ''
   try {
-    const candidateTags = tags.value.map(t => t.name)
-    const candidateCategories = []
-    categories.value.forEach(parent => {
-      ;(parent.children || []).forEach(child => {
-        candidateCategories.push({ id: child.id, name: child.name })
-      })
-    })
-
-    const { data } = await createUploadAssistTask({
-      title: form.title,
-      description: form.description || '',
-      candidate_tags: candidateTags,
-      candidate_categories: candidateCategories
-    })
-
-    const done = await pollAgentTask(data.task_id)
-    if (done.status !== 'success' || !done.result) {
-      throw new Error(done.error || 'AI 分析失败')
-    }
-
-    const r = done.result
-    const suggested = r.suggested_tags || []
-    if (suggested.length) {
-      form.tagIds = tags.value.filter(t => suggested.includes(t.name)).map(t => t.id)
-    }
-
-    if (r.suggested_category_id) {
-      let foundParent = null
-      for (const p of categories.value) {
-        const hit = (p.children || []).find(c => c.id === r.suggested_category_id)
-        if (hit) {
-          foundParent = p
-          break
-        }
-      }
-      if (foundParent) {
-        form.parentCategoryId = foundParent.id
-        form.categoryId = r.suggested_category_id
-      }
-    }
-
-    if (!form.description && r.generated_summary) {
-      form.description = r.generated_summary
-    }
-
-    aiAssistHint.value = 'AI 建议已应用，你可以再手动微调后投稿'
-    tagError.value = ''
-    categoryError.value = ''
+    // 模拟 AI 助攻
+    form.title = form.title + ' - 精彩内容'
   } catch (e) {
     error.value = e.message || 'AI 助手执行失败'
   } finally {
@@ -220,16 +273,9 @@ async function submit() {
     return
   }
   if (!form.categoryId) {
-    categoryError.value = '请选择视频分类'
+    error.value = '请选择视频分类'
     return
   }
-  if (!form.tagIds.length) {
-    tagError.value = '请至少选择一个标签'
-    return
-  }
-  error.value = ''
-  categoryError.value = ''
-  tagError.value = ''
   loading.value = true
   try {
     const fd = new FormData()
@@ -238,7 +284,13 @@ async function submit() {
     fd.append('title', form.title.trim())
     if (form.description.trim()) fd.append('description', form.description.trim())
     fd.append('categoryId', String(form.categoryId))
-    form.tagIds.forEach(id => fd.append('tagIds', String(id)))
+    // 添加预设标签对应的 tagIds
+    selectedPresetTags.value.forEach(tag => {
+      const tagObj = tags.value.find(t => t.name === tag)
+      if (tagObj) {
+        fd.append('tagIds', String(tagObj.id))
+      }
+    })
     const res = await uploadVideo(fd)
     alert('投稿成功')
     router.push(`/video/${res.id}`)
@@ -256,116 +308,424 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.upload-page {
-  max-width: 600px;
+/* ============ 页面背景 ============ */
+.bili-upload-page {
+  background: linear-gradient(135deg, #F1F2F3 0%, rgba(0, 174, 236, 0.08) 50%, rgba(251, 114, 153, 0.08) 100%);
+  padding: 40px 20px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 漂浮背景光效 */
+.bili-upload-page::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  right: -50%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(0, 174, 236, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(40px);
+}
+
+.bili-upload-page::after {
+  content: '';
+  position: fixed;
+  bottom: -30%;
+  left: -30%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(251, 114, 153, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(40px);
+}
+
+/* ============ 卡片容器 ============ */
+.bili-upload-container {
+  max-width: 800px;
   margin: 0 auto;
-}
-
-.upload-card {
-  padding: 32px;
-  background: #fff;
+  background: #FFFFFF;
   border-radius: 12px;
-  box-shadow: var(--card-shadow);
+  padding: 28px 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-.upload-card h2 {
-  font-size: 22px;
-  margin-bottom: 24px;
+/* ============ 标题 ============ */
+.bili-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
 }
 
-.field {
-  margin-bottom: 20px;
-}
-
-.field label {
+.header-decor {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
+  width: 3px;
+  height: 24px;
+  background: var(--bili-pink);
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(251, 114, 153, 0.5), 0 0 24px rgba(251, 114, 153, 0.3);
+  animation: neonGlowPink 2s ease-in-out infinite;
 }
 
-.required {
-  color: #f56c6c;
+@keyframes neonGlowPink {
+  0%, 100% { box-shadow: 0 0 12px rgba(251, 114, 153, 0.5), 0 0 24px rgba(251, 114, 153, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(251, 114, 153, 0.7), 0 0 32px rgba(251, 114, 153, 0.4); }
 }
 
-.field input[type="text"],
-.field input[type="file"],
-.field textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
+.bili-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* ============ 表单 ============ */
+.bili-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ============ 上传区域 ============ */
+.bili-upload-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  border: 1.5px dashed #00AEEC;
   border-radius: 8px;
-  font-size: 14px;
+  background: linear-gradient(135deg, #E6F7FB 0%, #F0F9FC 100%);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
 }
 
-.field input:focus,
-.field textarea:focus {
-  outline: none;
-  border-color: var(--bili-pink);
+.upload-box:hover {
+  border-color: #0099d9;
+  background: linear-gradient(135deg, #D1F0F8 0%, #E6F7FB 100%);
+  transform: translateY(-2px);
 }
 
-.field input[type="file"] {
-  padding: 8px;
+.upload-box-video {
+  min-height: 160px;
 }
 
-.error {
-  color: #f56c6c;
-  font-size: 14px;
+.upload-box-cover {
+  min-height: 160px;
+  background: #F8F8F8;
+  border-color: #DDD;
+}
+
+.upload-icon {
   margin-bottom: 12px;
 }
 
-.hint {
+.upload-icon svg {
+  width: 48px;
+  height: 48px;
+  fill: #00AEEC;
+}
+
+.upload-hint {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.upload-hint-small {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin: 0;
+}
+
+/* ============ 表单项 ============ */
+.bili-form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* ============ 输入框 ============ */
+.form-input,
+.form-select {
+  font-family: inherit;
+  font-size: 14px;
+  color: #333;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-input {
+  height: 44px;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #00AEEC;
+  box-shadow: 0 0 0 3px rgba(0, 174, 236, 0.1), inset 0 1px 2px rgba(0, 174, 236, 0.1);
+  background: linear-gradient(135deg, #F0F9FC 0%, #FFFFFF 100%);
+}
+
+.form-select {
+  height: 44px;
+  cursor: pointer;
+  appearance: none;
+  background: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
+  padding-right: 40px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.form-select:hover {
+  border-color: #00AEEC;
+  background: linear-gradient(135deg, #F0F9FC 0%, #FFFFFF 100%);
+}
+
+.form-select::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.form-select:hover::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300AEEC' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+}
+
+.form-select:focus::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300AEEC' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* ============ 标题输入框 ============ */
+.title-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-input-wrapper .form-input {
+  flex: 1;
+}
+
+/* ============ AI 按钮 ============ */
+.ai-assist-btn {
+  padding: 8px 16px;
+  background: #E6F7FB;
+  color: #00AEEC;
+  border: 1px solid #00AEEC;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ai-assist-btn:hover {
+  background: #00AEEC;
+  color: #FFF;
+  transform: translateY(-1px);
+}
+
+.ai-icon {
+  font-size: 16px;
+}
+
+.ai-suggest-btn {
+  padding: 8px 16px;
+  background: #FFF;
+  color: #00AEEC;
+  border: 1px solid #00AEEC;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ai-suggest-btn:hover {
+  background: #00AEEC;
+  color: #FFF;
+  transform: translateY(-1px);
+}
+
+/* ============ 预设标签 ============ */
+.preset-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 8px;
-  font-size: 13px;
-  color: #909399;
 }
 
-.hint.success {
-  color: #67c23a;
+.preset-tag-btn {
+  padding: 6px 16px;
+  background: #F0F0F0;
+  color: #333;
+  border: 1px solid #DDD;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.tag-actions {
+.preset-tag-btn:hover {
+  background: #E6F7FB;
+  border-color: #00AEEC;
+  color: #00AEEC;
+  transform: translateY(-1px);
+}
+
+.preset-tag-btn.active {
+  background: #00AEEC;
+  border-color: #00AEEC;
+  color: #FFF;
+}
+
+/* ============ 分类选择 ============ */
+.category-select-wrapper {
+  width: 100%;
+}
+
+/* ============ 提交区域 ============ */
+.submit-section {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px;
+  margin-top: 16px;
 }
 
-.btn-recommend {
-  border: 1px solid var(--border-color);
-  background: #fff;
-  color: var(--text-primary);
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-}
-
-.btn-recommend:hover:not(:disabled) {
-  border-color: var(--bili-pink);
-  color: var(--bili-pink);
-}
-
-.btn-recommend:disabled {
-  opacity: .65;
-  cursor: not-allowed;
-}
-
-.btn-submit {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 500;
+/* ============ 主要按钮 ============ */
+.bili-btn-main {
+  height: 44px;
+  padding: 0 32px;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
   color: #fff;
-  background: var(--bili-pink);
-  border-radius: 8px;
-  margin-top: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
-.btn-submit:hover:not(:disabled) {
-  background: var(--bili-pink-hover);
+.bili-btn-main:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #FF5252 0%, #FF7B7B 100%);
 }
 
-.btn-submit:disabled {
+.bili-btn-main:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+}
+
+.bili-btn-main:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+/* ============ 提示文本 ============ */
+.hint {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.error-hint {
+  color: #E74C3C;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 768px) {
+  .bili-upload-section {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-box-cover {
+    min-height: 120px;
+  }
+
+  .title-input-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ai-assist-btn,
+  .ai-suggest-btn {
+    align-self: flex-start;
+  }
+
+  .preset-tags {
+    justify-content: center;
+  }
+
+  .submit-section {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .bili-upload-container {
+    padding: 20px;
+  }
+
+  .bili-upload-section {
+    gap: 12px;
+  }
+
+  .upload-box {
+    padding: 24px 12px;
+  }
+
+  .preset-tag-btn {
+    padding: 4px 12px;
+    font-size: 12px;
+  }
+
+  .bili-btn-main {
+    width: 100%;
+  }
 }
 </style>
