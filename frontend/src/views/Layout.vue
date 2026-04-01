@@ -168,66 +168,128 @@
         </div>
 
         <div class="message-content">
-          <div v-if="!userStore.isLoggedIn" class="empty-panel">登录后可查看消息</div>
+          <div v-if="sidebarLoading" class="empty-panel">加载中...</div>
 
-          <template v-else>
-            <div v-if="sidebarLoading" class="empty-panel">加载中...</div>
-
-            <div v-else-if="messageActiveTab === 'message'" class="message-list">
-              <div
-                v-for="item in conversations"
-                :key="item.targetId"
-                class="message-item"
-                @click="goConversation(item)"
-              >
-                <div class="message-avatar">
-                  <img :src="resolveAvatar(item.targetAvatar)" alt="avatar" />
-                </div>
-                <div class="message-info">
-                  <div class="message-name">{{ item.targetName || `用户 ${item.targetId}` }}</div>
-                  <div class="message-preview">{{ item.lastContent || '暂无消息内容' }}</div>
-                </div>
-                <div class="message-time">
-                  <div>{{ formatDateTime(item.lastTime) }}</div>
-                  <span v-if="item.unread" class="inline-badge">{{ item.unread }}</span>
-                </div>
+          <div v-else-if="messageActiveTab === 'message'" class="message-list">
+            <div
+              v-for="item in conversations"
+              :key="item.targetId"
+              class="message-item"
+              @click="goConversation(item)"
+            >
+              <div class="message-avatar">
+                <img :src="resolveAvatar(item.targetAvatar)" alt="avatar" />
               </div>
-              <div v-if="!conversations.length" class="empty-panel">暂无私信会话</div>
-            </div>
-
-            <div v-else-if="messageActiveTab === 'notification'" class="notification-list">
-              <div
-                v-for="item in interactionNotifications"
-                :key="item.id"
-                class="notification-item"
-                @click="markNotificationRead(item)"
-              >
-                <div class="notification-icon">🔔</div>
-                <div class="notification-content">
-                  <div class="notification-title">{{ item.content }}</div>
-                  <div class="notification-time">{{ formatDateTime(item.createTime) }}</div>
-                </div>
+              <div class="message-info">
+                <div class="message-name">{{ item.targetName || `用户 ${item.targetId}` }}</div>
+                <div class="message-preview">{{ item.lastContent || '暂无消息内容' }}</div>
               </div>
-              <div v-if="!interactionNotifications.length" class="empty-panel">暂无互动通知</div>
-            </div>
-
-            <div v-else class="system-list">
-              <div
-                v-for="item in systemNotifications"
-                :key="item.id"
-                class="system-item"
-                @click="markNotificationRead(item)"
-              >
-                <div class="system-icon">📢</div>
-                <div class="system-content">
-                  <div class="system-title">{{ item.type || '系统通知' }}</div>
-                  <div class="system-text">{{ item.content }}</div>
-                  <div class="system-time">{{ formatDateTime(item.createTime) }}</div>
-                </div>
+              <div class="message-time">
+                <div>{{ formatDateTime(item.lastTime) }}</div>
+                <span v-if="item.unread" class="inline-badge">{{ item.unread }}</span>
               </div>
-              <div v-if="!systemNotifications.length" class="empty-panel">暂无系统通知</div>
             </div>
-          </template>
+            <div v-if="!conversations.length" class="empty-panel">暂无私信会话</div>
+          </div>
+
+          <div v-else-if="messageActiveTab === 'notification'" class="notification-list">
+            <div
+              v-for="item in interactionNotifications"
+              :key="item.id"
+              class="notification-item"
+              @click="markNotificationRead(item)"
+            >
+              <div class="notification-icon">🔔</div>
+              <div class="notification-content">
+                <div class="notification-title">{{ item.content }}</div>
+                <div class="notification-time">{{ formatDateTime(item.createTime) }}</div>
+              </div>
+            </div>
+            <div v-if="!interactionNotifications.length" class="empty-panel">暂无互动通知</div>
+          </div>
+
+          <div v-else class="system-list">
+            <div
+              v-for="item in systemNotifications"
+              :key="item.id"
+              class="system-item"
+              @click="markNotificationRead(item)"
+            >
+              <div class="system-icon">📢</div>
+              <div class="system-content">
+                <div class="system-title">{{ item.type || '系统通知' }}</div>
+                <div class="system-text">{{ item.content }}</div>
+                <div class="system-time">{{ formatDateTime(item.createTime) }}</div>
+              </div>
+            </div>
+            <div v-if="!systemNotifications.length" class="empty-panel">暂无系统通知</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 左侧消息框 -->
+    <div class="left-message-panel" :class="{ open: showLeftMessagePanel }">
+      <div class="left-message-header">
+        <button class="back-btn" @click="showLeftMessagePanel = false">←</button>
+        <div class="conversation-info">
+          <div class="conversation-avatar">
+            <img :src="resolveAvatar(currentConversation?.targetAvatar)" alt="avatar" />
+          </div>
+          <div class="conversation-name">{{ currentConversation?.targetName }}</div>
+        </div>
+        <button class="more-btn">⋯</button>
+      </div>
+      <div class="left-message-content">
+        <div class="message-list">
+          <div class="message-item others-message">
+            <div class="message-avatar">
+              <img :src="resolveAvatar(currentConversation?.targetAvatar)" alt="avatar" />
+            </div>
+            <div class="message-bubble">
+              <div class="message-text">感谢您关注黑马程序员😘</div>
+              <div class="message-time">10月13日 21:55</div>
+            </div>
+          </div>
+          <div class="message-item others-message">
+            <div class="message-avatar">
+              <img :src="resolveAvatar(currentConversation?.targetAvatar)" alt="avatar" />
+            </div>
+            <div class="message-bubble">
+              <div class="message-text">黑马程序员为B站科技计算机技术区第一UP主，粉丝400万+，教学视频播放量3.1亿+，是国内公认的好口碑教育培训机构，累计培养IT人才30万+</div>
+              <div class="message-time">10月13日 21:55</div>
+            </div>
+          </div>
+          <div class="message-item others-message">
+            <div class="message-avatar">
+              <img :src="resolveAvatar(currentConversation?.targetAvatar)" alt="avatar" />
+            </div>
+            <div class="message-bubble">
+              <div class="message-text">
+                <div>✨ 1对1学习/求职指导+免费咨询10大高薪就业课：网页链接</div>
+                <div>✨ 领取资源回复：02</div>
+                <div>✨ 找不到资料可以找裙获取：网页链接</div>
+                <div>✨ 2025自学路线图：直接回复Java/AI人工智能/鸿蒙/嵌入式/Python大数据/软件测试/电商设计等关键词</div>
+              </div>
+              <div class="message-time">10月13日 21:55</div>
+            </div>
+          </div>
+          <div class="message-item others-message">
+            <div class="message-avatar">
+              <img :src="resolveAvatar(currentConversation?.targetAvatar)" alt="avatar" />
+            </div>
+            <div class="message-bubble">
+              <div class="message-text">其余问题可直接私信</div>
+              <div class="message-time">10月13日 21:55</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="left-message-footer">
+        <input v-model="messageInput" type="text" placeholder="发个消息聊聊呗～" />
+        <div class="footer-actions">
+          <button class="emoji-btn">😀</button>
+          <button class="send-btn" :disabled="!messageInput.trim()">发送</button>
         </div>
       </div>
     </div>
@@ -271,6 +333,11 @@ const sidebarLoading = ref(false)
 const conversations = ref([])
 const interactionNotifications = ref([])
 const systemNotifications = ref([])
+
+// 左侧消息框相关
+const showLeftMessagePanel = ref(false)
+const currentConversation = ref(null)
+const messageInput = ref('')
 
 const isAdmin = computed(() => {
   const value = userStore.userInfo?.isAdmin
@@ -350,32 +417,90 @@ async function loadSearchPanelData() {
  * 按后端真实接口加载消息中心摘要、会话和通知列表。
  */
 async function loadSidebarMessages() {
-  if (!userStore.isLoggedIn) {
-    conversations.value = []
-    interactionNotifications.value = []
-    systemNotifications.value = []
-    messageUnreadCount.value = 0
-    notificationUnreadCount.value = 0
-    systemUnreadCount.value = 0
-    return
-  }
-
+  // 模拟消息数据，无论是否登录都显示
   sidebarLoading.value = true
   try {
-    const [summary, conversationList, notificationPage] = await Promise.all([
-      getMessageSummary().catch(() => null),
-      getConversations().catch(() => []),
-      getNotifications(1, 20).catch(() => ({ records: [] }))
-    ])
+    // 模拟私信会话数据
+    conversations.value = [
+      {
+        targetId: 1,
+        targetName: '张三',
+        targetAvatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20male%20chinese&image_size=square',
+        lastContent: '你好，最近怎么样？',
+        lastTime: new Date().toISOString(),
+        unread: 2
+      },
+      {
+        targetId: 2,
+        targetName: '李四',
+        targetAvatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20female%20chinese&image_size=square',
+        lastContent: '视频做得很棒！',
+        lastTime: new Date(Date.now() - 3600000).toISOString(),
+        unread: 1
+      },
+      {
+        targetId: 3,
+        targetName: '王五',
+        targetAvatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20male%20chinese%20glasses&image_size=square',
+        lastContent: '一起合作做个项目吧',
+        lastTime: new Date(Date.now() - 7200000).toISOString(),
+        unread: 0
+      }
+    ]
 
-    messageUnreadCount.value = Number(summary?.messageUnread || 0)
-    notificationUnreadCount.value = Number(summary?.notificationUnread || 0)
-    systemUnreadCount.value = Number(summary?.systemUnread || 0)
-    conversations.value = Array.isArray(conversationList) ? conversationList : []
+    // 模拟通知数据
+    interactionNotifications.value = [
+      {
+        id: 1,
+        content: '张三赞了你的视频',
+        createTime: new Date().toISOString(),
+        status: 0
+      },
+      {
+        id: 2,
+        content: '李四评论了你的视频',
+        createTime: new Date(Date.now() - 3600000).toISOString(),
+        status: 0
+      },
+      {
+        id: 3,
+        content: '王五关注了你',
+        createTime: new Date(Date.now() - 7200000).toISOString(),
+        status: 1
+      }
+    ]
 
-    const notifications = Array.isArray(notificationPage?.records) ? notificationPage.records : []
-    interactionNotifications.value = notifications.filter((item) => item.type !== 'SYSTEM')
-    systemNotifications.value = notifications.filter((item) => item.type === 'SYSTEM')
+    // 模拟系统消息数据
+    systemNotifications.value = [
+      {
+        id: 1,
+        type: '系统通知',
+        content: '您的视频已通过审核',
+        createTime: new Date().toISOString(),
+        status: 0
+      },
+      {
+        id: 2,
+        type: '活动通知',
+        content: '新活动开始了，快来参加吧！',
+        createTime: new Date(Date.now() - 86400000).toISOString(),
+        status: 1
+      },
+      {
+        id: 3,
+        type: '系统通知',
+        content: '您的账户已升级',
+        createTime: new Date(Date.now() - 172800000).toISOString(),
+        status: 1
+      }
+    ]
+
+    // 计算未读消息数
+    messageUnreadCount.value = conversations.value.reduce((sum, item) => sum + (item.unread || 0), 0)
+    notificationUnreadCount.value = interactionNotifications.value.filter(item => item.status === 0).length
+    systemUnreadCount.value = systemNotifications.value.filter(item => item.status === 0).length
+  } catch (error) {
+    console.error('Failed to load sidebar messages:', error)
   } finally {
     sidebarLoading.value = false
   }
@@ -487,13 +612,8 @@ async function openMessageSidebar() {
 
 function goConversation(item) {
   showMessageSidebar.value = false
-  router.push({
-    path: '/message',
-    query: {
-      targetId: item.targetId,
-      targetName: item.targetName
-    }
-  })
+  currentConversation.value = item
+  showLeftMessagePanel.value = true
 }
 
 /**
@@ -550,13 +670,25 @@ watch(
   }
 )
 
-onMounted(async () => {
+onMounted(() => {
+  // 延迟加载用户信息，避免阻塞页面渲染
   if (userStore.isLoggedIn && !userStore.userInfo) {
-    await userStore.fetchUserInfo()
+    setTimeout(async () => {
+      try {
+        await userStore.fetchUserInfo()
+      } catch (error) {
+        console.error('Failed to fetch user info:', error)
+      }
+    }, 100)
   }
-  if (userStore.isLoggedIn) {
-    await loadSidebarMessages()
-  }
+  // 延迟加载消息，避免阻塞页面渲染，无论是否登录都加载
+  setTimeout(async () => {
+    try {
+      await loadSidebarMessages()
+    } catch (error) {
+      console.error('Failed to load messages:', error)
+    }
+  }, 500)
   document.addEventListener('click', onGlobalClick)
 })
 
@@ -1159,6 +1291,213 @@ onUnmounted(() => {
   padding: 40px 20px;
   text-align: center;
   color: #9499a0;
+}
+
+/* 左侧消息框样式 */
+.left-message-panel {
+  position: fixed;
+  top: 0;
+  left: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.3s ease;
+}
+
+.left-message-panel.open {
+  left: 0;
+}
+
+.left-message-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e3e5e7;
+  gap: 12px;
+}
+
+.back-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #61666d;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.back-btn:hover {
+  background: #f4f5f7;
+}
+
+.conversation-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.conversation-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.conversation-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.conversation-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #18191c;
+}
+
+.more-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #61666d;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.more-btn:hover {
+  background: #f4f5f7;
+}
+
+.left-message-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f9f9f9;
+}
+
+.left-message-content .message-list {
+  gap: 16px;
+}
+
+.left-message-content .message-item {
+  display: flex;
+  gap: 10px;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.left-message-content .message-item.others-message {
+  justify-content: flex-start;
+}
+
+.left-message-content .message-item.my-message {
+  justify-content: flex-end;
+}
+
+.left-message-content .message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  position: relative;
+}
+
+.left-message-content .others-message .message-bubble {
+  background: #fff;
+  border: 1px solid #e3e5e7;
+  border-bottom-left-radius: 4px;
+}
+
+.left-message-content .my-message .message-bubble {
+  background: #fb7299;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.left-message-content .message-text {
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  margin-bottom: 4px;
+}
+
+.left-message-content .message-time {
+  font-size: 12px;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.left-message-footer {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid #e3e5e7;
+  gap: 10px;
+  background: #fff;
+}
+
+.left-message-footer input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e3e5e7;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+}
+
+.left-message-footer input:focus {
+  border-color: #fb7299;
+  box-shadow: 0 0 0 2px rgba(251, 114, 153, 0.1);
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emoji-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.emoji-btn:hover {
+  background: #f4f5f7;
+}
+
+.send-btn {
+  padding: 8px 16px;
+  border: none;
+  background: #fb7299;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.send-btn:disabled {
+  background: #e3e5e7;
+  color: #9499a0;
+  cursor: not-allowed;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #f95a8c;
 }
 
 @media (max-width: 1024px) {

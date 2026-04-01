@@ -85,7 +85,7 @@ async function fetchList(isMore = false) {
     hasMore.value = res.current < res.pages
     page.value = isMore ? page.value + 1 : 2
   } catch (e) {
-    console.error(e)
+    console.error('Failed to fetch video list:', e)
     if (!isMore) {
       videoList.value = []
       hasMore.value = false
