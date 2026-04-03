@@ -17,6 +17,13 @@ public interface SearchService {
     void deleteVideo(Long videoId);
 
     /**
+     * 全量重建视频搜索索引。
+     *
+     * @return 成功重建的文档数量
+     */
+    int reindexAllVideos();
+
+    /**
      * 记录搜索词（写入用户历史 + 热搜计数）
      */
     void recordSearchKeyword(Long userId, String keyword);
@@ -35,4 +42,9 @@ public interface SearchService {
      * 获取热门搜索
      */
     List<String> getHotSearches(int limit);
+
+    /**
+     * 混合搜索：结合 ES 关键词搜索和 Agent 语义检索
+     */
+    IPage<VideoVO> hybridSearch(String keyword, int page, int size, Long userId);
 }

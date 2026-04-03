@@ -15,6 +15,8 @@ import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.service.CommentService;
 import com.bilibili.video.service.MQService;
+import com.bilibili.video.service.RecommendationFeatureService;
+import com.bilibili.video.service.VideoCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,8 @@ public class CommentServiceImpl implements CommentService {
     private final VideoMapper videoMapper;
     private final MQService mqService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RecommendationFeatureService recommendationFeatureService;
+    private final VideoCacheService videoCacheService;
 
     @Override
     public CommentVO add(CommentDTO dto, Long userId) {
@@ -50,15 +54,15 @@ public class CommentServiceImpl implements CommentService {
         comment.setParentId(dto.getParentId());
         commentMapper.insert(comment);
 
-        String statsKey = RedisConstants.VIDEO_STATS_KEY_PREFIX + dto.getVideoId();
-        redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_COMMENT, 1);
-        redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
-
+        // 评论数统一以评论表聚合结果为准，这里不再额外维护 Redis comment delta，避免统计口径分裂。
         String commentCacheKey = RedisConstants.COMMENT_LIST_KEY_PREFIX + dto.getVideoId();
         redisTemplate.delete(commentCacheKey);
+        // 评论新增会影响视频详情页里的 commentCount，需要同步失效聚合详情缓存。
+        videoCacheService.invalidateVideo(dto.getVideoId());
 
         mqService.sendNotify(new NotifyMessage("comment", userId, dto.getVideoId(), comment.getContent()));
         mqService.sendSearchSync(new SearchSyncMessage("comment", comment.getId(), "create"));
+        recommendationFeatureService.increaseUserInterestByVideo(userId, dto.getVideoId(), 2.5D);
         redisTemplate.opsForZSet().incrementScore(
                 Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h",
                 String.valueOf(dto.getVideoId()),

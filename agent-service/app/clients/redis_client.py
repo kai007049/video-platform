@@ -5,13 +5,11 @@ try:
 except Exception:  # pragma: no cover
     redis = None
 
-try:
-    from app.core.config import settings
-except ImportError:
-    from core.config import settings
+from app.core.config import settings
 
 
 def get_redis() -> Optional["redis.Redis"]:
+    """获取 Redis 客户端；未安装依赖时返回 None。"""
     if redis is None:
         return None
     return redis.Redis(

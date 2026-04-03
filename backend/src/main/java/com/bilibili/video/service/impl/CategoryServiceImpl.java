@@ -1,11 +1,14 @@
 package com.bilibili.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.entity.Category;
 import com.bilibili.video.mapper.CategoryMapper;
 import com.bilibili.video.model.vo.CategoryVO;
 import com.bilibili.video.service.CategoryService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,9 +21,19 @@ import java.util.Map;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public List<CategoryVO> tree() {
+        Object cached = redisTemplate.opsForValue().get(RedisConstants.CATEGORY_TREE_KEY);
+        if (cached != null) {
+            return objectMapper.convertValue(
+                    cached,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, CategoryVO.class)
+            );
+        }
+
         List<Category> categories = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
                 .orderByAsc(Category::getParentId)
                 .orderByAsc(Category::getId));
@@ -44,11 +57,20 @@ public class CategoryServiceImpl implements CategoryService {
                 }
             }
         }
+        redisTemplate.opsForValue().set(RedisConstants.CATEGORY_TREE_KEY, roots, RedisConstants.METADATA_CACHE_TTL);
         return roots;
     }
 
     @Override
     public List<CategoryVO> list() {
+        Object cached = redisTemplate.opsForValue().get(RedisConstants.CATEGORY_LIST_KEY);
+        if (cached != null) {
+            return objectMapper.convertValue(
+                    cached,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, CategoryVO.class)
+            );
+        }
+
         List<Category> categories = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
                 .orderByAsc(Category::getParentId)
                 .orderByAsc(Category::getId));
@@ -56,6 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
         for (Category c : categories) {
             list.add(toVO(c));
         }
+        redisTemplate.opsForValue().set(RedisConstants.CATEGORY_LIST_KEY, list, RedisConstants.METADATA_CACHE_TTL);
         return list;
     }
 

@@ -320,9 +320,14 @@ public class MinioUtils {
 
     private boolean isSafeAvatarObject(String objectName) {
         if (objectName == null || objectName.isBlank()) return false;
-        if (!(objectName.startsWith("default/") || objectName.startsWith("user/"))) return false;
         if (objectName.contains("..") || objectName.contains("\\") || objectName.startsWith("/")) return false;
-        if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
+        if (objectName.startsWith("default/") || objectName.startsWith("user/")) {
+            if (objectName.substring(objectName.indexOf('/') + 1).isBlank()) return false;
+            return true;
+        }
+        if (objectName.contains("/")) return false;
+        int dot = objectName.lastIndexOf('.');
+        if (dot <= 0 || dot == objectName.length() - 1) return false;
         return true;
     }
 

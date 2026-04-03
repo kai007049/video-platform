@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.bilibili.video.entity.WatchHistory;
 import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.mapper.WatchHistoryMapper;
+import com.bilibili.video.service.RecommendationFeatureService;
 import com.bilibili.video.service.WatchHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,28 +20,41 @@ public class WatchHistoryServiceImpl implements WatchHistoryService {
 
     private final WatchHistoryMapper watchHistoryMapper;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RecommendationFeatureService recommendationFeatureService;
 
     @Override
     public void saveProgress(Long userId, Long videoId, int watchSeconds) {
         if (userId == null) return;
+
+        Integer previousWatchSeconds = getLastWatchSeconds(userId, videoId);
+        int safeWatchSeconds = Math.max(0, watchSeconds);
+        // 仅对本次新增观看时长计入兴趣画像，避免重复上报同一进度导致兴趣权重被放大。
+        int watchDeltaSeconds = previousWatchSeconds == null ? safeWatchSeconds : Math.max(0, safeWatchSeconds - previousWatchSeconds);
+
         // 先尝试按唯一键更新，避免并发场景下“先查再插”触发重复插入。
-        int updated = updateExistingProgress(userId, videoId, watchSeconds);
+        int updated = updateExistingProgress(userId, videoId, safeWatchSeconds);
         if (updated == 0) {
             try {
                 WatchHistory history = new WatchHistory();
                 history.setUserId(userId);
                 history.setVideoId(videoId);
-                history.setWatchSeconds(watchSeconds);
+                history.setWatchSeconds(safeWatchSeconds);
                 watchHistoryMapper.insert(history);
             } catch (DuplicateKeyException ex) {
                 // 并发下可能有别的请求已插入成功，这里回退为更新即可。
-                updateExistingProgress(userId, videoId, watchSeconds);
+                updateExistingProgress(userId, videoId, safeWatchSeconds);
             }
         }
 
         String key = WATCH_PROGRESS_KEY_PREFIX + userId;
-        redisTemplate.opsForHash().put(key, String.valueOf(videoId), watchSeconds);
+        redisTemplate.opsForHash().put(key, String.valueOf(videoId), safeWatchSeconds);
         redisTemplate.expire(key, WATCH_PROGRESS_EXPIRE_DAYS, java.util.concurrent.TimeUnit.DAYS);
+
+        if (watchDeltaSeconds <= 0) {
+            return;
+        }
+        double delta = Math.max(0.2D, Math.min(watchDeltaSeconds / 120.0D, 2.0D));
+        recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, delta);
     }
 
     @Override

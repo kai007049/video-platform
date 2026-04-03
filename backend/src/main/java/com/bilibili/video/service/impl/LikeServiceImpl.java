@@ -11,6 +11,8 @@ import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.service.LikeService;
 import com.bilibili.video.service.MQService;
+import com.bilibili.video.service.RecommendationFeatureService;
+import com.bilibili.video.service.VideoCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,8 @@ public class LikeServiceImpl implements LikeService {
     private final VideoMapper videoMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MQService mqService;
+    private final RecommendationFeatureService recommendationFeatureService;
+    private final VideoCacheService videoCacheService;
 
     @Override
     public void like(Long videoId, Long userId) {
@@ -57,6 +61,7 @@ public class LikeServiceImpl implements LikeService {
 
         mqService.sendNotify(new NotifyMessage("like", userId, videoId, "点赞视频"));
         mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
+        recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, 3.0D);
 
         redisTemplate.opsForZSet().incrementScore(
                 Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h",
@@ -67,6 +72,8 @@ public class LikeServiceImpl implements LikeService {
 
         String key = LIKE_KEY + videoId + ":" + userId;
         redisTemplate.opsForValue().set(key, "1", LIKE_EXPIRE_DAYS, TimeUnit.DAYS);
+        // 点赞状态会影响详情页展示的点赞数与已点赞状态，因此这里主动失效视频详情缓存。
+        videoCacheService.invalidateVideo(videoId);
     }
 
     @Override
@@ -82,6 +89,9 @@ public class LikeServiceImpl implements LikeService {
 
         String key = LIKE_KEY + videoId + ":" + userId;
         redisTemplate.delete(key);
+        if (deleted > 0) {
+            videoCacheService.invalidateVideo(videoId);
+        }
     }
 
     @Override

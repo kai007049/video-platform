@@ -4,6 +4,9 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bilibili.video.client.AgentClient;
+import com.bilibili.video.client.dto.SemanticSearchResult;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.entity.Video;
 import com.bilibili.video.mapper.UserMapper;
@@ -23,6 +26,8 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,14 +37,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
 
-    private static final String SEARCH_HISTORY_KEY_PREFIX = "search:history:";
-    private static final String HOT_SEARCH_KEY = "search:hot";
+    private static final DateTimeFormatter HOT_SEARCH_BUCKET_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
 
     private final VideoMapper videoMapper;
     private final UserMapper userMapper;
     private final ElasticsearchOperations elasticsearchOperations;
     private final VideoSearchService videoSearchService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final AgentClient agentClient;
+    private final VideoViewAssembler videoViewAssembler;
 
     @Override
     public IPage<VideoVO> searchVideos(String keyword, int page, int size, String sortBy) {
@@ -129,23 +135,40 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
+    public int reindexAllVideos() {
+        List<Video> videos = videoMapper.selectList(new LambdaQueryWrapper<Video>()
+                .orderByAsc(Video::getId));
+        if (videos == null || videos.isEmpty()) {
+            return 0;
+        }
+        int indexedCount = 0;
+        for (Video video : videos) {
+            if (video == null || video.getId() == null) {
+                continue;
+            }
+            videoSearchService.index(video);
+            indexedCount++;
+        }
+        return indexedCount;
+    }
+
+    @Override
     public void recordSearchKeyword(Long userId, String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return;
         }
         String normalized = keyword.trim();
 
-        // 全站热搜计数
-        redisTemplate.opsForZSet().incrementScore(HOT_SEARCH_KEY, normalized, 1D);
+        String hotBucketKey = getHotSearchBucketKey(LocalDate.now());
+        redisTemplate.opsForZSet().incrementScore(hotBucketKey, normalized, 1D);
+        redisTemplate.expire(hotBucketKey, RedisConstants.HOT_SEARCH_BUCKET_TTL);
 
-        // 登录用户记录个人搜索历史（最近在前）
         if (userId != null) {
-            String key = SEARCH_HISTORY_KEY_PREFIX + userId;
-            // 先删再加，保证最新搜索排在最前
+            String key = RedisConstants.SEARCH_HISTORY_KEY_PREFIX + userId;
             redisTemplate.opsForList().remove(key, 0, normalized);
             redisTemplate.opsForList().leftPush(key, normalized);
-            // 仅保留最近 30 条
             redisTemplate.opsForList().trim(key, 0, 29);
+            redisTemplate.expire(key, RedisConstants.SEARCH_HISTORY_TTL);
         }
     }
 
@@ -155,7 +178,7 @@ public class SearchServiceImpl implements SearchService {
             return new ArrayList<>();
         }
         int safeLimit = Math.max(1, Math.min(limit, 30));
-        String key = SEARCH_HISTORY_KEY_PREFIX + userId;
+        String key = RedisConstants.SEARCH_HISTORY_KEY_PREFIX + userId;
         List<Object> values = redisTemplate.opsForList().range(key, 0, safeLimit - 1);
         if (values == null || values.isEmpty()) {
             return new ArrayList<>();
@@ -168,17 +191,114 @@ public class SearchServiceImpl implements SearchService {
         if (userId == null) {
             return;
         }
-        String key = SEARCH_HISTORY_KEY_PREFIX + userId;
+        String key = RedisConstants.SEARCH_HISTORY_KEY_PREFIX + userId;
         redisTemplate.delete(key);
     }
 
     @Override
     public List<String> getHotSearches(int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 20));
-        Set<Object> values = redisTemplate.opsForZSet().reverseRange(HOT_SEARCH_KEY, 0, safeLimit - 1);
+        List<String> keys = getRecentHotSearchBucketKeys();
+        if (keys.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> existingKeys = keys.stream()
+                .filter(key -> Boolean.TRUE.equals(redisTemplate.hasKey(key)))
+                .collect(Collectors.toList());
+        if (existingKeys.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        redisTemplate.opsForZSet().unionAndStore(
+                existingKeys.get(0),
+                existingKeys.subList(1, existingKeys.size()),
+                RedisConstants.HOT_SEARCH_WINDOW_KEY
+        );
+        redisTemplate.expire(RedisConstants.HOT_SEARCH_WINDOW_KEY, RedisConstants.HOT_SEARCH_WINDOW_TTL);
+
+        Set<Object> values = redisTemplate.opsForZSet().reverseRange(RedisConstants.HOT_SEARCH_WINDOW_KEY, 0, safeLimit - 1);
         if (values == null || values.isEmpty()) {
             return new ArrayList<>();
         }
         return values.stream().map(String::valueOf).collect(Collectors.toList());
+    }
+
+    @Override
+    public IPage<VideoVO> hybridSearch(String keyword, int page, int size, Long userId) {
+        if (keyword == null || keyword.isBlank()) {
+            return new Page<>(page, size, 0);
+        }
+
+        Query esQuery = NativeQuery.builder()
+                .withQuery(QueryBuilders.multiMatch(m -> m
+                        .fields("title", "description")
+                        .query(keyword)
+                ))
+                .withPageable(PageRequest.of(0, 50))
+                .build();
+
+        SearchHits<VideoDocument> esResult = elasticsearchOperations.search(esQuery, VideoDocument.class);
+        List<Long> esIds = esResult.stream()
+                .map(hit -> hit.getContent().getId())
+                .collect(Collectors.toList());
+
+        SemanticSearchResult semanticResult = agentClient.semanticSearch(keyword, 20);
+        List<Long> semanticIds = semanticResult.getVideoIds();
+
+        List<Long> mergedIds = mergeSearchResults(esIds, semanticIds, 0.6, 0.4);
+
+        int start = (page - 1) * size;
+        int end = Math.min(start + size, mergedIds.size());
+        if (start >= mergedIds.size()) {
+            return new Page<>(page, size, mergedIds.size());
+        }
+        List<Long> pageIds = mergedIds.subList(start, end);
+
+        List<Video> videos = videoMapper.selectBatchIds(pageIds);
+        List<VideoVO> records = videoViewAssembler.toVideoVOList(videos, userId);
+
+        Page<VideoVO> resultPage = new Page<>(page, size, mergedIds.size());
+        resultPage.setRecords(records);
+        return resultPage;
+    }
+
+    private String getHotSearchBucketKey(LocalDate date) {
+        return RedisConstants.HOT_SEARCH_KEY_PREFIX + HOT_SEARCH_BUCKET_FORMATTER.format(date);
+    }
+
+    private List<String> getRecentHotSearchBucketKeys() {
+        List<String> keys = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (int i = 0; i < RedisConstants.HOT_SEARCH_WINDOW_DAYS; i++) {
+            keys.add(getHotSearchBucketKey(today.minusDays(i)));
+        }
+        return keys;
+    }
+
+    /**
+     * 融合 ES 和语义搜索结果
+     * 使用加权排序：靠前的结果得分更高
+     */
+    private List<Long> mergeSearchResults(List<Long> esIds, List<Long> semanticIds,
+                                          double esWeight, double semanticWeight) {
+        java.util.Map<Long, Double> scoreMap = new java.util.HashMap<>();
+
+        for (int i = 0; i < esIds.size(); i++) {
+            Long id = esIds.get(i);
+            double score = (esIds.size() - i) * esWeight;
+            scoreMap.put(id, scoreMap.getOrDefault(id, 0.0) + score);
+        }
+
+        for (int i = 0; i < semanticIds.size(); i++) {
+            Long id = semanticIds.get(i);
+            double score = (semanticIds.size() - i) * semanticWeight;
+            scoreMap.put(id, scoreMap.getOrDefault(id, 0.0) + score);
+        }
+
+        return scoreMap.entrySet().stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .map(java.util.Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }

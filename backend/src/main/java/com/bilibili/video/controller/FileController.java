@@ -26,6 +26,7 @@ import java.util.Optional;
 public class FileController {
 
     private static final String DEFAULT_COVER_OBJECT = "default/default-video-cover.png";
+    private static final String DEFAULT_AVATAR_OBJECT = "default/default-avatar.png";
     private static final byte[] DEFAULT_COVER_BYTES = """
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
               <defs>
@@ -42,6 +43,19 @@ public class FileController {
               <polygon points="430,208 430,332 560,270" fill="#ffffff"/>
               <text x="146" y="462" fill="#ffffff" font-size="42" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Video Cover</text>
               <text x="146" y="500" fill="rgba(255,255,255,0.82)" font-size="24" font-family="Segoe UI, Arial, sans-serif">Default placeholder image</text>
+            </svg>
+            """.getBytes(StandardCharsets.UTF_8);
+    private static final byte[] DEFAULT_AVATAR_BYTES = """
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+              <defs>
+                <linearGradient id="avbg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f472b6"/>
+                  <stop offset="100%" stop-color="#60a5fa"/>
+                </linearGradient>
+              </defs>
+              <rect width="200" height="200" rx="100" fill="url(#avbg)"/>
+              <circle cx="100" cy="78" r="34" fill="rgba(255,255,255,0.9)"/>
+              <path d="M42 170c8-28 32-44 58-44s50 16 58 44" fill="rgba(255,255,255,0.9)"/>
             </svg>
             """.getBytes(StandardCharsets.UTF_8);
 
@@ -80,6 +94,12 @@ public class FileController {
                     .contentType(mediaType)
                     .body(bytes);
         } catch (Exception e) {
+            if (DEFAULT_AVATAR_OBJECT.equals(objectName) || objectName.startsWith("user/")) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CACHE_CONTROL, "max-age=86400")
+                        .contentType(MediaType.parseMediaType("image/svg+xml"))
+                        .body(DEFAULT_AVATAR_BYTES);
+            }
             log.warn("avatar proxy failed: {}", objectName, e);
             return ResponseEntity.notFound().build();
         }

@@ -2,9 +2,9 @@ package com.bilibili.video.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.bilibili.video.common.Result;
+import com.bilibili.video.exception.BizException;
 import com.bilibili.video.model.dto.VideoUploadDTO;
 import com.bilibili.video.model.vo.VideoVO;
-import com.bilibili.video.exception.BizException;
 import com.bilibili.video.service.VideoService;
 import com.bilibili.video.service.WatchHistoryService;
 import com.bilibili.video.utils.MinioUtils;
@@ -17,10 +17,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +38,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/video")
 @RequiredArgsConstructor
-@Tag(name = "视频管理", description = "视频上传、列表、详情、播放记录接口")
+@Tag(name = "视频管理", description = "视频上传、列表、详情、播放等接口")
 @Slf4j
 public class VideoController {
 
@@ -40,17 +47,16 @@ public class VideoController {
     private final WatchHistoryService watchHistoryService;
 
     /**
-     * 上传视频（需登录）
-     * multipart/form-data: video(必填), cover(可选), title(必填), description(可选)
+     * 上传视频（分类/标签可不填，后端可走 AI 自动补全）。
      */
     @PostMapping("/upload")
     @Operation(summary = "上传视频", description = "上传视频和封面，需要登录")
     public Result<VideoVO> upload(
             @Parameter(description = "视频文件", required = true) @RequestParam("video") MultipartFile videoFile,
             @Parameter(description = "封面文件") @RequestParam(value = "cover", required = false) MultipartFile coverFile,
-            @Parameter(description = "视频标题", required = true) @RequestParam("title") String title,
+            @Parameter(description = "视频标题", required = false) @RequestParam(value = "title", required = false) String title,
             @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
-            @Parameter(description = "分类ID", required = true) @RequestParam("categoryId") Long categoryId,
+            @Parameter(description = "分类ID") @RequestParam(value = "categoryId", required = false) Long categoryId,
             @Parameter(description = "标签ID列表") @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @Parameter(hidden = true) HttpServletRequest request) {
         Long userId = UserContext.get();
@@ -62,9 +68,6 @@ public class VideoController {
         return Result.success(videoService.upload(videoFile, coverFile, dto, userId));
     }
 
-    /**
-     * 视频列表（分页）
-     */
     @GetMapping("/list")
     @Operation(summary = "视频列表", description = "获取视频列表，支持分页")
     public Result<IPage<VideoVO>> list(
@@ -75,9 +78,6 @@ public class VideoController {
         return Result.success(videoService.list(page, size, userId));
     }
 
-    /**
-     * 创作者作品列表（需登录）
-     */
     @GetMapping("/creator")
     @Operation(summary = "创作者作品列表")
     public Result<IPage<VideoVO>> creatorVideos(
@@ -88,9 +88,6 @@ public class VideoController {
         return Result.success(videoService.listCreatorVideos(userId, page, size));
     }
 
-    /**
-     * 点赞视频列表（需登录）
-     */
     @GetMapping("/liked")
     @Operation(summary = "点赞视频列表")
     public Result<IPage<VideoVO>> likedVideos(
@@ -101,9 +98,6 @@ public class VideoController {
         return Result.success(videoService.listLikedVideos(userId, page, size));
     }
 
-    /**
-     * 收藏视频列表（需登录）
-     */
     @GetMapping("/favorite")
     @Operation(summary = "收藏视频列表")
     public Result<IPage<VideoVO>> favoriteVideos(
@@ -114,9 +108,6 @@ public class VideoController {
         return Result.success(videoService.listFavoriteVideos(userId, page, size));
     }
 
-    /**
-     * 观看历史列表（需登录）
-     */
     @GetMapping("/history")
     @Operation(summary = "观看历史列表")
     public Result<IPage<VideoVO>> historyVideos(
@@ -127,11 +118,8 @@ public class VideoController {
         return Result.success(videoService.listHistoryVideos(userId, page, size));
     }
 
-    /**
-     * 推荐流（热门+最新混合）
-     */
     @GetMapping("/recommended")
-    @Operation(summary = "推荐流", description = "热门+最新混合排序的视频列表")
+    @Operation(summary = "推荐流", description = "热门 + 最新 + 兴趣 + AI 混合推荐")
     public Result<IPage<VideoVO>> recommended(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size,
@@ -150,9 +138,6 @@ public class VideoController {
         return Result.success(videoService.listHot(page, size, userId));
     }
 
-    /**
-     * UP主视频列表
-     */
     @GetMapping("/author/{authorId}")
     @Operation(summary = "UP主视频列表")
     public Result<IPage<VideoVO>> byAuthor(
@@ -164,11 +149,8 @@ public class VideoController {
         return Result.success(videoService.listByAuthor(authorId, page, size, userId));
     }
 
-    /**
-     * 视频详情
-     */
     @GetMapping("/{id}")
-    @Operation(summary = "视频详情", description = "获取视频详细信息")
+    @Operation(summary = "视频详情")
     public Result<VideoVO> getById(
             @Parameter(description = "视频ID", required = true) @PathVariable Long id,
             @Parameter(hidden = true) HttpServletRequest request) {
@@ -176,25 +158,27 @@ public class VideoController {
         return Result.success(videoService.getById(id, userId));
     }
 
-    /**
-     * 视频流（用于播放，后端从 MinIO 转发，解决私有桶无法直接访问问题）
-     */
     @GetMapping("/{id}/stream")
-    @Operation(summary = "视频流", description = "获取视频播放流，支持 HTML5 video 播放")
+    @Operation(summary = "视频流", description = "后端从 MinIO 转发视频流")
     public ResponseEntity<StreamingResponseBody> stream(
             @Parameter(description = "视频ID", required = true) @PathVariable Long id) {
         var vo = videoService.getById(id, null);
         if (vo == null || vo.getVideoUrl() == null) {
             throw new BizException(404, "视频不存在");
         }
+
         StreamingResponseBody body = outputStream -> {
             try (InputStream in = minioUtils.getVideoStream(vo.getVideoUrl())) {
                 in.transferTo(outputStream);
             } catch (Exception e) {
-                log.info("视频流异常");
+                if (isClientDisconnected(e)) {
+                    log.debug("client disconnected while streaming, videoId={}", id);
+                    return;
+                }
                 throw new RuntimeException(e);
             }
         };
+
         String contentType = getVideoContentType(vo.getVideoUrl());
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
@@ -202,9 +186,6 @@ public class VideoController {
                 .body(body);
     }
 
-    /**
-     * 保存观看进度（继续播放用，需登录）
-     */
     @PostMapping("/{id}/progress")
     @Operation(summary = "保存观看进度")
     public Result<Void> saveProgress(
@@ -218,20 +199,14 @@ public class VideoController {
         return Result.success();
     }
 
-    /**
-     * 记录播放量（播放时调用，需登录）
-     */
     @PostMapping("/{id}/play")
-    @Operation(summary = "记录播放量", description = "记录视频播放量")
+    @Operation(summary = "记录播放量")
     public Result<Void> recordPlay(
             @Parameter(description = "视频ID", required = true) @PathVariable Long id) {
         videoService.recordPlayCount(id);
         return Result.success();
     }
 
-    /**
-     * 删除视频（需登录，仅作者）
-     */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除视频")
     public Result<Void> deleteVideo(
@@ -242,11 +217,6 @@ public class VideoController {
         return Result.success();
     }
 
-    /**
-     * 获取视频内容类型
-     * @param videoUrl
-     * @return
-     */
     private String getVideoContentType(String videoUrl) {
         if (videoUrl == null) return "video/mp4";
         String lower = videoUrl.toLowerCase();
@@ -260,4 +230,21 @@ public class VideoController {
         return "video/mp4";
     }
 
+    private boolean isClientDisconnected(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof IOException) {
+                String msg = current.getMessage();
+                if (msg != null) {
+                    String lower = msg.toLowerCase();
+                    if (lower.contains("broken pipe") || lower.contains("connection reset by peer")) {
+                        return true;
+                    }
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
 }
+

@@ -1,13 +1,19 @@
+"""Agent Service 启动入口。"""
+
+import logging
 from fastapi import FastAPI
 
-try:
-    from app.api.routes.tasks import router as tasks_router
-except ImportError:
-    from api.routes.tasks import router as tasks_router
+from app.api.routes.tasks import router as tasks_router, agent_router
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+)
 
 app = FastAPI(title="Agent Service")
 app.include_router(tasks_router)
+app.include_router(agent_router)
 
 
 if __name__ == "__main__":

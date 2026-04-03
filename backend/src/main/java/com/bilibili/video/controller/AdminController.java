@@ -6,6 +6,7 @@ import com.bilibili.video.model.vo.VideoVO;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.exception.BizException;
 import com.bilibili.video.mapper.UserMapper;
+import com.bilibili.video.service.SearchService;
 import com.bilibili.video.service.VideoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final VideoService videoService;
+    private final SearchService searchService;
     private final UserMapper userMapper;
     private final com.bilibili.video.utils.MinioUtils minioUtils;
 
@@ -86,6 +88,17 @@ public class AdminController {
         } catch (Exception e) {
             throw new BizException(500, "上传失败: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/search/reindex/videos")
+    @Operation(summary = "全量重建视频搜索索引")
+    public Result<Map<String, Object>> reindexVideos(HttpServletRequest request) {
+        ensureAdmin(request);
+        int count = searchService.reindexAllVideos();
+        Map<String, Object> data = new HashMap<>();
+        data.put("indexed", count);
+        data.put("message", "视频搜索索引重建完成");
+        return Result.success(data);
     }
 
     private void ensureAdmin(HttpServletRequest request) {

@@ -10,6 +10,8 @@ import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.service.FavoriteService;
 import com.bilibili.video.service.MQService;
+import com.bilibili.video.service.RecommendationFeatureService;
+import com.bilibili.video.service.VideoCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final VideoMapper videoMapper;
     private final MQService mqService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RecommendationFeatureService recommendationFeatureService;
+    private final VideoCacheService videoCacheService;
 
     @Override
     @Transactional
@@ -47,6 +51,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
             mqService.sendNotify(new NotifyMessage("favorite", userId, videoId, "收藏视频"));
             mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
+            recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, 3.5D);
             redisTemplate.opsForZSet().incrementScore(
                     Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h",
                     String.valueOf(videoId),
@@ -56,6 +61,8 @@ public class FavoriteServiceImpl implements FavoriteService {
 
             String key = FAVORITE_KEY_PREFIX + videoId + ":" + userId;
             redisTemplate.opsForValue().set(key, "1", FAVORITE_EXPIRE_DAYS, java.util.concurrent.TimeUnit.DAYS);
+            // 收藏状态会影响详情页展示的收藏数与已收藏状态，因此这里主动失效视频详情缓存。
+            videoCacheService.invalidateVideo(videoId);
         }
     }
 
@@ -73,6 +80,9 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         String key = FAVORITE_KEY_PREFIX + videoId + ":" + userId;
         redisTemplate.delete(key);
+        if (deleted > 0) {
+            videoCacheService.invalidateVideo(videoId);
+        }
     }
 
     @Override

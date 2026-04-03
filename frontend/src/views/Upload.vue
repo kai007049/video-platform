@@ -1,127 +1,207 @@
 <template>
-  <div class="bili-upload-page">
-    <div class="bili-upload-container">
-      <!-- 标题 -->
-      <div class="bili-header">
-        <span class="header-decor"></span>
+  <div class="upload-page">
+    <div class="upload-container">
+      <div class="page-title">
+        <span class="title-line"></span>
         <h1>投稿视频</h1>
       </div>
 
-      <form @submit.prevent="submit" class="bili-form-layout">
-        <!-- 视频和封面上传 -->
-        <div class="bili-upload-section">
-          <div 
-            class="upload-box upload-box-video"
+      <form class="upload-form" @submit.prevent="submit">
+        <div class="media-section">
+          <div
+            class="media-card media-card-video"
             @click="videoInput?.click()"
-            @dragover="onDragOver"
+            @dragover.prevent="onDragOver"
+            @dragleave.prevent="onDragLeave"
             @drop="onDropVideo"
+            :class="{ dragging: isVideoDragging }"
           >
-            <input
-              ref="videoInput"
-              type="file"
-              accept="video/*"
-              @change="onVideoChange"
-              style="display: none"
-            />
-            <div class="upload-icon">
-              <svg viewBox="0 0 24 24" width="48" height="48">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" fill="#00AEEC"/>
-              </svg>
-            </div>
-            <p class="upload-hint">{{ videoFile ? videoFile.name : '点击或拖拽视频文件到此处' }}</p>
+            <input ref="videoInput" type="file" accept="video/*" hidden @change="onVideoChange" />
+            <div class="plus-icon" aria-hidden="true">+</div>
+            <p class="card-main-text">
+              {{ videoFile ? videoFile.name : '点击或拖拽视频文件到此处' }}
+            </p>
+            <p v-if="videoFile" class="card-sub-text">
+              {{ prettySize(videoFile.size) }}
+            </p>
           </div>
 
-          <div 
-            class="upload-box upload-box-cover"
-            @click="coverInput?.click()"
-          >
-            <input
-              ref="coverInput"
-              type="file"
-              accept="image/*"
-              @change="onCoverChange"
-              style="display: none"
-            />
-            <p class="upload-hint-small">{{ coverFile ? '✓ 已上传' : '上传封面图' }}</p>
+          <div class="media-card media-card-cover" @click="coverInput?.click()">
+            <input ref="coverInput" type="file" accept="image/*" hidden @change="onCoverChange" />
+            <p class="cover-title">上传封面图</p>
+            <p class="cover-status">{{ coverFile ? '已选择封面' : '建议 16:9，清晰不模糊' }}</p>
           </div>
         </div>
 
-        <!-- 视频标题 -->
-        <div class="bili-form-item">
-          <label class="form-label">视频标题</label>
-          <div class="title-input-wrapper">
-            <input 
-              v-model="form.title" 
-              type="text" 
-              class="form-input"
-              placeholder="给视频起个响亮的标题吧！"
-              required 
+        <div class="form-item">
+          <label class="label">视频标题（可选）</label>
+          <div class="row">
+            <input
+              v-model.trim="form.title"
+              class="input"
+              type="text"
+              maxlength="80"
+              placeholder="可留空，后续也可以手动使用 AI 助攻补全"
             />
-            <button 
-              type="button" 
-              class="ai-assist-btn"
-              @click="runUploadAssist" 
-              :disabled="loadingAiAssist"
-            >
-              <span class="ai-icon">✨</span> AI 助攻
+            <button type="button" class="btn-secondary" :disabled="loadingAiAssist" @click="runUploadAssist({ applyGeneratedTitle: true })">
+              AI 助攻
             </button>
           </div>
         </div>
 
-        <!-- 标签选择 -->
-        <div class="bili-form-item">
-          <label class="form-label">摄序</label>
-          <div class="title-input-wrapper">
-            <input 
-              v-model="form.description" 
-              type="text" 
-              class="form-input"
-              placeholder="给视频起个响亮的标题吧！"
+        <div class="form-item">
+          <label class="label">视频简介</label>
+          <div class="row">
+            <textarea
+              v-model.trim="form.description"
+              class="textarea"
+              rows="4"
+              maxlength="500"
+              placeholder="补充视频亮点、信息来源或观看提示（选填）"
             />
-            <button 
-              type="button" 
-              class="ai-suggest-btn"
-              @click="recommendTags" 
-              :disabled="loadingSuggest"
-            >
+            <button type="button" class="btn-secondary" :disabled="loadingSuggest" @click="recommendTags">
               AI 生成建议
             </button>
           </div>
-          
-          <div class="preset-tags">
-            <button 
-              type="button" 
-              v-for="tag in presetTags" 
-              :key="tag"
-              class="preset-tag-btn"
-              :class="{ active: selectedPresetTags.includes(tag) }"
-              @click="togglePresetTag(tag)"
-            >
-              {{ tag }}
-            </button>
-          </div>
         </div>
 
-        <!-- 分类选择 -->
-        <div class="bili-form-item">
-          <label class="form-label">分类选择</label>
-          <div class="category-select-wrapper">
-            <select 
-              v-model.number="form.categoryId" 
-              class="form-select"
-            >
-              <option value="">分类选择</option>
-              <option v-for="c in allCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
+        <div class="form-item">
+          <label class="label">标签</label>
+          <div v-if="tags.length > 0" class="selector-panel">
+            <div v-if="selectedTags.length > 0" class="selector-section">
+              <div class="section-title-row">
+                <span class="section-title">已选标签</span>
+                <button type="button" class="link-btn" @click="form.tagIds = []">清空</button>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="tag in selectedTags"
+                  :key="`selected-${tag.id}`"
+                  type="button"
+                  class="tag-chip active"
+                  @click="toggleTag(tag.id)"
+                >
+                  {{ tag.name }}
+                </button>
+              </div>
+            </div>
+
+            <div v-if="recommendedTags.length > 0" class="selector-section">
+              <div class="section-title-row">
+                <span class="section-title">AI 推荐</span>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="tag in recommendedTags"
+                  :key="`recommended-${tag.id}`"
+                  type="button"
+                  class="tag-chip suggested"
+                  @click="toggleTag(tag.id)"
+                >
+                  {{ tag.name }}
+                </button>
+              </div>
+            </div>
+
+            <div class="selector-section">
+              <div class="section-title-row">
+                <span class="section-title">选择标签</span>
+              </div>
+              <input
+                v-model.trim="tagKeyword"
+                class="input tag-search-input"
+                type="text"
+                maxlength="20"
+                placeholder="搜索标签"
+              />
+              <div class="tag-list">
+                <button
+                  v-for="tag in visibleAvailableTags"
+                  :key="tag.id"
+                  type="button"
+                  class="tag-chip"
+                  :class="{
+                    active: form.tagIds.includes(tag.id),
+                    suggested: aiSuggestedTagIds.includes(tag.id) && !form.tagIds.includes(tag.id)
+                  }"
+                  @click="toggleTag(tag.id)"
+                >
+                  {{ tag.name }}
+                </button>
+              </div>
+              <div v-if="filteredAvailableTags.length > defaultVisibleTagCount" class="more-row">
+                <button type="button" class="link-btn" @click="showAllTags = !showAllTags">
+                  {{ showAllTags ? '收起标签' : '展开更多标签' }}
+                </button>
+              </div>
+            </div>
           </div>
+          <p v-else class="tip-text">暂无标签数据，请先在后台维护标签。</p>
         </div>
 
-        <!-- 错误提示 -->
-        <p v-if="error" class="hint error-hint">{{ error }}</p>
+        <div class="form-item">
+          <label class="label">分类选择</label>
+          <div v-if="parentCategories.length > 0" class="selector-panel">
+            <div class="selector-section">
+              <div class="section-title-row">
+                <span class="section-title">一级分区</span>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="parent in parentCategories"
+                  :key="parent.id"
+                  type="button"
+                  class="tag-chip category-chip"
+                  :class="{ active: selectedParentCategoryId === parent.id && (!activeChildCategories.length || !form.categoryId || form.categoryId === parent.id || activeChildCategories.some(item => item.id === form.categoryId)) }"
+                  @click="selectParentCategory(parent)"
+                >
+                  {{ parent.name }}
+                </button>
+              </div>
+            </div>
 
-        <!-- 提交按钮 -->
-        <div class="submit-section">
-          <button type="submit" class="bili-btn-main" :disabled="loading">
+            <div v-if="activeChildCategories.length > 0" class="selector-section">
+              <div class="section-title-row">
+                <span class="section-title">二级分区</span>
+                <span v-if="selectedCategoryLabel" class="section-tip">已选：{{ selectedCategoryLabel }}</span>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="child in activeChildCategories"
+                  :key="child.id"
+                  type="button"
+                  class="tag-chip subcategory-chip"
+                  :class="{ active: form.categoryId === child.id }"
+                  @click="selectChildCategory(child)"
+                >
+                  {{ child.name }}
+                </button>
+              </div>
+            </div>
+            <div v-else class="selector-section">
+              <div class="section-title-row">
+                <span class="section-title">当前分区</span>
+                <span v-if="selectedCategoryLabel" class="section-tip">已选：{{ selectedCategoryLabel }}</span>
+              </div>
+              <div class="tag-list">
+                <button
+                  type="button"
+                  class="tag-chip subcategory-chip"
+                  :class="{ active: form.categoryId === selectedParentCategoryId }"
+                  @click="selectCurrentParentAsCategory"
+                >
+                  {{ activeParentCategory?.name || '请选择一级分区' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <p v-else class="tip-text">暂无分类数据，请先在后台维护分类。</p>
+        </div>
+
+        <p v-if="error" class="error-text">{{ error }}</p>
+
+        <div class="submit-row">
+          <button class="btn-main" type="submit" :disabled="loading">
             {{ loading ? '上传中...' : '立即投稿' }}
           </button>
         </div>
@@ -131,7 +211,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { uploadVideo } from '../api/video'
 import { getCategoryTree } from '../api/category'
@@ -145,10 +225,17 @@ const loading = ref(false)
 const error = ref('')
 const loadingSuggest = ref(false)
 const loadingAiAssist = ref(false)
+const isVideoDragging = ref(false)
 const videoFile = ref(null)
 const coverFile = ref(null)
 const categories = ref([])
 const tags = ref([])
+const selectedParentCategoryId = ref(null)
+const tagKeyword = ref('')
+const showAllTags = ref(false)
+const aiSuggestedTagIds = ref([])
+const defaultVisibleTagCount = 18
+
 const form = reactive({
   title: '',
   description: '',
@@ -156,37 +243,116 @@ const form = reactive({
   tagIds: []
 })
 
-// 预设标签
-const presetTags = ref([
-  '创作灵感',
-  '生活日常',
-  'ACG',
-  '游戏视频',
-  '数码科技'
-])
+const parentCategories = computed(() => categories.value || [])
 
-const selectedPresetTags = ref([])
+const activeParentCategory = computed(() =>
+  parentCategories.value.find(item => item.id === selectedParentCategoryId.value) || null
+)
 
-// 所有分类（扁平化处理）
-const allCategories = computed(() => {
-  const flatCategories = []
-  categories.value.forEach(parent => {
-    flatCategories.push(parent)
-    if (parent.children) {
-      parent.children.forEach(child => {
-        flatCategories.push(child)
-      })
-    }
+const activeChildCategories = computed(() =>
+  Array.isArray(activeParentCategory.value?.children) ? activeParentCategory.value.children : []
+)
+
+const selectedTags = computed(() => tags.value.filter(tag => form.tagIds.includes(tag.id)))
+
+const recommendedTags = computed(() =>
+  tags.value.filter(tag => aiSuggestedTagIds.value.includes(tag.id) && !form.tagIds.includes(tag.id))
+)
+
+const filteredAvailableTags = computed(() => {
+  const keyword = tagKeyword.value.trim().toLowerCase()
+  let available = tags.value.filter(tag => !form.tagIds.includes(tag.id))
+  if (keyword) {
+    available = available.filter(tag => tag.name.toLowerCase().includes(keyword))
+  }
+  const recommendedIds = new Set(aiSuggestedTagIds.value)
+  return [...available].sort((a, b) => {
+    const aPriority = recommendedIds.has(a.id) ? 0 : 1
+    const bPriority = recommendedIds.has(b.id) ? 0 : 1
+    if (aPriority !== bPriority) return aPriority - bPriority
+    return a.id - b.id
   })
-  return flatCategories
 })
 
-function collectTagIds() {
-  const presetTagIds = selectedPresetTags.value
-    .map(tagName => tags.value.find(tag => tag.name === tagName)?.id)
-    .filter(id => id != null)
+const visibleAvailableTags = computed(() =>
+  showAllTags.value ? filteredAvailableTags.value : filteredAvailableTags.value.slice(0, defaultVisibleTagCount)
+)
 
-  return [...new Set([...(form.tagIds || []), ...presetTagIds])]
+const flattenedCategories = computed(() => {
+  const flat = []
+  parentCategories.value.forEach(parent => {
+    flat.push({ id: parent.id, name: parent.name })
+    ;(parent.children || []).forEach(child => {
+      flat.push({ id: child.id, name: child.name })
+    })
+  })
+  return flat
+})
+
+const selectedCategoryLabel = computed(() => {
+  if (!form.categoryId) return ''
+  for (const parent of parentCategories.value) {
+    if (parent.id === form.categoryId) return parent.name
+    const child = (parent.children || []).find(item => item.id === form.categoryId)
+    if (child) return `${parent.name} / ${child.name}`
+  }
+  return ''
+})
+
+function syncSelectedCategory(categoryId) {
+  if (!categoryId) {
+    selectedParentCategoryId.value = null
+    form.categoryId = ''
+    return
+  }
+  for (const parent of parentCategories.value) {
+    if (parent.id === categoryId) {
+      selectedParentCategoryId.value = parent.id
+      form.categoryId = parent.id
+      return
+    }
+    const child = (parent.children || []).find(item => item.id === categoryId)
+    if (child) {
+      selectedParentCategoryId.value = parent.id
+      form.categoryId = child.id
+      return
+    }
+  }
+}
+
+function selectParentCategory(parent) {
+  selectedParentCategoryId.value = parent.id
+  if (!Array.isArray(parent.children) || parent.children.length === 0) {
+    form.categoryId = parent.id
+    return
+  }
+  const stillSelected = parent.children.some(item => item.id === form.categoryId)
+  if (!stillSelected) {
+    form.categoryId = ''
+  }
+}
+
+function selectChildCategory(child) {
+  form.categoryId = child.id
+}
+
+function selectCurrentParentAsCategory() {
+  if (selectedParentCategoryId.value) {
+    form.categoryId = selectedParentCategoryId.value
+  }
+}
+
+function prettySize(bytes = 0) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`
+}
+
+function toggleTag(tagId) {
+  const idx = form.tagIds.indexOf(tagId)
+  if (idx >= 0) form.tagIds.splice(idx, 1)
+  else form.tagIds.push(tagId)
 }
 
 function onVideoChange(e) {
@@ -197,43 +363,34 @@ function onCoverChange(e) {
   coverFile.value = e.target.files?.[0] || null
 }
 
-function onDragOver(e) {
-  e.preventDefault()
-  e.stopPropagation()
-  e.currentTarget.style.borderColor = 'var(--bili-blue)'
-  e.currentTarget.style.background = 'rgba(0, 174, 236, 0.05)'
+function onDragOver() {
+  isVideoDragging.value = true
+}
+
+function onDragLeave() {
+  isVideoDragging.value = false
 }
 
 function onDropVideo(e) {
   e.preventDefault()
-  e.stopPropagation()
-  e.currentTarget.style.borderColor = 'var(--border-dashed)'
-  e.currentTarget.style.background = 'transparent'
-  
+  isVideoDragging.value = false
   const files = e.dataTransfer?.files
-  if (files && files.length > 0) {
-    const file = files[0]
-    if (file.type.startsWith('video/')) {
-      videoFile.value = file
-    } else {
-      error.value = '请拖拽视频文件'
-    }
+  if (!files || files.length === 0) return
+  const file = files[0]
+  if (!file.type.startsWith('video/')) {
+    error.value = '请拖拽视频文件'
+    return
   }
-}
-
-// 切换预设标签
-function togglePresetTag(tag) {
-  const index = selectedPresetTags.value.indexOf(tag)
-  if (index > -1) {
-    selectedPresetTags.value.splice(index, 1)
-  } else {
-    selectedPresetTags.value.push(tag)
-  }
+  videoFile.value = file
 }
 
 async function loadCategories() {
   try {
     categories.value = await getCategoryTree()
+    syncSelectedCategory(form.categoryId)
+    if (!selectedParentCategoryId.value && parentCategories.value.length > 0) {
+      selectedParentCategoryId.value = parentCategories.value[0].id
+    }
   } catch (e) {
     console.error(e)
   }
@@ -248,10 +405,21 @@ async function loadTags() {
 }
 
 async function recommendTags() {
+  if (!form.title.trim() && !form.description.trim()) {
+    error.value = '请先填写标题或简介，再使用 AI 建议'
+    return
+  }
   loadingSuggest.value = true
+  error.value = ''
   try {
-    // 模拟 AI 生成建议
-    form.description = '这是一个关于 ' + form.title + ' 的视频，内容丰富精彩，欢迎观看！'
+    const ids = await recommendTagsApi({
+      title: form.title || '',
+      description: form.description || ''
+    })
+    if (Array.isArray(ids) && ids.length > 0) {
+      aiSuggestedTagIds.value = [...new Set(ids)]
+      form.tagIds = [...new Set([...form.tagIds, ...ids])]
+    }
   } catch (e) {
     error.value = e.message || '智能推荐失败'
   } finally {
@@ -259,31 +427,57 @@ async function recommendTags() {
   }
 }
 
-async function runUploadAssist() {
-  if (!form.title.trim()) {
-    error.value = '请先填写标题，再使用 AI 助手'
-    return
-  }
+async function runUploadAssist(options = {}) {
+  const { silent = false, applyGeneratedTitle = false } = options
   loadingAiAssist.value = true
+  if (!silent) error.value = ''
   try {
-    // 模拟 AI 助攻
-    form.title = form.title + ' - 精彩内容'
+    const createRes = await createUploadAssistTask({
+      title: form.title || '',
+      description: form.description || '',
+      candidate_tags: tags.value.map(i => i.name),
+      candidate_categories: flattenedCategories.value.map(i => ({ id: i.id, name: i.name }))
+    })
+
+    const taskId = createRes?.data?.task_id
+    if (!taskId) throw new Error('AI 任务创建失败')
+
+    const task = await pollAgentTask(taskId)
+    const result = task?.result || {}
+
+    if (Array.isArray(result.suggested_tags) && result.suggested_tags.length > 0) {
+      const suggestedIds = result.suggested_tags
+        .map(name => tags.value.find(i => i.name === name)?.id)
+        .filter(Boolean)
+      aiSuggestedTagIds.value = [...new Set(suggestedIds)]
+      form.tagIds = [...new Set([...form.tagIds, ...suggestedIds])]
+    }
+
+    if (result.suggested_category_id) syncSelectedCategory(Number(result.suggested_category_id))
+    if (typeof result.generated_summary === 'string' && result.generated_summary.trim() && !form.description.trim()) {
+      form.description = result.generated_summary.trim()
+    }
+    if (applyGeneratedTitle && typeof result.generated_title === 'string' && result.generated_title.trim() && !form.title.trim()) {
+      form.title = result.generated_title.trim()
+    }
+    return result
   } catch (e) {
-    error.value = e.message || 'AI 助手执行失败'
+    if (!silent) {
+      error.value = e.message || 'AI 助攻失败'
+    }
+    return null
   } finally {
     loadingAiAssist.value = false
   }
 }
 
 async function submit() {
-  if (!videoFile.value || !form.title.trim()) {
-    error.value = '请选择视频并填写标题'
+  error.value = ''
+  if (!videoFile.value) {
+    error.value = '请选择视频文件'
     return
   }
-  if (!form.categoryId) {
-    error.value = '请选择视频分类'
-    return
-  }
+
   loading.value = true
   try {
     const fd = new FormData()
@@ -291,13 +485,12 @@ async function submit() {
     if (coverFile.value) fd.append('cover', coverFile.value)
     fd.append('title', form.title.trim())
     if (form.description.trim()) fd.append('description', form.description.trim())
-    fd.append('categoryId', String(form.categoryId))
-    const tagIds = collectTagIds()
-    tagIds.forEach(tagId => {
-      fd.append('tagIds', String(tagId))
-    })
+
+    if (form.categoryId) fd.append('categoryId', String(form.categoryId))
+    form.tagIds.forEach(tagId => fd.append('tagIds', String(tagId)))
+
     const res = await uploadVideo(fd)
-    alert('投稿成功')
+    alert('上传成功')
     router.push(`/video/${res.id}`)
   } catch (e) {
     error.value = e.message || '上传失败'
@@ -313,423 +506,366 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ============ 页面背景 ============ */
-.bili-upload-page {
-  background: linear-gradient(135deg, #F1F2F3 0%, rgba(0, 174, 236, 0.08) 50%, rgba(251, 114, 153, 0.08) 100%);
-  padding: 40px 20px;
+.upload-page {
   min-height: 100vh;
-  position: relative;
+  background: #f4f5f7;
+  padding: 20px 16px 28px;
 }
 
-/* 漂浮背景光效 */
-.bili-upload-page::before {
-  content: '';
-  position: fixed;
-  top: -50%;
-  right: -50%;
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(circle, rgba(0, 174, 236, 0.1) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: -1;
-  filter: blur(40px);
-}
-
-.bili-upload-page::after {
-  content: '';
-  position: fixed;
-  bottom: -30%;
-  left: -30%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(251, 114, 153, 0.1) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: -1;
-  filter: blur(40px);
-}
-
-/* ============ 卡片容器 ============ */
-.bili-upload-container {
-  max-width: 800px;
+.upload-container {
+  max-width: 920px;
   margin: 0 auto;
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: 28px 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ebedf0;
+  padding: 20px 24px 24px;
 }
 
-/* ============ 标题 ============ */
-.bili-header {
+.page-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 32px;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-.header-decor {
-  display: block;
+.title-line {
   width: 3px;
-  height: 24px;
-  background: var(--bili-pink);
-  border-radius: 2px;
-  box-shadow: 0 0 12px rgba(251, 114, 153, 0.5), 0 0 24px rgba(251, 114, 153, 0.3);
-  animation: neonGlowPink 2s ease-in-out infinite;
+  height: 18px;
+  border-radius: 3px;
+  background: #fb7299;
 }
 
-@keyframes neonGlowPink {
-  0%, 100% { box-shadow: 0 0 12px rgba(251, 114, 153, 0.5), 0 0 24px rgba(251, 114, 153, 0.3); }
-  50% { box-shadow: 0 0 16px rgba(251, 114, 153, 0.7), 0 0 32px rgba(251, 114, 153, 0.4); }
-}
-
-.bili-header h1 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
+.page-title h1 {
   margin: 0;
-  letter-spacing: -0.5px;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 700;
+  color: #18191c;
 }
 
-/* ============ 表单 ============ */
-.bili-form-layout {
+.upload-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
-/* ============ 上传区域 ============ */
-.bili-upload-section {
+.media-section {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 16px;
-  margin-bottom: 0;
+  gap: 14px;
 }
 
-.upload-box {
+.media-card {
+  border-radius: 8px;
+  min-height: 136px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
-  border: 1.5px dashed #00AEEC;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #E6F7FB 0%, #F0F9FC 100%);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+}
+
+.media-card-video {
+  border: 2px dashed #00aeec;
+  background: #f4fbff;
+}
+
+.media-card-video:hover,
+.media-card-video.dragging {
+  border-color: #00a1d6;
+  background: #e8f8ff;
+}
+
+.media-card-cover {
+  border: 1px dashed #d7d9dd;
+  background: #fafafa;
+}
+
+.media-card-cover:hover {
+  border-color: #00aeec;
+  background: #f8fcff;
+}
+
+.plus-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #00aeec;
+  color: #fff;
+  font-size: 34px;
+  line-height: 38px;
   text-align: center;
-  position: relative;
+  margin-bottom: 10px;
+  user-select: none;
 }
 
-.upload-box:hover {
-  border-color: #0099d9;
-  background: linear-gradient(135deg, #D1F0F8 0%, #E6F7FB 100%);
-  transform: translateY(-2px);
-}
-
-.upload-box-video {
-  min-height: 160px;
-}
-
-.upload-box-cover {
-  min-height: 160px;
-  background: #F8F8F8;
-  border-color: #DDD;
-}
-
-.upload-icon {
-  margin-bottom: 12px;
-}
-
-.upload-icon svg {
-  width: 48px;
-  height: 48px;
-  fill: #00AEEC;
-}
-
-.upload-hint {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+.card-main-text {
   margin: 0;
+  color: #18191c;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.upload-hint-small {
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
+.card-sub-text {
+  margin: 6px 0 0;
+  color: #61666d;
+  font-size: 12px;
+}
+
+.cover-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: #18191c;
+  font-weight: 600;
+}
+
+.cover-status {
   margin: 0;
+  color: #9499a0;
+  font-size: 12px;
 }
 
-/* ============ 表单项 ============ */
-.bili-form-item {
+.form-item {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.form-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-/* ============ 输入框 ============ */
-.form-input,
-.form-select {
-  font-family: inherit;
-  font-size: 14px;
-  color: #333;
-  border: 1px solid #E0E0E0;
-  border-radius: 6px;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
-  transition: all 0.3s ease;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.form-input {
-  height: 44px;
-}
-
-.form-input:focus,
-.form-select:focus {
-  outline: none;
-  border-color: #00AEEC;
-  box-shadow: 0 0 0 3px rgba(0, 174, 236, 0.1), inset 0 1px 2px rgba(0, 174, 236, 0.1);
-  background: linear-gradient(135deg, #F0F9FC 0%, #FFFFFF 100%);
-}
-
-.form-select {
-  height: 44px;
-  cursor: pointer;
-  appearance: none;
-  background: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
-  padding-right: 40px;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.form-select:hover {
-  border-color: #00AEEC;
-  background: linear-gradient(135deg, #F0F9FC 0%, #FFFFFF 100%);
-}
-
-.form-select::after {
-  content: '';
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 14px;
-  height: 14px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-.form-select:hover::after {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300AEEC' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
-}
-
-.form-select:focus::after {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300AEEC' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
-  transform: translateY(-50%) rotate(180deg);
-}
-
-/* ============ 标题输入框 ============ */
-.title-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.title-input-wrapper .form-input {
-  flex: 1;
-}
-
-/* ============ AI 按钮 ============ */
-.ai-assist-btn {
-  padding: 8px 16px;
-  background: #E6F7FB;
-  color: #00AEEC;
-  border: 1px solid #00AEEC;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.ai-assist-btn:hover {
-  background: #00AEEC;
-  color: #FFF;
-  transform: translateY(-1px);
-}
-
-.ai-icon {
-  font-size: 16px;
-}
-
-.ai-suggest-btn {
-  padding: 8px 16px;
-  background: #FFF;
-  color: #00AEEC;
-  border: 1px solid #00AEEC;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.ai-suggest-btn:hover {
-  background: #00AEEC;
-  color: #FFF;
-  transform: translateY(-1px);
-}
-
-/* ============ 预设标签 ============ */
-.preset-tags {
-  display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  margin-top: 8px;
 }
 
-.preset-tag-btn {
-  padding: 6px 16px;
-  background: #F0F0F0;
-  color: #333;
-  border: 1px solid #DDD;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.label {
+  font-size: 18px;
+  color: #18191c;
+  font-weight: 700;
 }
 
-.preset-tag-btn:hover {
-  background: #E6F7FB;
-  border-color: #00AEEC;
-  color: #00AEEC;
-  transform: translateY(-1px);
-}
-
-.preset-tag-btn.active {
-  background: #00AEEC;
-  border-color: #00AEEC;
-  color: #FFF;
-}
-
-/* ============ 分类选择 ============ */
-.category-select-wrapper {
-  width: 100%;
-}
-
-/* ============ 提交区域 ============ */
-.submit-section {
+.row {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
+  gap: 10px;
+  align-items: stretch;
 }
 
-/* ============ 主要按钮 ============ */
-.bili-btn-main {
+.input,
+.textarea,
+.select {
+  width: 100%;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  background: #fff;
+  color: #18191c;
+  font-size: 14px;
+  padding: 0 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input {
   height: 44px;
-  padding: 0 32px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 600;
+}
+
+.textarea {
+  min-height: 92px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.select {
+  height: 44px;
+  max-width: 260px;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #00aeec;
+  box-shadow: 0 0 0 2px rgba(0, 174, 236, 0.16);
+}
+
+.btn-secondary {
+  flex: 0 0 auto;
+  min-width: 118px;
+  height: 44px;
+  border: 1px solid #00aeec;
+  border-radius: 8px;
+  background: #f4fbff;
+  color: #00a1d6;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  transition: all 0.2s ease;
 }
 
-.bili-btn-main:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
-  background: linear-gradient(135deg, #FF5252 0%, #FF7B7B 100%);
+.btn-secondary:hover:not(:disabled) {
+  background: #00aeec;
+  color: #fff;
 }
 
-.bili-btn-main:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
-}
-
-.bili-btn-main:disabled {
-  opacity: 0.7;
+.btn-secondary:disabled {
+  opacity: 0.56;
   cursor: not-allowed;
 }
 
-/* ============ 提示文本 ============ */
-.hint {
-  margin-top: 8px;
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  border: 1px solid #e3e5e7;
+  border-radius: 999px;
+  background: #f7f8fa;
+  color: #61666d;
+  font-size: 13px;
+  height: 32px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag-chip:hover {
+  border-color: #00aeec;
+  color: #00a1d6;
+  background: #f4fbff;
+}
+
+.tag-chip.active {
+  color: #fff;
+  border-color: #00aeec;
+  background: #00aeec;
+}
+
+.selector-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #ebedf0;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.selector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #18191c;
+}
+
+.section-tip {
   font-size: 12px;
-  line-height: 1.5;
+  color: #9499a0;
 }
 
-.error-hint {
-  color: #E74C3C;
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: #00a1d6;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
 }
 
-/* ============ 响应式 ============ */
-@media (max-width: 768px) {
-  .bili-upload-section {
+.link-btn:hover {
+  color: #008ac5;
+}
+
+.tag-search-input {
+  max-width: 280px;
+}
+
+.tag-chip.suggested {
+  border-color: #8fd8ff;
+  color: #00a1d6;
+  background: #eef9ff;
+}
+
+.category-chip {
+  font-weight: 700;
+}
+
+.subcategory-chip {
+  min-width: 96px;
+}
+
+.more-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.tip-text {
+  margin: 0;
+  color: #9499a0;
+  font-size: 12px;
+}
+
+.error-text {
+  margin: 0;
+  color: #f56c6c;
+  font-size: 12px;
+}
+
+.submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.btn-main {
+  width: 132px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #fb7299;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-main:hover:not(:disabled) {
+  background: #fc5f8f;
+}
+
+.btn-main:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 960px) {
+  .media-section {
     grid-template-columns: 1fr;
   }
 
-  .upload-box-cover {
-    min-height: 120px;
-  }
-
-  .title-input-wrapper {
+  .row {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .ai-assist-btn,
-  .ai-suggest-btn {
-    align-self: flex-start;
+  .btn-secondary {
+    width: 100%;
   }
 
-  .preset-tags {
-    justify-content: center;
+  .select {
+    max-width: 100%;
   }
 
-  .submit-section {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .bili-upload-container {
-    padding: 20px;
+  .submit-row {
+    justify-content: stretch;
   }
 
-  .bili-upload-section {
-    gap: 12px;
-  }
-
-  .upload-box {
-    padding: 24px 12px;
-  }
-
-  .preset-tag-btn {
-    padding: 4px 12px;
-    font-size: 12px;
-  }
-
-  .bili-btn-main {
+  .btn-main {
     width: 100%;
   }
 }

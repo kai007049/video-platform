@@ -3,10 +3,12 @@ from uuid import uuid4
 import time
 
 
+# 内存任务存储（单机开发场景使用）。
 TASKS: Dict[str, Dict[str, Any]] = {}
 
 
 def create_task() -> str:
+    """创建任务并初始化为 running 状态。"""
     task_id = str(uuid4())
     TASKS[task_id] = {
         "status": "running",
@@ -18,6 +20,7 @@ def create_task() -> str:
 
 
 def complete_task(task_id: str, result: Dict[str, Any]) -> None:
+    """标记任务成功并写入结果。"""
     task = TASKS.get(task_id)
     if not task:
         return
@@ -26,6 +29,7 @@ def complete_task(task_id: str, result: Dict[str, Any]) -> None:
 
 
 def fail_task(task_id: str, error: str) -> None:
+    """标记任务失败并记录错误信息。"""
     task = TASKS.get(task_id)
     if not task:
         return
@@ -34,4 +38,5 @@ def fail_task(task_id: str, error: str) -> None:
 
 
 def get_task(task_id: str) -> Dict[str, Any] | None:
+    """按任务 ID 查询任务状态。"""
     return TASKS.get(task_id)

@@ -2,6 +2,7 @@ package com.bilibili.video.mq;
 
 import com.bilibili.video.common.MqTopics;
 import com.bilibili.video.model.mq.MessageNotifyMessage;
+import com.bilibili.video.service.impl.MqReliabilityService;
 import com.bilibili.video.ws.MessageWebSocketServer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,22 +13,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@RocketMQMessageListener(topic = MqTopics.MESSAGE_NOTIFY, consumerGroup = "message-notify-consumer")
+@RocketMQMessageListener(
+        topic = MqTopics.MESSAGE_NOTIFY,
+        consumerGroup = "message-notify-consumer",
+        maxReconsumeTimes = 5
+)
 public class MessageNotifyConsumer implements RocketMQListener<MessageNotifyMessage> {
 
     private final MessageWebSocketServer messageWebSocketServer;
+    private final MqReliabilityService mqReliabilityService;
 
     @Override
     public void onMessage(MessageNotifyMessage message) {
-        log.info("[MQ] message notify: {}", message);
-        // 推送到 WebSocket，通知在线用户
-        messageWebSocketServer.push(message.getReceiverId(), toJson(message));
+        mqReliabilityService.consumeWithIdempotency(MqTopics.MESSAGE_NOTIFY, message, () -> {
+            log.info("[MQ] message notify: {}", message);
+            messageWebSocketServer.push(message.getReceiverId(), toJson(message));
+        });
     }
 
-    /**
-     * 简单拼接 JSON 字符串，便于前端解析
-     * 注意：这里未做转义处理，若 content 含引号可改为 JSON 序列化工具
-     */
     private String toJson(MessageNotifyMessage message) {
         return String.format("{\"type\":\"%s\",\"content\":\"%s\",\"refId\":%d}",
                 message.getType(),

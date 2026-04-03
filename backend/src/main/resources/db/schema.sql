@@ -20,6 +20,16 @@ create table user
 )
     comment '用户表' collate = utf8mb4_unicode_ci;
 
+create table category
+(
+    id          bigint auto_increment
+        primary key,
+    name        varchar(128)                       not null comment '分类名称',
+    parent_id   bigint                             null comment '父分类ID，用于多级分类',
+    create_time datetime default CURRENT_TIMESTAMP not null comment '创建时间'
+)
+    comment '视频分类表' collate = utf8mb4_unicode_ci;
+
 -- 视频表
 create table video
 (
@@ -217,6 +227,136 @@ create index idx_video_tag_tag
     on video_tag (tag_id);
 
 -- 标签初始化数据
+-- =========================================
+-- V3 推荐最小数据模型
+-- =========================================
+
+-- 视频标签增强特征（可由 agent-service 异步回写）
+create table video_tag_feature
+(
+    id         bigint auto_increment
+        primary key,
+    video_id   bigint                                 not null comment '视频ID',
+    tag_id     bigint                                 not null comment '标签ID',
+    confidence decimal(6, 4) default 0.0000          not null comment '标签置信度(0~1)',
+    source     varchar(32)  default 'llm'            not null comment '来源: llm/rule/manual',
+    version    varchar(32)  default 'v1'             not null comment '特征版本',
+    updated_at datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint uk_video_tag_feature
+        unique (video_id, tag_id)
+)
+    comment '视频标签增强特征表' collate = utf8mb4_unicode_ci;
+
+create index idx_vtf_tag_conf
+    on video_tag_feature (tag_id, confidence);
+
+create index idx_vtf_updated_at
+    on video_tag_feature (updated_at);
+
+-- 用户兴趣标签画像（由行为与内容理解共同更新）
+create table user_interest_tag
+(
+    id         bigint auto_increment
+        primary key,
+    user_id    bigint                                  not null comment '用户ID',
+    tag_id     bigint                                  not null comment '标签ID',
+    weight     decimal(10, 4) default 0.0000          not null comment '兴趣权重',
+    updated_at datetime      default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint uk_user_interest_tag
+        unique (user_id, tag_id)
+)
+    comment '用户兴趣标签画像表' collate = utf8mb4_unicode_ci;
+
+create index idx_uit_user_weight
+    on user_interest_tag (user_id, weight);
+
+create index idx_uit_tag_weight
+    on user_interest_tag (tag_id, weight);
+
+-- 推荐曝光日志（先落 MySQL，后续可迁移 OLAP）
+create table rec_exposure_log
+(
+    id               bigint auto_increment
+        primary key,
+    user_id          bigint                             null comment '用户ID(未登录可为空)',
+    video_id         bigint                             not null comment '曝光视频ID',
+    req_id           varchar(64)                        not null comment '请求链路ID',
+    scene            varchar(32)                        not null comment '场景: recommended/hot/search',
+    `rank`           int                                not null comment '曝光位次(从1开始)',
+    score            decimal(12, 6)                    null comment '推荐分数',
+    channels         varchar(255)                       null comment '召回通道列表，逗号分隔',
+    strategy_version varchar(32)                        null comment '推荐策略版本',
+    ts               datetime default CURRENT_TIMESTAMP not null comment '曝光时间',
+    constraint uk_rec_exposure
+        unique (req_id, video_id)
+)
+    comment '推荐曝光日志表' collate = utf8mb4_unicode_ci;
+
+create index idx_rel_user_ts
+    on rec_exposure_log (user_id, ts);
+
+create index idx_rel_scene_ts
+    on rec_exposure_log (scene, ts);
+
+insert into category (name, parent_id) values
+('动画', 0),
+('影视', 0),
+('音乐', 0),
+('游戏', 0),
+('科技', 0),
+('生活', 0),
+('娱乐', 0),
+('知识', 0),
+('体育', 0),
+('美食', 0),
+('旅行', 0),
+('数码', 0),
+('搞笑', 0),
+('Vlog', 0),
+('二次元', 1),
+('鬼畜', 1),
+('影视解说', 2),
+('电影', 2),
+('电视剧', 2),
+('纪录片', 2),
+('翻唱', 3),
+('舞蹈', 3),
+('说唱', 3),
+('宅舞', 3),
+('电子竞技', 4),
+('手游', 4),
+('单机游戏', 4),
+('主机游戏', 4),
+('实况解说', 4),
+('攻略', 4),
+('编程', 5),
+('前端', 5),
+('后端', 5),
+('人工智能', 5),
+('机器学习', 5),
+('日常', 6),
+('校园', 6),
+('健身', 6),
+('穿搭', 6),
+('宠物', 6),
+('科普', 8),
+('教程', 8),
+('篮球', 9),
+('足球', 9),
+('NBA', 9),
+('CBA', 9),
+('欧冠', 9),
+('英超', 9),
+('世界杯', 9),
+('体育解说', 9),
+('家常菜', 10),
+('探店', 10),
+('摄影', 11),
+('开箱', 12),
+('评测', 12),
+('测评', 12),
+('汽车', 12);
+
 insert into tag (name) values
 ('动画'),
 ('影视'),
@@ -225,14 +365,72 @@ insert into tag (name) values
 ('科技'),
 ('生活'),
 ('娱乐'),
-('搞笑'),
-('鬼畜'),
 ('知识'),
-('影视解说'),
+('体育'),
 ('美食'),
 ('旅行'),
 ('数码'),
+('搞笑'),
+('Vlog'),
 ('二次元'),
-('Vlog');
+('鬼畜'),
+('影视解说'),
+('电影'),
+('电视剧'),
+('纪录片'),
+('混剪'),
+('剪辑'),
+('原声'),
+('翻唱'),
+('舞蹈'),
+('说唱'),
+('宅舞'),
+('电子竞技'),
+('手游'),
+('单机游戏'),
+('主机游戏'),
+('实况解说'),
+('攻略'),
+('篮球'),
+('足球'),
+('NBA'),
+('CBA'),
+('欧冠'),
+('英超'),
+('世界杯'),
+('集锦'),
+('赛事'),
+('绝杀'),
+('三分'),
+('扣篮'),
+('罚球'),
+('球星'),
+('体育解说'),
+('直播回放'),
+('开箱'),
+('评测'),
+('测评'),
+('教程'),
+('编程'),
+('前端'),
+('后端'),
+('Java'),
+('SpringBoot'),
+('Vue'),
+('React'),
+('MySQL'),
+('Redis'),
+('Docker'),
+('数据库'),
+('人工智能'),
+('机器学习'),
+('日常'),
+('校园'),
+('健身'),
+('穿搭'),
+('宠物'),
+('汽车'),
+('摄影'),
+('绘画');
 
 

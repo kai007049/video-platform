@@ -71,6 +71,16 @@ rocketmq:
   producer:
     group: video-platform-producer
 
+mq:
+  reliability:
+    producer:
+      max-retries: 3
+      retry-delay-ms: 1500
+      dead-letter-key: mq:producer:dead-letter
+    consumer:
+      dedup-prefix: mq:consume:done
+      dedup-ttl-hours: 168
+
 # 播放量同步定时任务 (每分钟)
 play-count:
   sync-cron: "0 * * * * ?"
@@ -90,8 +100,28 @@ video:
   search:
     enabled: true
   cover:
-    fallback-delay-ms: 12000
+    fallback-delay-ms: 2000
 
 agent:
   service:
     url: http://localhost:8001
+
+recommend:
+  recall:
+    hot-size: 200
+    fresh-size: 120
+    tag-size-per-tag: 80
+    category-size-per-category: 60
+    author-size-per-author: 40
+  weight:
+    hot: 2.6
+    fresh: 1.2
+    tag: 3.4
+    category: 1.8
+    author: 1.6
+    editorial: 0.8
+    recent-watch-penalty: 1.4
+  rerank:
+    max-same-author: 2
+    max-same-category: 3
+    max-consecutive-same-category: 2

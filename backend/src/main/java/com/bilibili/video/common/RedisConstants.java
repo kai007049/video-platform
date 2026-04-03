@@ -15,8 +15,6 @@ public class RedisConstants {
     public static final String VIDEO_STAT_LIKE = "like";
     /** 收藏数字段名 */
     public static final String VIDEO_STAT_SAVE = "save";
-    /** 评论数字段名 */
-    public static final String VIDEO_STAT_COMMENT = "comment";
     /** 统计缓存过期天数 */
     public static final long VIDEO_STATS_EXPIRE_DAYS = 7;
 
@@ -41,6 +39,31 @@ public class RedisConstants {
     public static final Duration COMMENT_LIST_TTL = Duration.ofMinutes(2);
     /** 评论列表空值缓存 TTL（防穿透） */
     public static final Duration COMMENT_LIST_NULL_TTL = Duration.ofSeconds(30);
+
+    /** 分类树缓存 key */
+    public static final String CATEGORY_TREE_KEY = "category:tree";
+    /** 分类列表缓存 key */
+    public static final String CATEGORY_LIST_KEY = "category:list";
+    /** 标签列表缓存 key */
+    public static final String TAG_LIST_KEY = "tag:list";
+    /** 元数据缓存 TTL */
+    public static final Duration METADATA_CACHE_TTL = Duration.ofMinutes(30);
+
+    /** 搜索历史 key 前缀：search:history:{userId} */
+    public static final String SEARCH_HISTORY_KEY_PREFIX = "search:history:";
+    /** 搜索历史 TTL */
+    public static final Duration SEARCH_HISTORY_TTL = Duration.ofDays(30);
+
+    /** 热搜日桶 key 前缀：search:hot:{yyyyMMdd} */
+    public static final String HOT_SEARCH_KEY_PREFIX = "search:hot:";
+    /** 热搜窗口天数 */
+    public static final int HOT_SEARCH_WINDOW_DAYS = 7;
+    /** 热搜日桶缓存保留天数 */
+    public static final Duration HOT_SEARCH_BUCKET_TTL = Duration.ofDays(HOT_SEARCH_WINDOW_DAYS + 1L);
+    /** 热搜聚合临时 key */
+    public static final String HOT_SEARCH_WINDOW_KEY = "search:hot:window:7d";
+    /** 热搜聚合临时 key TTL */
+    public static final Duration HOT_SEARCH_WINDOW_TTL = Duration.ofSeconds(60);
 
     /** 统计刷盘分布式锁 key */
     public static final String VIDEO_STATS_SYNC_LOCK = "lock:video:stat:sync";

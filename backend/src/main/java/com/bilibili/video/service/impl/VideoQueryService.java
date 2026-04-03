@@ -1,7 +1,6 @@
 package com.bilibili.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.video.common.Constants;
@@ -15,6 +14,8 @@ import com.bilibili.video.mapper.VideoLikeMapper;
 import com.bilibili.video.mapper.VideoMapper;
 import com.bilibili.video.mapper.WatchHistoryMapper;
 import com.bilibili.video.model.vo.VideoVO;
+import com.bilibili.video.service.RecExposureLogService;
+import com.bilibili.video.service.RecommendationService;
 import com.bilibili.video.service.VideoCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -42,6 +43,8 @@ public class VideoQueryService {
     private final VideoCacheService videoCacheService;
     private final VideoViewAssembler videoViewAssembler;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RecommendationService recommendationService;
+    private final RecExposureLogService recExposureLogService;
 
     /**
      * 查询最新视频列表
@@ -57,11 +60,7 @@ public class VideoQueryService {
      * 查询推荐视频列表
      */
     public IPage<VideoVO> listRecommended(int page, int size, Long userId) {
-        Page<Video> pageParam = new Page<>(page, size);
-        QueryWrapper<Video> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc("(play_count + like_count * 5)").orderByDesc("create_time");
-        Page<Video> result = videoMapper.selectPage(pageParam, queryWrapper);
-        return convertVideoPage(result, result.getRecords(), userId);
+        return recommendationService.listRecommended(page, size, userId);
     }
 
     /**
@@ -84,6 +83,7 @@ public class VideoQueryService {
         Long total = redisTemplate.opsForZSet().zCard(key);
         Page<VideoVO> result = new Page<>(page, size, total == null ? 0 : total);
         result.setRecords(videoViewAssembler.toVideoVOList(videos, userId));
+        recExposureLogService.logExposureBatch(userId, "hot", page, size, result.getRecords());
         return result;
     }
 

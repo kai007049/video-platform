@@ -14,6 +14,8 @@ public class MqTopics {
     public static final String NOTIFY_EVENT = "notify_event";
     /** 搜索索引同步 */
     public static final String SEARCH_SYNC = "search_sync";
+    /** 视频语义索引 */
+    public static final String VIDEO_SEMANTIC_INDEX = "video_semantic_index";
     /** 删除视频资源 */
     public static final String VIDEO_DELETE = "video_delete";
     /** 站内消息通知（私信/系统通知） */

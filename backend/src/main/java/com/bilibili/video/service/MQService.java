@@ -6,6 +6,7 @@ import com.bilibili.video.model.mq.MessageNotifyMessage;
 import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.model.mq.VideoDeleteMessage;
 import com.bilibili.video.model.mq.VideoProcessMessage;
+import com.bilibili.video.model.mq.VideoSemanticIndexMessage;
 
 public interface MQService {
 
@@ -26,6 +27,9 @@ public interface MQService {
 
     /** 发送视频删除消息 */
     void sendVideoDelete(VideoDeleteMessage message);
+
+    /** 发送视频语义索引消息 */
+    void sendVideoSemanticIndex(VideoSemanticIndexMessage message);
 
     /** 发送站内消息通知（私信/系统通知） */
     void sendMessageNotify(MessageNotifyMessage message);

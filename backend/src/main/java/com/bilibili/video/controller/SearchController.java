@@ -68,4 +68,15 @@ public class SearchController {
     public Result<List<String>> hot(@RequestParam(defaultValue = "10") int limit) {
         return Result.success(searchService.getHotSearches(limit));
     }
+
+    @GetMapping("/hybrid")
+    @Operation(summary = "混合搜索（ES + AI语义检索）")
+    public Result<IPage<VideoVO>> hybridSearch(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        Long userId = UserContext.get();
+        searchService.recordSearchKeyword(userId, keyword);
+        return Result.success(searchService.hybridSearch(keyword, page, size, userId));
+    }
 }
