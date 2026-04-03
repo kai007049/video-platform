@@ -26,9 +26,14 @@ export const useUserStore = defineStore('user', () => {
 
   async function fetchUserInfo() {
     if (!token.value) return
-    const info = await getUserInfo()
-    userInfo.value = info
-    sessionStorage.setItem('userInfo', JSON.stringify(info))
+    try {
+      const info = await getUserInfo()
+      userInfo.value = info
+      sessionStorage.setItem('userInfo', JSON.stringify(info))
+    } catch (error) {
+      console.error('Failed to fetch user info:', error)
+      // 即使获取失败，也不影响页面渲染
+    }
   }
 
   function logout() {
