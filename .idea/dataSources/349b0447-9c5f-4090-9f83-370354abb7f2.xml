@@ -942,7 +942,7 @@
     <schema id="299" parent="1" name="bilibili">
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-04-01.05:32:07</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-04-08.01:21:30</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="300" parent="1" name="mysql.infoschema">
@@ -1066,7 +1066,7 @@
       <CollationName>utf8mb4_unicode_ci</CollationName>
     </table>
     <column id="321" parent="304" name="id">
-      <AutoIncrement>24</AutoIncrement>
+      <AutoIncrement>81</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1161,7 +1161,7 @@
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="338" parent="306" name="id">
-      <AutoIncrement>31</AutoIncrement>
+      <AutoIncrement>33</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1213,7 +1213,7 @@
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="347" parent="307" name="id">
-      <AutoIncrement>29</AutoIncrement>
+      <AutoIncrement>31</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1307,7 +1307,7 @@ following_id</ColNames>
       <UnderlyingIndexName>uk_follow</UnderlyingIndexName>
     </key>
     <column id="366" parent="309" name="id">
-      <AutoIncrement>46</AutoIncrement>
+      <AutoIncrement>47</AutoIncrement>
       <Comment>消息ID</Comment>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1484,7 +1484,7 @@ ts</ColNames>
       <UnderlyingIndexName>uk_rec_exposure</UnderlyingIndexName>
     </key>
     <column id="397" parent="312" name="id">
-      <AutoIncrement>16</AutoIncrement>
+      <AutoIncrement>165</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1521,7 +1521,7 @@ ts</ColNames>
       <UnderlyingIndexName>uk_tag_name</UnderlyingIndexName>
     </key>
     <column id="404" parent="313" name="id">
-      <AutoIncrement>11</AutoIncrement>
+      <AutoIncrement>13</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1586,7 +1586,7 @@ ts</ColNames>
       <UnderlyingIndexName>username</UnderlyingIndexName>
     </key>
     <column id="416" parent="314" name="id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>6</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1648,7 +1648,7 @@ weight</ColNames>
       <UnderlyingIndexName>uk_user_interest_tag</UnderlyingIndexName>
     </key>
     <column id="427" parent="315" name="id">
-      <AutoIncrement>70</AutoIncrement>
+      <AutoIncrement>94</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1793,7 +1793,7 @@ category_id</ColNames>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="452" parent="317" name="id">
-      <AutoIncrement>30</AutoIncrement>
+      <AutoIncrement>32</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1841,7 +1841,7 @@ user_id</ColNames>
       <UnderlyingIndexName>uk_video_user</UnderlyingIndexName>
     </key>
     <column id="461" parent="318" name="id">
-      <AutoIncrement>12</AutoIncrement>
+      <AutoIncrement>31</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1893,7 +1893,7 @@ tag_id</ColNames>
       <UnderlyingIndexName>uk_video_tag</UnderlyingIndexName>
     </key>
     <column id="471" parent="319" name="id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>19</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>
@@ -1968,7 +1968,7 @@ confidence</ColNames>
       <UnderlyingIndexName>uk_video_tag_feature</UnderlyingIndexName>
     </key>
     <column id="484" parent="320" name="id">
-      <AutoIncrement>21</AutoIncrement>
+      <AutoIncrement>31</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>bigint|0s</StoredType>

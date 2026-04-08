@@ -1,9 +1,12 @@
 """Agent business services: QA, upload assist, message draft, and tag scoring."""
 
 from typing import List, Dict, Any, Tuple
+import base64
 import json
 import re
+from urllib.parse import urlparse
 
+import httpx
 
 from app.schemas.task import AskResult, UploadAssistResult
 from app.clients.llm_client import chat_completion
@@ -339,6 +342,35 @@ def build_generated_title(title: str, tags: List[str], category_name: str | None
     return "精彩视频分享"
 
 
+def _normalize_media_url(url: str) -> str:
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if host in {"localhost", "127.0.0.1"}:
+        return url.replace(host, "127.0.0.1")
+    return url
+
+
+async def _build_cover_message_content(cover_url: str, text_prompt: str) -> List[Dict[str, Any]]:
+    normalized_url = _normalize_media_url(cover_url)
+    if normalized_url.startswith("http://") or normalized_url.startswith("https://"):
+        return [
+            {"type": "text", "text": text_prompt},
+            {"type": "image_url", "image_url": {"url": normalized_url}},
+        ]
+
+    async with httpx.AsyncClient(timeout=settings.llm_timeout_seconds) as client:
+        response = await client.get(normalized_url)
+        response.raise_for_status()
+
+    content_type = response.headers.get("content-type", "image/jpeg").split(";")[0].strip() or "image/jpeg"
+    image_base64 = base64.b64encode(response.content).decode("utf-8")
+    data_url = f"data:{content_type};base64,{image_base64}"
+    return [
+        {"type": "text", "text": text_prompt},
+        {"type": "image_url", "image_url": {"url": data_url}},
+    ]
+
+
 async def analyze_cover_content(cover_url: str, candidate_tags: List[str], candidate_categories: List[Dict[str, Any]]) -> Dict[str, Any]:
     if not cover_url:
         return {"tags": [], "category_id": None, "category_name": None, "generated_title": ""}
@@ -348,15 +380,13 @@ async def analyze_cover_content(cover_url: str, candidate_tags: List[str], candi
         "请根据图片判断视频大类内容，并严格从候选标签和候选分类中选择。若不确定，请少选，不要猜。\n"
         "返回JSON字段：suggested_tags, suggested_category_id, generated_title, rationale"
     )
+    text_prompt = f"候选标签：{tag_text}\n候选分类：{cat_text}\n{prompt}"
     raw = await chat_completion(
         messages=[
             {"role": "system", "content": "你是视频内容识别助手，输出必须是严格 JSON。"},
             {
                 "role": "user",
-                "content": [
-                    {"type": "text", "text": f"候选标签：{tag_text}\n候选分类：{cat_text}\n{prompt}"},
-                    {"type": "image_url", "image_url": {"url": cover_url}},
-                ],
+                "content": await _build_cover_message_content(cover_url, text_prompt),
             },
         ],
         temperature=0.2,
@@ -366,6 +396,8 @@ async def analyze_cover_content(cover_url: str, candidate_tags: List[str], candi
     parsed_tags = [t for t in (parsed.get("suggested_tags") or []) if isinstance(t, str) and t in valid_tag_set][:5]
     valid_cat = {int(c.get("id")): c for c in candidate_categories if c.get("id") is not None}
     cat_id = parsed.get("suggested_category_id")
+    if isinstance(cat_id, str) and cat_id.isdigit():
+        cat_id = int(cat_id)
     cat = valid_cat.get(int(cat_id)) if isinstance(cat_id, int) and int(cat_id) in valid_cat else None
     generated_title = parsed.get("generated_title") if isinstance(parsed.get("generated_title"), str) else ""
     return {

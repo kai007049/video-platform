@@ -24,7 +24,7 @@ from app.schemas.task import (
 from app.repos.task_store import create_task, complete_task, fail_task, get_task
 from app.clients.backend_client import search_videos, list_messages
 from app.services.retrieval_service import hybrid_merge
-from app.clients.milvus_client import upsert_video_vector, delete_video_vector
+from app.clients.milvus_client import MilvusUnavailableError, upsert_video_vector, delete_video_vector
 from app.services.agent_service import (
     extract_data,
     build_rag_answer,
@@ -289,17 +289,24 @@ async def index_video_vector(req: VideoVectorIndexRequest):
         )
         from app.clients.embedding_client import embed_text
         vector = await embed_text(semantic_text)
-        upsert_video_vector(
-            req.video_id,
-            vector,
-            {
-                "title": req.title or "",
-                "description": req.description or "",
-                "tags": req.tags or [],
-                "category_id": req.category_id,
-                "semantic_text": semantic_text,
-            },
-        )
+        try:
+            upsert_video_vector(
+                req.video_id,
+                vector,
+                {
+                    "title": req.title or "",
+                    "description": req.description or "",
+                    "tags": req.tags or [],
+                    "category_id": req.category_id,
+                    "semantic_text": semantic_text,
+                },
+            )
+        except MilvusUnavailableError:
+            logger.warning("[Agent][vector/index] milvus unavailable videoId=%s", req.video_id, exc_info=True)
+            return {"success": False, "video_id": req.video_id, "reason": "milvus_unavailable"}
+        except Exception:
+            logger.warning("[Agent][vector/index] milvus upsert failed videoId=%s", req.video_id, exc_info=True)
+            return {"success": False, "video_id": req.video_id, "reason": "milvus_upsert_failed"}
         logger.info("[Agent][vector/index] success videoId=%s", req.video_id)
         return {"success": True, "video_id": req.video_id}
     except Exception:
@@ -313,6 +320,9 @@ async def delete_video_vector_api(req: VideoVectorDeleteRequest):
         delete_video_vector(req.video_id)
         logger.info("[Agent][vector/delete] success videoId=%s", req.video_id)
         return {"success": True, "video_id": req.video_id}
+    except MilvusUnavailableError:
+        logger.warning("[Agent][vector/delete] milvus unavailable videoId=%s", req.video_id, exc_info=True)
+        return {"success": False, "video_id": req.video_id, "reason": "milvus_unavailable"}
     except Exception:
         logger.error("[Agent][vector/delete] failed videoId=%s", req.video_id, exc_info=True)
         raise HTTPException(status_code=500, detail="vector delete failed")

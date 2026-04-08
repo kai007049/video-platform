@@ -1,6 +1,7 @@
 """Milvus 客户端：负责向量相似检索。"""
 
 from typing import List, Dict, Any
+import logging
 import time
 
 try:
@@ -10,11 +11,17 @@ except Exception:  # pragma: no cover
 
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
+
+
+class MilvusUnavailableError(RuntimeError):
+    """Milvus 依赖或服务不可用。"""
+
 
 def _get_client() -> MilvusClient:
     """创建 Milvus 客户端实例。"""
     if MilvusClient is None:
-        raise RuntimeError("未安装 pymilvus，请先安装依赖")
+        raise MilvusUnavailableError("未安装 pymilvus，请先安装依赖")
     uri = f"http://{settings.milvus_host}:{settings.milvus_port}"
     return MilvusClient(uri=uri)
 
@@ -52,16 +59,19 @@ def delete_video_vector(video_id: int) -> None:
 
 def search_similar_videos(vector: List[float], top_k: int | None = None) -> List[Dict[str, Any]]:
     """根据向量检索相似视频，返回 videoId 与相似度分数。"""
-    client = _get_client()
-    limit = top_k or settings.milvus_top_k
-    result = client.search(
-        collection_name=settings.milvus_collection,
-        data=[vector],
-        limit=limit,
-        output_fields=["video_id"],
-    )
+    try:
+        client = _get_client()
+        limit = top_k or settings.milvus_top_k
+        result = client.search(
+            collection_name=settings.milvus_collection,
+            data=[vector],
+            limit=limit,
+            output_fields=["video_id"],
+        )
+    except Exception:
+        logger.warning("[Milvus] search unavailable", exc_info=True)
+        return []
 
-    # pymilvus 返回二维列表（每个 query 对应一组命中）
     hits = result[0] if result else []
     out: List[Dict[str, Any]] = []
     for hit in hits:
