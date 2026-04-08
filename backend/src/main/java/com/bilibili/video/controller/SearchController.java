@@ -70,7 +70,7 @@ public class SearchController {
     }
 
     @GetMapping("/hybrid")
-    @Operation(summary = "混合搜索（ES + AI语义检索）")
+    @Operation(summary = "混合搜索（当前为 ES 搜索实现）")
     public Result<IPage<VideoVO>> hybridSearch(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "1") int page,

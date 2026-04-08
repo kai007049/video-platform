@@ -4,8 +4,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bilibili.video.client.AgentClient;
-import com.bilibili.video.client.dto.SemanticSearchResult;
 import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.entity.Video;
@@ -44,7 +42,6 @@ public class SearchServiceImpl implements SearchService {
     private final ElasticsearchOperations elasticsearchOperations;
     private final VideoSearchService videoSearchService;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final AgentClient agentClient;
     private final VideoViewAssembler videoViewAssembler;
 
     @Override
@@ -230,37 +227,26 @@ public class SearchServiceImpl implements SearchService {
             return new Page<>(page, size, 0);
         }
 
-        Query esQuery = NativeQuery.builder()
+        int safePage = Math.max(1, page);
+        int safeSize = Math.min(50, Math.max(1, size));
+        Query query = NativeQuery.builder()
                 .withQuery(QueryBuilders.multiMatch(m -> m
                         .fields("title", "description")
                         .query(keyword)
                 ))
-                .withPageable(PageRequest.of(0, 50))
+                .withPageable(PageRequest.of(safePage - 1, safeSize))
                 .build();
 
-        SearchHits<VideoDocument> esResult = elasticsearchOperations.search(esQuery, VideoDocument.class);
-        List<Long> esIds = esResult.stream()
+        SearchHits<VideoDocument> result = elasticsearchOperations.search(query, VideoDocument.class);
+        List<Long> ids = result.stream()
                 .map(hit -> hit.getContent().getId())
                 .collect(Collectors.toList());
+        List<Video> videos = ids.isEmpty() ? List.of() : videoMapper.selectBatchIds(ids);
+        List<VideoVO> records = videos.isEmpty() ? List.of() : videoViewAssembler.toVideoVOList(videos, userId);
 
-        SemanticSearchResult semanticResult = agentClient.semanticSearch(keyword, 20);
-        List<Long> semanticIds = semanticResult.getVideoIds();
-
-        List<Long> mergedIds = mergeSearchResults(esIds, semanticIds, 0.6, 0.4);
-
-        int start = (page - 1) * size;
-        int end = Math.min(start + size, mergedIds.size());
-        if (start >= mergedIds.size()) {
-            return new Page<>(page, size, mergedIds.size());
-        }
-        List<Long> pageIds = mergedIds.subList(start, end);
-
-        List<Video> videos = videoMapper.selectBatchIds(pageIds);
-        List<VideoVO> records = videoViewAssembler.toVideoVOList(videos, userId);
-
-        Page<VideoVO> resultPage = new Page<>(page, size, mergedIds.size());
-        resultPage.setRecords(records);
-        return resultPage;
+        Page<VideoVO> pageResult = new Page<>(safePage, safeSize, result.getTotalHits());
+        pageResult.setRecords(records);
+        return pageResult;
     }
 
     private String getHotSearchBucketKey(LocalDate date) {
@@ -274,31 +260,5 @@ public class SearchServiceImpl implements SearchService {
             keys.add(getHotSearchBucketKey(today.minusDays(i)));
         }
         return keys;
-    }
-
-    /**
-     * 融合 ES 和语义搜索结果
-     * 使用加权排序：靠前的结果得分更高
-     */
-    private List<Long> mergeSearchResults(List<Long> esIds, List<Long> semanticIds,
-                                          double esWeight, double semanticWeight) {
-        java.util.Map<Long, Double> scoreMap = new java.util.HashMap<>();
-
-        for (int i = 0; i < esIds.size(); i++) {
-            Long id = esIds.get(i);
-            double score = (esIds.size() - i) * esWeight;
-            scoreMap.put(id, scoreMap.getOrDefault(id, 0.0) + score);
-        }
-
-        for (int i = 0; i < semanticIds.size(); i++) {
-            Long id = semanticIds.get(i);
-            double score = (semanticIds.size() - i) * semanticWeight;
-            scoreMap.put(id, scoreMap.getOrDefault(id, 0.0) + score);
-        }
-
-        return scoreMap.entrySet().stream()
-                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                .map(java.util.Map.Entry::getKey)
-                .collect(Collectors.toList());
     }
 }

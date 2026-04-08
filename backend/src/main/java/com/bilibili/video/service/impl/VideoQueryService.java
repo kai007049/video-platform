@@ -76,7 +76,12 @@ public class VideoQueryService {
                 .map(Long::valueOf)
                 .toList();
         if (ids.isEmpty()) {
-            return new Page<>(page, size, 0);
+            Page<Video> fallbackPage = new Page<>(page, size);
+            Page<Video> result = videoMapper.selectPage(fallbackPage,
+                    new LambdaQueryWrapper<Video>()
+                            .orderByDesc(Video::getPlayCount)
+                            .orderByDesc(Video::getCreateTime));
+            return convertVideoPage(result, result.getRecords(), userId);
         }
 
         List<Video> videos = loadVideosByIds(ids);

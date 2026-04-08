@@ -18,12 +18,12 @@ public class VideoUploadDTO {
     private String description;
 
     /**
-     * 可为空：为空时由 AI 自动补全分类
+     * 可为空：为空时由后端规则自动补全分类
      */
     private Long categoryId;
 
     /**
-     * 可为空：为空时由 AI 自动补全标签
+     * 可为空：为空时由后端规则自动补全标签
      */
     private List<Long> tagIds;
 }

@@ -6,11 +6,6 @@
       <button class="tab" :class="{ active: activeTab === 'hot' }" @click="switchTab('hot')">热门</button>
     </div>
 
-    <div class="ai-ask-box">
-      <input v-model="aiQuestion" type="text" placeholder="AI 问答搜索，例如：帮我找 SpringBoot 实战视频" @keyup.enter="runAiAsk" />
-      <button :disabled="aiLoading || !aiQuestion.trim()" @click="runAiAsk">{{ aiLoading ? '分析中...' : 'AI 搜索' }}</button>
-    </div>
-    <div v-if="aiAnswer" class="ai-answer">{{ aiAnswer }}</div>
     <div v-if="error" class="ai-answer error">{{ error }}</div>
 
     <div class="video-grid">
@@ -52,7 +47,6 @@
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getVideoList, getRecommended, getHotList } from '../api/video'
-import { createAskTask, pollAgentTask } from '../api/agent'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,9 +56,6 @@ const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
 const pageSize = 16
-const aiQuestion = ref('')
-const aiAnswer = ref('')
-const aiLoading = ref(false)
 const error = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 
@@ -107,24 +98,6 @@ function syncFromQuery() {
   if (tab && ['recommend', 'latest', 'hot'].includes(tab)) activeTab.value = tab
 }
 
-async function runAiAsk() {
-  if (!aiQuestion.value.trim()) return
-  aiLoading.value = true
-  aiAnswer.value = ''
-  try {
-    const question = aiQuestion.value.trim()
-    const response = await createAskTask({ question, page: 1, size: pageSize })
-    const done = await pollAgentTask(response.data.task_id)
-    if (done.status !== 'success' || !done.result) throw new Error(done.error || 'AI 搜索失败')
-    aiAnswer.value = done.result.answer || ''
-    router.push({ path: '/search', query: { keyword: question, type: 'video', sortBy: 'comprehensive' } })
-  } catch (e) {
-    aiAnswer.value = e.message || 'AI 搜索失败'
-  } finally {
-    aiLoading.value = false
-  }
-}
-
 function loadMore() { fetchList(true) }
 function goVideo(id) { router.push(`/video/${id}`) }
 function goProfile(authorId) { if (authorId) router.push(`/user/${authorId}`) }
@@ -147,10 +120,6 @@ watch(() => route.query, () => {
 
 <style scoped>
 .home { padding-bottom: 40px; }
-.ai-ask-box { display: flex; gap: 10px; margin: 0 0 14px; }
-.ai-ask-box input { flex: 1; padding: 10px 12px; border: 1px solid #e3e5e7; border-radius: 8px; }
-.ai-ask-box button { padding: 10px 14px; border: 1px solid #fb7299; color: #fb7299; background: #fff; border-radius: 8px; }
-.ai-answer { margin-bottom: 14px; padding: 10px 12px; border-radius: 8px; background: #fff3f7; color: #61666d; border: 1px solid #ffd1df; font-size: 13px; }
 .ai-answer.error { background: #fff5f5; border-color: #ffd7d7; color: #c0392b; }
 .tabs { display: flex; align-items: center; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #e3e5e7; }
 .tab { position: relative; padding: 10px 16px; font-size: 15px; color: #61666d; background: transparent; border: none; cursor: pointer; }

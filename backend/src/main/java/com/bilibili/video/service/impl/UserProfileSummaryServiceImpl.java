@@ -54,7 +54,7 @@ public class UserProfileSummaryServiceImpl implements UserProfileSummaryService 
         long recentLikeCount = countRecentLikes(userId, 20);
         long recentFavoriteCount = countRecentFavorites(userId, 20);
 
-        // 3) 组装紧凑画像上下文，直接提供给 agent-service 作为召回语境。
+        // 3) 组装紧凑画像上下文，供后端推荐与规则逻辑使用。
         return "userId=" + userId
                 + "; topTags=" + topTags
                 + "; recentWatchCount=" + recentWatchCount

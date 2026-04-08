@@ -1,7 +1,6 @@
 package com.bilibili.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.bilibili.video.client.AgentClient;
 import com.bilibili.video.client.dto.ContentAnalysisResult;
 import com.bilibili.video.client.dto.ScoredTag;
 import com.bilibili.video.common.Constants;
@@ -25,7 +24,6 @@ import com.bilibili.video.model.dto.VideoUploadDTO;
 import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.model.mq.VideoDeleteMessage;
 import com.bilibili.video.model.mq.VideoProcessMessage;
-import com.bilibili.video.model.mq.VideoSemanticIndexMessage;
 import com.bilibili.video.model.vo.VideoVO;
 import com.bilibili.video.service.MQService;
 import com.bilibili.video.service.RecommendationFeatureService;
@@ -71,7 +69,7 @@ public class VideoCommandService {
     private final WatchHistoryMapper watchHistoryMapper;
     private final TagMapper tagMapper;
     private final CategoryMapper categoryMapper;
-    private final AgentClient agentClient;
+    private final LocalContentAnalysisService localContentAnalysisService;
     private final MinioUtils minioUtils;
     private final VideoCoverExtractor videoCoverExtractor;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -83,7 +81,7 @@ public class VideoCommandService {
 
     /**
      * 上传视频并创建记录。
-     * 支持“轻投稿”：当分类/标签/简介缺失时，使用 AI 自动补全。
+     * 支持“轻投稿”：当分类/标签/简介缺失时，使用本地规则自动补全。
      */
     public VideoVO upload(MultipartFile videoFile, MultipartFile coverFile, VideoUploadDTO dto, Long authorId) {
         if (videoFile == null || videoFile.isEmpty()) {
@@ -138,15 +136,6 @@ public class VideoCommandService {
         mqService.sendVideoProcess(new VideoProcessMessage(video.getId(), authorId));
         mqService.sendSearchSync(new SearchSyncMessage("video", video.getId(), "create"));
         mqService.sendVideoCoverProcess(new VideoProcessMessage(video.getId(), authorId));
-        mqService.sendVideoSemanticIndex(new VideoSemanticIndexMessage(
-                video.getId(),
-                videoUrl,
-                coverUrl,
-                metadata.title,
-                metadata.description,
-                metadata.categoryId,
-                resolveTagNames(metadata.tagIds)
-        ));
         if (useDefaultCover) {
             videoPostProcessFallbackService.triggerCoverProcessFallback(video.getId());
         }
@@ -242,7 +231,7 @@ public class VideoCommandService {
     /**
      * 解析投稿元数据。
      * - 全量手填：manual + confidence=1.0
-     * - 存在缺失：走 AI 补全分支
+     * - 存在缺失：走本地规则补全分支
      */
     private UploadMetadata resolveUploadMetadata(VideoUploadDTO dto, String coverUrl) {
         String title = normalizeNullableText(dto.getTitle());
@@ -253,12 +242,12 @@ public class VideoCommandService {
                 .collect(Collectors.toCollection(ArrayList::new));
         Long manualCategoryId = dto.getCategoryId();
 
-        boolean needAiFill = title.isBlank()
+        boolean needRuleFill = title.isBlank()
                 || manualTagIds.isEmpty()
                 || manualCategoryId == null
                 || description.isBlank();
 
-        if (!needAiFill) {
+        if (!needRuleFill) {
             UploadMetadata metadata = new UploadMetadata();
             metadata.title = title;
             metadata.description = description;
@@ -276,42 +265,23 @@ public class VideoCommandService {
             throw new BizException(400, "系统未配置分类，无法自动补全，请先维护分类");
         }
 
-        List<String> candidateTags = allTags == null ? Collections.emptyList()
-                : allTags.stream().map(Tag::getName).filter(Objects::nonNull).toList();
-        List<Map<String, Object>> candidateCategories = allCategories.stream()
-                .map(c -> {
-                    Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("id", c.getId());
-                    m.put("name", c.getName());
-                    return m;
-                })
-                .toList();
-
-        ContentAnalysisResult aiResult = agentClient.analyzeContent(
+        ContentAnalysisResult ruleResult = localContentAnalysisService.analyzeContent(
                 title,
                 description,
-                coverUrl,
-                candidateTags,
-                candidateCategories
+                allTags,
+                allCategories
         );
 
         UploadMetadata metadata = new UploadMetadata();
-        metadata.description = description.isBlank()
-                ? firstNonBlank(aiResult == null ? null : aiResult.getSummary(), "")
-                : description;
+        metadata.description = description.isBlank() ? "" : description;
 
         boolean hasManualTags = !manualTagIds.isEmpty();
         metadata.tagIds = hasManualTags
                 ? manualTagIds
-                : mapAiTagNamesToIds(aiResult, allTags);
+                : mapRuleTagNamesToIds(ruleResult, allTags);
+        metadata.featureSource = "rule";
+        metadata.confidenceByTagId = localContentAnalysisService.buildConfidenceMap(metadata.tagIds, ruleResult, allTags);
 
-        // 只要进入 AI 分支，特征来源就是 ai，置信度尽量取 AI 分数。
-        metadata.featureSource = "ai";
-        metadata.confidenceByTagId = buildConfidenceMap(metadata.tagIds, aiResult, allTags, true);
-
-        // 修复点：
-        // 不再硬塞前两个标签（会造成“篮球内容被写成动漫/影视”）。
-        // 先按标题+简介做关键词兜底，仍匹配不到则保持空标签，避免脏数据。
         if (metadata.tagIds.isEmpty() && allTags != null && !allTags.isEmpty()) {
             String fallbackText = firstNonBlank(title, "") + " " + firstNonBlank(metadata.description, "");
             metadata.tagIds = fallbackMatchTags(fallbackText, allTags, 5);
@@ -320,14 +290,14 @@ public class VideoCommandService {
                         .collect(Collectors.toMap(id -> id, id -> 0.45D, (a, b) -> a, LinkedHashMap::new));
             } else {
                 metadata.confidenceByTagId = Collections.emptyMap();
-                log.warn("AI标签为空且关键词兜底未命中: title={}, description={}", title, metadata.description);
+                log.warn("规则标签为空且关键词兜底未命中: title={}, description={}", title, metadata.description);
             }
         }
 
         metadata.categoryId = manualCategoryId != null
                 ? manualCategoryId
-                : resolveCategoryId(aiResult, metadata.tagIds, allTags, allCategories, title, metadata.description);
-        metadata.title = buildUploadTitle(title, aiResult == null ? null : aiResult.getGeneratedTitle(), metadata.description, metadata.tagIds, allTags);
+                : resolveCategoryId(ruleResult, metadata.tagIds, allTags, allCategories, title, metadata.description);
+        metadata.title = buildUploadTitle(title, ruleResult == null ? null : ruleResult.getGeneratedTitle(), metadata.description, metadata.tagIds, allTags);
         return metadata;
     }
 
@@ -447,12 +417,12 @@ public class VideoCommandService {
         return null;
     }
 
-    private List<Long> mapAiTagNamesToIds(ContentAnalysisResult aiResult, List<Tag> allTags) {
-        if (aiResult == null || aiResult.getSuggestedTags() == null || aiResult.getSuggestedTags().isEmpty()) {
+    private List<Long> mapRuleTagNamesToIds(ContentAnalysisResult ruleResult, List<Tag> allTags) {
+        if (ruleResult == null || ruleResult.getSuggestedTags() == null || ruleResult.getSuggestedTags().isEmpty()) {
             return new ArrayList<>();
         }
         List<Long> out = new ArrayList<>();
-        for (String name : aiResult.getSuggestedTags()) {
+        for (String name : ruleResult.getSuggestedTags()) {
             Long id = resolveTagIdByName(name, allTags);
             if (id != null && !out.contains(id)) {
                 out.add(id);

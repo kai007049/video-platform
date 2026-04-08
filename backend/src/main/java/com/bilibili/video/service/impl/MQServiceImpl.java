@@ -7,7 +7,6 @@ import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.model.mq.SearchSyncMessage;
 import com.bilibili.video.model.mq.VideoDeleteMessage;
 import com.bilibili.video.model.mq.VideoProcessMessage;
-import com.bilibili.video.model.mq.VideoSemanticIndexMessage;
 import com.bilibili.video.service.MQService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -99,11 +98,6 @@ public class MQServiceImpl implements MQService {
     @Override
     public void sendVideoDelete(VideoDeleteMessage message) {
         sendAsyncWithRetry(MqTopics.VIDEO_DELETE, message, "video delete");
-    }
-
-    @Override
-    public void sendVideoSemanticIndex(VideoSemanticIndexMessage message) {
-        sendAsyncWithRetry(MqTopics.VIDEO_SEMANTIC_INDEX, message, "video semantic index");
     }
 
     @Override

@@ -1,6 +1,6 @@
-﻿# Video Platform Backend
+# Video Platform Backend
 
-基于 Spring Boot 3 的视频平台后端服务。
+基于 Spring Boot 3 的视频平台后端服务，当前为 **纯 Java** 架构，不依赖独立 Python agent 服务。
 
 ## 技术栈
 
@@ -13,6 +13,15 @@
 - RocketMQ
 - WebSocket
 - MinIO
+
+## 主要能力
+
+- 视频上传、删除、详情、播放统计
+- 点赞、收藏、评论、弹幕、观看进度
+- 搜索、热门搜索、搜索历史
+- backend-only 推荐系统
+- 私信、通知、系统消息
+- 基于本地规则的标签推荐与投稿内容补全
 
 ## 快速开始
 
@@ -47,5 +56,5 @@ mvn spring-boot:run
 ## 说明
 
 - 当前目录是 Java 后端独立模块
-- 根目录的 `frontend/` 和 `agent-service/` 为并列模块
-- 推荐后续将环境变量和部署脚本继续按模块拆分管理
+- 根目录与 `frontend/` 配合运行即可
+- 搜索与投稿补全已收敛为 backend 内部实现

@@ -44,7 +44,7 @@ public interface SearchService {
     List<String> getHotSearches(int limit);
 
     /**
-     * 混合搜索：结合 ES 关键词搜索和 Agent 语义检索
+     * 混合搜索接口保留给前端调用，当前实现为 ES-only。
      */
     IPage<VideoVO> hybridSearch(String keyword, int page, int size, Long userId);
 }

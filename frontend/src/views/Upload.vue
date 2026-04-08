@@ -41,11 +41,8 @@
               class="input"
               type="text"
               maxlength="80"
-              placeholder="可留空，后续也可以手动使用 AI 助攻补全"
+              placeholder="可留空，上传时后端会自动补全"
             />
-            <button type="button" class="btn-secondary" :disabled="loadingAiAssist" @click="runUploadAssist({ applyGeneratedTitle: true })">
-              AI 助攻
-            </button>
           </div>
         </div>
 
@@ -60,7 +57,7 @@
               placeholder="补充视频亮点、信息来源或观看提示（选填）"
             />
             <button type="button" class="btn-secondary" :disabled="loadingSuggest" @click="recommendTags">
-              AI 生成建议
+              推荐标签
             </button>
           </div>
         </div>
@@ -88,7 +85,7 @@
 
             <div v-if="recommendedTags.length > 0" class="selector-section">
               <div class="section-title-row">
-                <span class="section-title">AI 推荐</span>
+                <span class="section-title">推荐标签</span>
               </div>
               <div class="tag-list">
                 <button
@@ -216,7 +213,6 @@ import { useRouter } from 'vue-router'
 import { uploadVideo } from '../api/video'
 import { getCategoryTree } from '../api/category'
 import { getTagList, recommendTags as recommendTagsApi } from '../api/tag'
-import { createUploadAssistTask, pollAgentTask } from '../api/agent'
 
 const router = useRouter()
 const videoInput = ref(null)
@@ -224,7 +220,6 @@ const coverInput = ref(null)
 const loading = ref(false)
 const error = ref('')
 const loadingSuggest = ref(false)
-const loadingAiAssist = ref(false)
 const isVideoDragging = ref(false)
 const videoFile = ref(null)
 const coverFile = ref(null)
@@ -406,7 +401,7 @@ async function loadTags() {
 
 async function recommendTags() {
   if (!form.title.trim() && !form.description.trim()) {
-    error.value = '请先填写标题或简介，再使用 AI 建议'
+    error.value = '请先填写标题或简介，再获取推荐标签'
     return
   }
   loadingSuggest.value = true
@@ -421,53 +416,9 @@ async function recommendTags() {
       form.tagIds = [...new Set([...form.tagIds, ...ids])]
     }
   } catch (e) {
-    error.value = e.message || '智能推荐失败'
+    error.value = e.message || '推荐标签失败'
   } finally {
     loadingSuggest.value = false
-  }
-}
-
-async function runUploadAssist(options = {}) {
-  const { silent = false, applyGeneratedTitle = false } = options
-  loadingAiAssist.value = true
-  if (!silent) error.value = ''
-  try {
-    const createRes = await createUploadAssistTask({
-      title: form.title || '',
-      description: form.description || '',
-      candidate_tags: tags.value.map(i => i.name),
-      candidate_categories: flattenedCategories.value.map(i => ({ id: i.id, name: i.name }))
-    })
-
-    const taskId = createRes?.data?.task_id
-    if (!taskId) throw new Error('AI 任务创建失败')
-
-    const task = await pollAgentTask(taskId)
-    const result = task?.result || {}
-
-    if (Array.isArray(result.suggested_tags) && result.suggested_tags.length > 0) {
-      const suggestedIds = result.suggested_tags
-        .map(name => tags.value.find(i => i.name === name)?.id)
-        .filter(Boolean)
-      aiSuggestedTagIds.value = [...new Set(suggestedIds)]
-      form.tagIds = [...new Set([...form.tagIds, ...suggestedIds])]
-    }
-
-    if (result.suggested_category_id) syncSelectedCategory(Number(result.suggested_category_id))
-    if (typeof result.generated_summary === 'string' && result.generated_summary.trim() && !form.description.trim()) {
-      form.description = result.generated_summary.trim()
-    }
-    if (applyGeneratedTitle && typeof result.generated_title === 'string' && result.generated_title.trim() && !form.title.trim()) {
-      form.title = result.generated_title.trim()
-    }
-    return result
-  } catch (e) {
-    if (!silent) {
-      error.value = e.message || 'AI 助攻失败'
-    }
-    return null
-  } finally {
-    loadingAiAssist.value = false
   }
 }
 

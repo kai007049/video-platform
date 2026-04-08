@@ -5,26 +5,72 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="投稿功能完善">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/349b0447-9c5f-4090-9f83-370354abb7f2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/349b0447-9c5f-4090-9f83-370354abb7f2.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/_2026_3_29_14_26____.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/在进行签出之前于_2026_3_29_14_26_取消提交了更改_[更改]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent-service/app/api/routes/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/app/api/routes/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/milvus_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/app/clients/milvus_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent-service/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/app/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agent-service/app/services/agent_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/agent-service/app/services/agent_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/axios.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/axios.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/stores/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/stores/user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/CreatorDashboard.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/CreatorDashboard.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Layout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Layout.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/.idea/agent-service.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/api/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/api/routes/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/api/routes/tasks.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/backend_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/embedding_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/llm_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/milvus_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/clients/redis_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/core/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/core/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/evals/demo_dataset.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/evals/run_eval.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/repos/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/repos/task_store.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/schemas/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/schemas/task.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/agent_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/app/services/retrieval_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/agent-service/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/client/AgentClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/client/dto/ModerationResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/client/dto/SemanticSearchResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/client/dto/TagRecommendResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/client/dto/TaskResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/client/dto/TaskResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/common/MqTopics.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/common/MqTopics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/config/RestTemplateConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/SearchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/SearchController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/TagController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/TagController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/model/mq/VideoSemanticIndexMessage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/VideoDeleteConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/VideoDeleteConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/VideoSemanticIndexConsumer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/MQService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/MQService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/SearchService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/SearchService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/MQServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/UserProfileSummaryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/UserProfileSummaryServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoAutoTagServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoAutoTagServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoCommandService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoCommandService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/AGENT_INTEGRATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/Agent.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/RECOMMENDATION_ARCHITECTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/RECOMMENDATION_ARCHITECTURE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/SYSTEM_ARCHITECTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/SYSTEM_ARCHITECTURE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/agent.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Upload.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Upload.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -318,7 +364,8 @@
     <MESSAGE value="缓存、头像、消息队列完善" />
     <MESSAGE value="agent功能完善" />
     <MESSAGE value="bug修复" />
-    <option name="LAST_COMMIT_MESSAGE" value="bug修复" />
+    <MESSAGE value="前端布局修改" />
+    <option name="LAST_COMMIT_MESSAGE" value="前端布局修改" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
