@@ -8,22 +8,55 @@
     </transition>
     <div class="modal">
       <div class="modal-header">
-        <h2>注册</h2>
+        <div class="tabs">
+          <button class="tab" @click="switchToLogin">登录</button>
+          <button class="tab active" @click="switchToRegister">注册</button>
+        </div>
         <button class="btn-close" @click="close">×</button>
       </div>
-      <form class="form" @submit.prevent="handleSubmit">
-        <div class="field">
-          <input v-model="form.username" type="text" placeholder="用户名" required minlength="2" />
-        </div>
-        <div class="field">
-          <input v-model="form.password" type="password" placeholder="密码" required minlength="6" />
-        </div>
-        <p v-if="error" class="error">{{ error }}</p>
-        <button type="submit" class="btn-submit" :disabled="loading">注册</button>
-        <p class="tip">
-          已有账号？<a href="#" @click.prevent="switchToLogin">立即登录</a>
-        </p>
-      </form>
+      <div class="modal-content">
+        <h2 class="modal-title">开启你的旅程</h2>
+        <p class="modal-subtitle">加入VisionPlay，探索无限可能</p>
+        <form class="form" @submit.prevent="handleSubmit">
+          <div class="field">
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input v-model="form.username" type="text" placeholder="用户名" required minlength="2" />
+            </div>
+          </div>
+          <div class="field">
+            <div class="input-wrapper">
+              <span class="input-icon">✉</span>
+              <input v-model="form.email" type="email" placeholder="邮箱地址" required />
+            </div>
+          </div>
+          <div class="field">
+            <div class="input-wrapper">
+              <span class="input-icon">🔑</span>
+              <input v-model="form.password" type="password" placeholder="密码" required minlength="6" />
+            </div>
+          </div>
+          <div class="terms">
+            <input type="checkbox" id="terms" v-model="agreedToTerms" required />
+            <label for="terms">我已阅读并同意 <a href="#" @click.prevent>服务条款</a></label>
+          </div>
+          <p v-if="error" class="error">{{ error }}</p>
+          <button type="submit" class="btn-submit" :disabled="loading">创建账号 →</button>
+          <div class="third-party-login">
+            <p class="third-party-title">第三方登录</p>
+            <div class="third-party-buttons">
+              <button type="button" class="third-party-btn">
+                <span class="btn-icon">🔒</span>
+                <span>GitHub</span>
+              </button>
+              <button type="button" class="third-party-btn">
+                <span class="btn-icon">📱</span>
+                <span>手机号</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -40,14 +73,17 @@ const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 const error = ref('')
+const agreedToTerms = ref(false)
 const toast = reactive({ show: false, message: '', type: 'success', timer: null })
-const form = reactive({ username: '', password: '' })
+const form = reactive({ username: '', email: '', password: '' })
 
 watch(() => props.modelValue, (v) => {
   if (v) {
     error.value = ''
     form.username = ''
+    form.email = ''
     form.password = ''
+    agreedToTerms.value = false
     hideToast()
   }
 })
@@ -64,6 +100,10 @@ function switchToLogin() {
   const q = { ...router.currentRoute.value.query, login: '1' }
   delete q.register
   router.push({ path: router.currentRoute.value.path, query: q })
+}
+
+function switchToRegister() {
+  // 已在注册页面，无需操作
 }
 
 function showToast(message, type = 'success') {
@@ -85,6 +125,10 @@ function hideToast() {
 
 async function handleSubmit() {
   error.value = ''
+  if (!agreedToTerms.value) {
+    error.value = '请阅读并同意服务条款'
+    return
+  }
   loading.value = true
   try {
     await userStore.register(form)
@@ -167,7 +211,7 @@ async function handleSubmit() {
   width: 400px;
   padding: 32px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 16px 48px rgba(0,0,0,.2);
 }
 
@@ -175,12 +219,32 @@ async function handleSubmit() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
-.modal-header h2 {
-  font-size: 22px;
-  font-weight: 600;
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab.active {
+  background: #fff;
+  color: #1f2937;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-close {
@@ -190,51 +254,124 @@ async function handleSubmit() {
   line-height: 1;
   color: #999;
   background: none;
+  border: none;
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .btn-close:hover {
-  background: var(--bg-gray);
-  color: var(--text-primary);
+  background: #f1f5f9;
+  color: #1f2937;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .field {
-  margin-bottom: 16px;
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 16px;
 }
 
 .field input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 14px 16px 14px 44px;
   font-size: 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  background: #f8fafc;
 }
 
 .field input:focus {
-  border-color: var(--bili-pink);
+  border-color: #4f46e5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.terms input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: #4f46e5;
+}
+
+.terms a {
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.terms a:hover {
+  text-decoration: underline;
 }
 
 .error {
   color: #f56c6c;
   font-size: 14px;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .btn-submit {
   width: 100%;
-  padding: 12px;
+  padding: 16px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: #fff;
-  background: var(--bili-pink);
-  border-radius: 8px;
-  margin-top: 8px;
+  background: #1f2937;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: var(--bili-pink-hover);
+  background: #4f46e5;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
 .btn-submit:disabled {
@@ -242,18 +379,47 @@ async function handleSubmit() {
   cursor: not-allowed;
 }
 
-.tip {
-  margin-top: 16px;
+.third-party-login {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.third-party-title {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #94a3b8;
   text-align: center;
+  margin: 0;
 }
 
-.tip a {
-  color: var(--bili-pink);
+.third-party-buttons {
+  display: flex;
+  gap: 12px;
 }
 
-.tip a:hover {
-  text-decoration: underline;
+.third-party-btn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.third-party-btn:hover {
+  border-color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.btn-icon {
+  font-size: 16px;
 }
 </style>

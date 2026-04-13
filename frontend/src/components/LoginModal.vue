@@ -8,29 +8,48 @@
     </transition>
     <div class="modal">
       <div class="modal-header">
-        <h2>登录</h2>
+        <div class="tabs">
+          <button class="tab active" @click="switchToLogin">登录</button>
+          <button class="tab" @click="switchToRegister">注册</button>
+        </div>
         <button class="btn-close" @click="close">×</button>
       </div>
-      <form class="form" @submit.prevent="handleSubmit">
-        <div class="field">
-          <input v-model="form.account" type="text" placeholder="用户名 / 手机号 / 邮箱" required />
-        </div>
-        <div class="field">
-          <input v-model="form.password" type="password" placeholder="密码" required />
-        </div>
-        <div class="field captcha-row">
-          <input v-model="form.captchaValue" type="text" placeholder="验证码" required />
-          <button type="button" class="btn-captcha" @click="refreshCaptcha" :disabled="captchaLoading">
-            <img v-if="captcha.imageBase64" :src="captcha.imageBase64" alt="验证码" />
-            <span v-else>获取验证码</span>
-          </button>
-        </div>
-        <p v-if="error" class="error">{{ error }}</p>
-        <button type="submit" class="btn-submit" :disabled="loading">登录</button>
-        <p class="tip">
-          还没有账号？<a href="#" @click.prevent="switchToRegister">立即注册</a>
-        </p>
-      </form>
+      <div class="modal-content">
+        <h2 class="modal-title">欢迎回来</h2>
+        <p class="modal-subtitle">在这里发现属于你的 AI 视频新体验</p>
+        <form class="form" @submit.prevent="handleSubmit">
+          <div class="field">
+            <div class="input-wrapper">
+              <span class="input-icon">✉</span>
+              <input v-model="form.account" type="email" placeholder="邮箱地址" required />
+            </div>
+          </div>
+          <div class="field">
+            <div class="input-wrapper">
+              <span class="input-icon">🔑</span>
+              <input v-model="form.password" type="password" placeholder="密码" required />
+            </div>
+          </div>
+          <div class="forgot-password">
+            <a href="#" @click.prevent>忘记密码？</a>
+          </div>
+          <p v-if="error" class="error">{{ error }}</p>
+          <button type="submit" class="btn-submit" :disabled="loading">立即登录 →</button>
+          <div class="third-party-login">
+            <p class="third-party-title">第三方登录</p>
+            <div class="third-party-buttons">
+              <button type="button" class="third-party-btn">
+                <span class="btn-icon">🔒</span>
+                <span>GitHub</span>
+              </button>
+              <button type="button" class="third-party-btn">
+                <span class="btn-icon">📱</span>
+                <span>手机号</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -46,22 +65,16 @@ const emit = defineEmits(['update:modelValue'])
 const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
-const captchaLoading = ref(false)
 const error = ref('')
 const toast = reactive({ show: false, message: '', type: 'success', timer: null })
-const form = reactive({ account: '', password: '', captchaKey: '', captchaValue: '' })
-const captcha = reactive({ imageBase64: '' })
+const form = reactive({ account: '', password: '' })
 
 watch(() => props.modelValue, (v) => {
   if (v) {
     error.value = ''
     form.account = ''
     form.password = ''
-    form.captchaKey = ''
-    form.captchaValue = ''
-    captcha.imageBase64 = ''
     hideToast()
-    refreshCaptcha()
   }
 })
 
@@ -70,6 +83,10 @@ function close() {
   delete q.login
   router.replace({ query: q })
   emit('update:modelValue', false)
+}
+
+function switchToLogin() {
+  // 已在登录页面，无需操作
 }
 
 function switchToRegister() {
@@ -96,20 +113,6 @@ function hideToast() {
   toast.timer = null
 }
 
-async function refreshCaptcha() {
-  if (captchaLoading.value) return
-  captchaLoading.value = true
-  try {
-    const data = await userStore.fetchCaptcha()
-    form.captchaKey = data.captchaKey
-    captcha.imageBase64 = `data:image/png;base64,${data.imageBase64}`
-  } catch (e) {
-    error.value = e.message || '验证码获取失败'
-  } finally {
-    captchaLoading.value = false
-  }
-}
-
 async function handleSubmit() {
   error.value = ''
   loading.value = true
@@ -122,7 +125,6 @@ async function handleSubmit() {
     }, 600)
   } catch (e) {
     error.value = e.message || '登录失败'
-    await refreshCaptcha()
   } finally {
     loading.value = false
   }
@@ -194,7 +196,7 @@ async function handleSubmit() {
   width: 400px;
   padding: 32px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 16px 48px rgba(0,0,0,.2);
 }
 
@@ -202,12 +204,32 @@ async function handleSubmit() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
-.modal-header h2 {
-  font-size: 22px;
-  font-weight: 600;
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab.active {
+  background: #fff;
+  color: #1f2937;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-close {
@@ -217,85 +239,117 @@ async function handleSubmit() {
   line-height: 1;
   color: #999;
   background: none;
+  border: none;
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .btn-close:hover {
-  background: var(--bg-gray);
-  color: var(--text-primary);
+  background: #f1f5f9;
+  color: #1f2937;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .field {
-  margin-bottom: 16px;
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 16px;
 }
 
 .field input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 14px 16px 14px 44px;
   font-size: 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  background: #f8fafc;
 }
 
 .field input:focus {
-  border-color: var(--bili-pink);
-}
-
-.captcha-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.captcha-row input {
-  flex: 1;
-}
-
-.btn-captcha {
-  width: 120px;
-  height: 44px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border-color: #4f46e5;
   background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 0;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-.btn-captcha img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.forgot-password {
+  align-self: flex-end;
 }
 
-.btn-captcha:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.forgot-password a {
+  font-size: 14px;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+  color: #4f46e5;
 }
 
 .error {
   color: #f56c6c;
   font-size: 14px;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .btn-submit {
   width: 100%;
-  padding: 12px;
+  padding: 16px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: #fff;
-  background: var(--bili-pink);
-  border-radius: 8px;
-  margin-top: 8px;
+  background: #1f2937;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: var(--bili-pink-hover);
+  background: #4f46e5;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
 .btn-submit:disabled {
@@ -303,18 +357,47 @@ async function handleSubmit() {
   cursor: not-allowed;
 }
 
-.tip {
-  margin-top: 16px;
+.third-party-login {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.third-party-title {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #94a3b8;
   text-align: center;
+  margin: 0;
 }
 
-.tip a {
-  color: var(--bili-pink);
+.third-party-buttons {
+  display: flex;
+  gap: 12px;
 }
 
-.tip a:hover {
-  text-decoration: underline;
+.third-party-btn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.third-party-btn:hover {
+  border-color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.btn-icon {
+  font-size: 16px;
 }
 </style>

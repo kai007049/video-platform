@@ -1,28 +1,35 @@
 <template>
   <div class="creator-dashboard">
     <section class="profile-card" v-if="userInfo">
-      <img :src="resolveAvatar(userInfo.avatar)" class="avatar" alt="avatar" @error="onAvatarError" />
+      <div class="avatar-wrapper">
+        <img :src="resolveAvatar(userInfo.avatar)" class="avatar" alt="avatar" @error="onAvatarError" />
+      </div>
       <div class="profile-main">
-        <h1>{{ userInfo.username }}</h1>
+        <h1 class="username">{{ userInfo.username }}</h1>
         <p class="profile-sign">{{ userInfo.sign || '这个人很神秘，什么都没有留下。' }}</p>
         <div class="profile-stats">
           <div class="stat-item">
+            <span class="stat-icon">🎬</span>
             <span class="stat-value">{{ formatCount(stats.videoCount) }}</span>
             <span class="stat-label">作品</span>
           </div>
           <div class="stat-item">
+            <span class="stat-icon">👥</span>
             <span class="stat-value">{{ formatCount(followingCount) }}</span>
             <span class="stat-label">关注</span>
           </div>
           <div class="stat-item">
+            <span class="stat-icon">🌟</span>
             <span class="stat-value">{{ formatCount(stats.fanCount) }}</span>
             <span class="stat-label">粉丝</span>
           </div>
           <div class="stat-item">
+            <span class="stat-icon">▶️</span>
             <span class="stat-value">{{ formatCount(stats.totalPlayCount) }}</span>
             <span class="stat-label">总播放</span>
           </div>
           <div class="stat-item">
+            <span class="stat-icon">❤️</span>
             <span class="stat-value">{{ formatCount(stats.totalLikeCount) }}</span>
             <span class="stat-label">总点赞</span>
           </div>
@@ -42,9 +49,29 @@
     </section>
 
     <section class="content-section">
-      <div v-if="loading" class="state-panel">加载中...</div>
-      <div v-else-if="errorMessage" class="state-panel error">{{ errorMessage }}</div>
-      <div v-else-if="currentList.length === 0" class="state-panel">当前还没有内容</div>
+      <EmptyState
+        v-if="errorMessage"
+        icon="⚠️"
+        title="加载失败"
+        :description="errorMessage"
+        :actions="[
+          { label: '重试', type: 'primary', handler: loadDashboard },
+          { label: '返回首页', type: 'secondary', handler: () => router.push('/') }
+        ]"
+      />
+      <EmptyState
+        v-else-if="currentList.length === 0 && !loading"
+        icon="📭"
+        title="暂无内容"
+        description="当前还没有内容，快来创作吧！"
+        :actions="[
+          { label: '发布视频', type: 'primary', handler: () => router.push('/upload') }
+        ]"
+      />
+      <div v-else-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>加载中...</p>
+      </div>
 
       <div v-else-if="isVideoTab" class="video-grid">
         <article v-for="video in currentList" :key="video.id" class="video-card">
@@ -100,6 +127,7 @@ import {
   getLikedVideos
 } from '../api/video'
 import { useUserStore } from '../stores/user'
+import EmptyState from '../components/EmptyState.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -348,10 +376,17 @@ onMounted(() => {
   display: flex;
   gap: 24px;
   align-items: center;
-  padding: 28px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #fff8f4, #ffffff);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  padding: 32px;
+  border-radius: 2.5rem;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.avatar-wrapper {
+  position: relative;
 }
 
 .avatar {
@@ -361,43 +396,67 @@ onMounted(() => {
   object-fit: cover;
   border: 4px solid #fff;
   background: #f3f4f6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
 }
 
 .profile-main {
   flex: 1;
 }
 
-.profile-main h1 {
+.username {
   margin: 0;
-  font-size: 30px;
+  font-size: 28px;
+  font-weight: 700;
   color: #111827;
+  line-height: 1.2;
 }
 
 .profile-sign {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: #6b7280;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
-  gap: 14px;
-  margin-top: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
 }
 
 .stat-item {
-  padding: 14px 12px;
-  border-radius: 14px;
-  background: #fff;
-  border: 1px solid #f1f5f9;
+  padding: 16px 12px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.stat-item:hover {
+  background: #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 8px;
 }
 
 .stat-value {
   display: block;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #111827;
+  line-height: 1.2;
 }
 
 .stat-label {
@@ -405,61 +464,89 @@ onMounted(() => {
   display: block;
   color: #6b7280;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .tabs-section {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 24px 0 18px;
+  gap: 12px;
+  margin: 24px 0 20px;
+  padding: 0 4px;
 }
 
 .tab-item {
-  padding: 10px 18px;
+  padding: 10px 20px;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   background: #fff;
   color: #4b5563;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tab-item.active,
 .tab-item:hover {
-  border-color: #fb7185;
-  color: #e11d48;
-  background: #fff1f2;
+  border-color: #4338ca;
+  color: white;
+  background: #4338ca;
+  box-shadow: 0 4px 8px rgba(67, 56, 202, 0.3);
+  transform: translateY(-1px);
 }
 
 .content-section {
-  min-height: 320px;
+  min-height: 400px;
 }
 
-.state-panel {
-  padding: 80px 20px;
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 60px 20px;
   text-align: center;
-  border-radius: 18px;
-  background: #fff;
   color: #6b7280;
+  font-size: 14px;
 }
 
-.state-panel.error {
-  color: #dc2626;
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #fb7185;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
 }
 
 .video-card,
 .user-card {
   background: #fff;
-  border-radius: 18px;
+  border-radius: 2.5rem;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+}
+
+.video-card:hover,
+.user-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }
 
 .cover-wrap {
@@ -467,76 +554,104 @@ onMounted(() => {
   aspect-ratio: 16 / 9;
   background: #f3f4f6;
   cursor: pointer;
+  overflow: hidden;
+  border-top-left-radius: 2.5rem;
+  border-top-right-radius: 2.5rem;
 }
 
 .cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.cover-wrap:hover .cover {
+  transform: scale(1.05);
 }
 
 .duration {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
-  padding: 4px 8px;
+  right: 12px;
+  bottom: 12px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(17, 24, 39, 0.78);
+  background: rgba(17, 24, 39, 0.85);
   color: #fff;
   font-size: 12px;
+  font-weight: 500;
 }
 
 .card-body {
-  padding: 16px;
+  padding: 18px;
 }
 
 .video-title {
   margin: 0;
   color: #111827;
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
   cursor: pointer;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .video-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 12px;
   color: #6b7280;
   font-size: 13px;
 }
 
 .delete-btn {
-  margin-top: 14px;
+  margin-top: 16px;
   width: 100%;
   padding: 10px 0;
   border: none;
   border-radius: 12px;
   background: #fff1f2;
   color: #e11d48;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.15);
 }
 
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .user-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 2.5rem;
 }
 
 .user-avatar {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   object-fit: cover;
   background: #f3f4f6;
+  border: 2px solid #e2e8f0;
+  transition: transform 0.3s;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
 }
 
 .user-card-main {
@@ -547,29 +662,39 @@ onMounted(() => {
 .user-name {
   color: #111827;
   font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
 }
 
 .user-signature {
-  margin-top: 6px;
   color: #6b7280;
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.4;
 }
 
 .user-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .action-btn {
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   background: #fff;
   color: #374151;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s;
+}
+
+.action-btn:hover {
+  background: #f9fafb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .action-btn.primary {
@@ -578,24 +703,64 @@ onMounted(() => {
   color: #fff;
 }
 
+.action-btn.primary:hover {
+  background: #f43f5e;
+  box-shadow: 0 4px 12px rgba(251, 113, 133, 0.3);
+}
+
 @media (max-width: 768px) {
   .creator-dashboard {
-    padding-top: 12px;
+    padding: 16px 16px 40px;
   }
 
   .profile-card {
     flex-direction: column;
     align-items: flex-start;
-    padding: 20px;
+    padding: 24px;
+    border-radius: 1.5rem;
+  }
+
+  .avatar-wrapper {
+    align-self: center;
+  }
+
+  .profile-main {
+    width: 100%;
+    text-align: center;
+  }
+
+  .username {
+    font-size: 24px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .stat-item {
+    padding: 12px 8px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
   }
 
   .user-card {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px;
+    border-radius: 1.5rem;
   }
 
   .user-actions {
     width: 100%;
+    margin-top: 12px;
   }
 
   .action-btn {
