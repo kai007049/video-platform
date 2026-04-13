@@ -28,7 +28,7 @@ public class MessageWebSocketServer extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Long userId = getUserId(session);
         if (userId != null) {
-            SESSIONS.remove(userId);
+            SESSIONS.remove(userId, session);
         }
     }
 
@@ -44,14 +44,13 @@ public class MessageWebSocketServer extends TextWebSocketHandler {
     }
 
     private Long getUserId(WebSocketSession session) {
-        try {
-            String uid = session.getUri().getQuery();
-            if (uid == null) return null;
-            // query: userId=123
-            String[] parts = uid.split("=");
-            return parts.length == 2 ? Long.valueOf(parts[1]) : null;
-        } catch (Exception e) {
-            return null;
+        Object userId = session.getAttributes().get(MessageWebSocketAuthInterceptor.WS_USER_ID_ATTR);
+        if (userId instanceof Long value) {
+            return value;
         }
+        if (userId instanceof Number value) {
+            return value.longValue();
+        }
+        return null;
     }
 }
