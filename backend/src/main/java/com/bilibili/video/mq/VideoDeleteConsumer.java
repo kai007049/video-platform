@@ -1,6 +1,5 @@
 package com.bilibili.video.mq;
 
-import com.bilibili.video.client.AgentClient;
 import com.bilibili.video.common.MqTopics;
 import com.bilibili.video.model.mq.VideoDeleteMessage;
 import com.bilibili.video.service.VideoCacheService;
@@ -24,7 +23,6 @@ public class VideoDeleteConsumer implements RocketMQListener<VideoDeleteMessage>
 
     private final MinioUtils minioUtils;
     private final VideoCacheService videoCacheService;
-    private final AgentClient agentClient;
     private final MqReliabilityService mqReliabilityService;
 
     @Override
@@ -35,7 +33,6 @@ public class VideoDeleteConsumer implements RocketMQListener<VideoDeleteMessage>
                 minioUtils.deleteVideoByUrl(message.getVideoUrl());
                 minioUtils.deleteCoverByObjectName(message.getCoverObject());
                 videoCacheService.invalidateVideo(message.getVideoId());
-                agentClient.deleteVideoSemantic(message.getVideoId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

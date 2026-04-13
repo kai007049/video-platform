@@ -47,7 +47,7 @@ public class VideoController {
     private final WatchHistoryService watchHistoryService;
 
     /**
-     * 上传视频（分类/标签可不填，后端可走 AI 自动补全）。
+     * 上传视频（分类/标签可不填，后端可走本地规则自动补全）。
      */
     @PostMapping("/upload")
     @Operation(summary = "上传视频", description = "上传视频和封面，需要登录")

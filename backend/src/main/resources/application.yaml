@@ -102,10 +102,6 @@ video:
   cover:
     fallback-delay-ms: 2000
 
-agent:
-  service:
-    url: http://localhost:8001
-
 recommend:
   recall:
     hot-size: 200

@@ -1,6 +1,5 @@
 package com.bilibili.video.service.impl;
 
-import com.bilibili.video.client.AgentClient;
 import com.bilibili.video.client.dto.ContentAnalysisResult;
 import com.bilibili.video.entity.Category;
 import com.bilibili.video.entity.Tag;
@@ -13,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 视频自动标注服务实现
@@ -29,7 +25,7 @@ public class VideoAutoTagServiceImpl implements VideoAutoTagService {
     private final VideoMapper videoMapper;
     private final TagMapper tagMapper;
     private final CategoryMapper categoryMapper;
-    private final AgentClient agentClient;
+    private final LocalContentAnalysisService localContentAnalysisService;
 
     @Override
     public void autoTagVideo(Long videoId) {
@@ -39,32 +35,15 @@ public class VideoAutoTagServiceImpl implements VideoAutoTagService {
                 return;
             }
 
-            // 获取候选标签和分类
             List<Tag> allTags = tagMapper.selectList(null);
-            List<String> candidateTags = allTags.stream()
-                    .map(Tag::getName)
-                    .collect(Collectors.toList());
-
             List<Category> allCategories = categoryMapper.selectList(null);
-            List<Map<String, Object>> candidateCategories = allCategories.stream()
-                    .map(c -> {
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("id", c.getId());
-                        map.put("name", c.getName());
-                        return map;
-                    })
-                    .collect(Collectors.toList());
-
-            // 调用 AI 分析
-            ContentAnalysisResult analysis = agentClient.analyzeContent(
+            ContentAnalysisResult analysis = localContentAnalysisService.analyzeContent(
                     video.getTitle(),
                     video.getDescription(),
-                    video.getCoverUrl(),
-                    candidateTags,
-                    candidateCategories
+                    allTags,
+                    allCategories
             );
 
-            // 自动补充分类（如果视频没有分类）
             if (video.getCategoryId() == null && analysis.getSuggestedCategoryId() != null) {
                 video.setCategoryId(Long.valueOf(analysis.getSuggestedCategoryId()));
                 videoMapper.updateById(video);
@@ -72,7 +51,6 @@ public class VideoAutoTagServiceImpl implements VideoAutoTagService {
             }
 
             log.info("视频自动标注完成: videoId={}, tags={}", videoId, analysis.getSuggestedTags());
-
         } catch (Exception e) {
             log.error("视频自动标注失败: videoId={}", videoId, e);
         }

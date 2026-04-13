@@ -238,7 +238,6 @@ import {
   getNotifications,
   readNotificationApi
 } from '../api/message'
-import { createMessageDraftTask, pollAgentTask } from '../api/agent'
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -252,7 +251,6 @@ const messages = ref([])
 const messageItems = ref([])
 const messageText = ref('')
 const uploadingImage = ref(false)
-const draftingAi = ref(false)
 const notifications = ref([])
 const systemNotifications = ref([])
 const actionMenu = ref({ visible: false, target: null })
@@ -299,29 +297,6 @@ async function sendImageMessage(event) {
     await loadMessages()
   } finally {
     uploadingImage.value = false
-  }
-}
-
-async function runAiDraft() {
-  if (!currentTarget.value) return
-  draftingAi.value = true
-  try {
-    const latest = messages.value.length ? messages.value[messages.value.length - 1].content || '' : '你好'
-    const { data } = await createMessageDraftTask({
-      target_id: currentTarget.value.targetId,
-      scenario: 'reply',
-      latest_user_message: latest,
-      tone: 'friendly'
-    })
-    const done = await pollAgentTask(data.task_id)
-    if (done.status !== 'success' || !done.result) {
-      throw new Error(done.error || 'AI 草稿生成失败')
-    }
-    messageText.value = done.result.draft || ''
-  } catch (e) {
-    alert(e.message || 'AI 草稿生成失败')
-  } finally {
-    draftingAi.value = false
   }
 }
 

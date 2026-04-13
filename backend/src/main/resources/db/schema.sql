@@ -231,7 +231,7 @@ create index idx_video_tag_tag
 -- V3 推荐最小数据模型
 -- =========================================
 
--- 视频标签增强特征（可由 agent-service 异步回写）
+-- 视频标签增强特征（由后端规则与行为链路维护）
 create table video_tag_feature
 (
     id         bigint auto_increment

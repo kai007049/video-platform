@@ -44,3 +44,6 @@ agent-service/app/evals/__pycache__/
 
 # Misc
 *.iml
+
+# Claude / worktrees
+.worktrees/
