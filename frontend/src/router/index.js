@@ -14,7 +14,8 @@ const routes = [
       { path: 'creator', name: 'Creator', component: () => import('../views/CreatorDashboard.vue'), meta: { title: '创作者中心', auth: true } },
       { path: 'admin', name: 'Admin', component: () => import('../views/AdminPage.vue'), meta: { title: '管理后台', auth: true } },
       { path: 'message', name: 'MessageCenter', component: () => import('../views/MessageCenter.vue'), meta: { title: '消息中心', auth: true } },
-      { path: 'search', name: 'SearchPage', component: () => import('../views/SearchPage.vue'), meta: { title: '搜索' } }
+      { path: 'search', name: 'SearchPage', component: () => import('../views/SearchPage.vue'), meta: { title: '搜索' } },
+      { path: 'danmu-test', name: 'DanmuTest', component: () => import('../views/DanmuTest.vue'), meta: { title: '弹幕测试' } }
     ]
   }
 ]
@@ -25,7 +26,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - 哔哩哔哩` : '哔哩哔哩'
+  document.title = to.meta.title ? `${to.meta.title} - Video Platform` : 'Video Platform'
   const userStore = useUserStore()
   if (to.meta.auth && !userStore.isLoggedIn) {
     next({ path: '/', query: { ...to.query, login: '1' } })

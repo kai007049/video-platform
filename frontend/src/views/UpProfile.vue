@@ -14,10 +14,28 @@
       </div>
       <div class="info">
         <h1 class="username">{{ profile.username }}</h1>
+        <div class="bio" v-if="profile.bio">{{ profile.bio }}</div>
         <div class="stats">
-          <span>投稿 {{ profile.videoCount }}</span>
-          <span>粉丝 {{ formatCount(profile.fanCount) }}</span>
-          <span>关注 {{ formatCount(profile.followingCount) }}</span>
+          <div class="stat-item">
+            <span class="icon">🎬</span>
+            <span class="value">{{ profile.videoCount }}</span>
+            <span class="label">作品</span>
+          </div>
+          <div class="stat-item">
+            <span class="icon">👥</span>
+            <span class="value">{{ formatCount(profile.followingCount) }}</span>
+            <span class="label">关注</span>
+          </div>
+          <div class="stat-item">
+            <span class="icon">🌟</span>
+            <span class="value">{{ formatCount(profile.fanCount) }}</span>
+            <span class="label">粉丝</span>
+          </div>
+          <div class="stat-item">
+            <span class="icon">▶️</span>
+            <span class="value">{{ formatCount(profile.viewCount || 0) }}</span>
+            <span class="label">总播放</span>
+          </div>
         </div>
         <div
           v-if="userStore.isLoggedIn && profile.id !== userStore.userInfo?.id"
@@ -221,15 +239,29 @@ onMounted(() => {
 .up-profile {
   max-width: 960px;
   margin: 0 auto;
+  padding: 24px 0;
 }
 
 .profile-header {
   display: flex;
   gap: 24px;
-  padding: 24px;
+  padding: 32px;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 2.5rem;
   margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--bili-pink), var(--bili-blue));
 }
 
 .avatar-wrapper {
@@ -237,21 +269,31 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  min-width: 96px;
+  gap: 12px;
+  min-width: 120px;
 }
 
 .avatar {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .avatar-upload {
   font-size: 12px;
   color: var(--bili-pink);
   cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(251, 114, 153, 0.1);
+  transition: all 0.3s;
+}
+
+.avatar-upload:hover {
+  background: rgba(251, 114, 153, 0.2);
 }
 
 .avatar-upload input {
@@ -263,74 +305,133 @@ onMounted(() => {
 }
 
 .username {
-  font-size: 24px;
-  margin-bottom: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.bio {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 .stats {
   display: flex;
-  gap: 24px;
+  gap: 32px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-item .icon {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.stat-item .value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-item .label {
+  font-size: 12px;
   color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 16px;
 }
 
 .action-group {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
 }
 
 .btn-follow {
-  padding: 8px 24px;
+  padding: 10px 28px;
   font-size: 14px;
+  font-weight: 600;
   color: #fff;
   background: var(--bili-pink);
   border: none;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(251, 114, 153, 0.3);
+}
+
+.btn-follow:hover {
+  background: var(--bili-pink-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(251, 114, 153, 0.4);
 }
 
 .btn-follow.followed {
   background: var(--bg-gray);
   color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.btn-follow.followed:hover {
+  background: var(--border-color);
+  transform: none;
 }
 
 .btn-message {
-  padding: 8px 20px;
+  padding: 10px 24px;
   font-size: 14px;
+  font-weight: 600;
   color: var(--bili-pink);
   background: #fff;
   border: 1px solid var(--bili-pink);
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
+  transition: all 0.3s;
 }
 
 .btn-message:hover {
-  background: rgba(251,114,153,.08);
+  background: rgba(251, 114, 153, 0.1);
+  transform: translateY(-2px);
 }
 
 .video-section h3 {
-  font-size: 18px;
-  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
 }
 
 .video-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 .video-card {
   cursor: pointer;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 2.5rem;
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .cover-wrap {
   position: relative;
   aspect-ratio: 16/9;
+  border-radius: 2.5rem 2.5rem 0 0;
+  overflow: hidden;
 }
 
 .cover {
@@ -343,36 +444,56 @@ onMounted(() => {
   position: absolute;
   font-size: 12px;
   color: #fff;
-  background: rgba(0,0,0,.6);
-  padding: 2px 6px;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
 }
 
-.play-count { left: 8px; bottom: 8px; }
-.duration { right: 8px; bottom: 8px; }
+.play-count { 
+  left: 12px; 
+  bottom: 12px; 
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.duration { 
+  right: 12px; 
+  bottom: 12px; 
+}
 
 .title {
-  padding: 12px;
+  padding: 16px;
   font-size: 14px;
+  font-weight: 600;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .loading, .load-more {
   text-align: center;
-  padding: 24px;
+  padding: 32px;
   color: var(--text-secondary);
 }
 
 .load-more button {
-  padding: 8px 24px;
+  padding: 10px 32px;
   font-size: 14px;
+  font-weight: 600;
   color: var(--bili-pink);
   background: transparent;
   border: 1px solid var(--bili-pink);
-  border-radius: 6px;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.load-more button:hover {
+  background: rgba(251, 114, 153, 0.1);
+  transform: translateY(-2px);
 }
 </style>

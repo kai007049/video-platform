@@ -1,110 +1,229 @@
 <template>
-  <div class="app-shell">
-    <aside class="app-sidebar">
-      <router-link class="brand" to="/">VP</router-link>
+  <div class="app-shell" style="background: #F0F2F5; display: flex; gap: 0; padding: 8px 4px; min-height: 100vh;">
+    <!-- 浮岛式悬浮侧边栏 -->
+    <aside 
+      class="sidebar-dock"
+      :class="{ expanded: sidebarExpanded }"
+    >
+      <!-- Logo 区 -->
+      <router-link to="/" class="sidebar-logo">
+        <div class="logo-icon">VP</div>
+        <span class="logo-text">Video Platform</span>
+      </router-link>
 
-      <nav class="nav-list">
-        <router-link class="nav-item" :class="{ active: $route.path === '/' }" to="/" title="首页">首页</router-link>
-        <router-link class="nav-item" to="/?tab=recommend" title="推荐">推荐</router-link>
-        <router-link class="nav-item" to="/?tab=hot" title="热门">热门</router-link>
-        <router-link class="nav-item" to="/?tab=latest" title="最新">最新</router-link>
-        <router-link class="nav-item" :class="{ active: $route.path === '/upload' }" to="/upload" title="投稿">投稿</router-link>
-        <router-link class="nav-item" :class="{ active: $route.path === '/message' }" to="/message" title="消息">消息</router-link>
-        <router-link class="nav-item" :class="{ active: $route.path === '/creator' }" to="/creator" title="我的">我的</router-link>
-        <router-link v-if="isAdmin" class="nav-item danger" :class="{ active: $route.path === '/admin' }" to="/admin" title="管理">管理</router-link>
+      <!-- 导航菜单 -->
+      <nav class="sidebar-nav">
+        <router-link to="/" class="nav-item" :class="{ active: $route.path === '/' && !$route.query.tab }">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">首页</span>
+        </router-link>
+
+        <router-link to="/?tab=recommend" class="nav-item" :class="{ active: $route.query.tab === 'recommend' }">
+          <span class="nav-icon">○</span>
+          <span class="nav-label">推荐</span>
+        </router-link>
+
+        <router-link to="/?tab=hot" class="nav-item" :class="{ active: $route.query.tab === 'hot' }">
+          <span class="nav-icon">◆</span>
+          <span class="nav-label">热门</span>
+        </router-link>
+
+        <router-link to="/?tab=latest" class="nav-item" :class="{ active: $route.query.tab === 'latest' }">
+          <span class="nav-icon">○</span>
+          <span class="nav-label">最新</span>
+        </router-link>
+
+        <div class="nav-divider"></div>
+
+        <router-link to="/message" class="nav-item" :class="{ active: $route.path === '/message' }">
+          <span class="nav-icon">
+            ◆
+            <span v-if="totalUnreadCount > 0" class="badge">{{ totalUnreadCount }}</span>
+          </span>
+          <span class="nav-label">消息</span>
+        </router-link>
+
+        <router-link to="/creator" class="nav-item" :class="{ active: $route.path === '/creator' }">
+          <span class="nav-icon">○</span>
+          <span class="nav-label">我的</span>
+        </router-link>
+
+        <router-link v-if="isAdmin" to="/admin" class="nav-item admin-item" :class="{ active: $route.path === '/admin' }">
+          <span class="nav-icon">⊚</span>
+          <span class="nav-label">管理</span>
+        </router-link>
       </nav>
 
-      <button class="nav-item message-entry" @click="openMessageSidebar">
-        站内通知
-        <span v-if="totalUnreadCount > 0" class="badge">{{ totalUnreadCount }}</span>
+      <!-- 底部投稿按钮 -->
+      <button class="sidebar-upload-btn" @click="() => $router.push('/upload')">
+        <span class="btn-icon">➕</span>
+        <span class="btn-label">发布投稿</span>
+      </button>
+
+      <!-- 展开/收起按钮 -->
+      <button class="sidebar-toggle-btn" @click="toggleSidebar">
+        <span class="toggle-icon">{{ sidebarExpanded ? '←' : '→' }}</span>
       </button>
     </aside>
 
-    <div class="app-main-wrap">
-      <header class="topbar">
-        <router-link to="/" class="title">Video Platform</router-link>
+    <div class="app-main-wrap" style="flex: 1; background: white; border-radius: 0 32px 32px 0; border: 1px solid #e2e8f0; border-left: none; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); overflow: hidden; display: flex; flex-direction: column;">
+      <header class="topbar" style="height: 96px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; position: relative; z-index: 10;">
+        <!-- 闪烁文字 -->
+        <div class="blinking-text" style="position: absolute; top: -24px; left: 40px; background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900; font-size: 14px; animation: blink 2s ease-in-out infinite; z-index: 20;">独家首发</div>
+        <!-- 背景光晕 -->
+        <div style="position: absolute; top: 0; right: 0; width: 500px; height: 300px; background: linear-gradient(to bottom left, rgba(129, 140, 248, 0.1) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 100%); opacity: 0.6; pointer-events: none;"></div>
 
-        <div class="search-wrap" ref="searchWrapRef">
-          <div class="search-bar">
-            <input
-              v-model="keyword"
-              type="text"
-              placeholder="搜索视频、用户"
-              @focus="activateSearch"
-              @input="activateSearch"
-              @keyup.enter="goSearch"
-              @blur="handleSearchBlur"
-            />
-            <button class="search-btn" @click="goSearch" @mousedown.prevent>搜索</button>
-          </div>
+        <router-link to="/" style="font-weight: 900; font-size: 20px; color: #1f2937; text-decoration: none; transition: color 0.3s;">Video Platform</router-link>
 
-          <div v-if="showSearchPanel" class="search-panel" @mousedown.prevent>
-            <div class="panel-section">
-              <div class="panel-title-row">
-                <span class="panel-title">搜索历史</span>
-                <button class="panel-link" @click="handleClearHistory">清空</button>
-              </div>
-              <div v-if="searchHistory.length" class="tag-list">
-                <button
-                  v-for="item in searchHistory"
-                  :key="`history-${item}`"
-                  class="search-tag"
-                  @click="clickSuggest(item)"
-                >
-                  {{ item }}
-                </button>
-              </div>
-              <div v-else class="panel-empty">暂无搜索历史</div>
+        <!-- 🎯 AI Search Hub：超级智能搜索框 -->
+        <div class="search-wrap" ref="searchWrapRef" style="flex: 1; max-width: 800px; position: relative; z-index: 10;">
+          <div style="position: relative; display: flex; align-items: center;">
+            <!-- ✨ 焦点时的光晕背景（Glow Effect） -->
+            <div 
+              class="search-glow"
+              style="position: absolute; inset: 0; background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%); border-radius: 20px; opacity: 0; transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; filter: blur(12px);" 
+              :style="{ opacity: searchFocused ? '0.08' : '0' }">
+            </div>
+            
+            <!-- 🎨 主搜索框容器 -->
+            <div 
+              class="search-container"
+              style="position: relative; display: flex; align-items: center; flex: 1; background: #f8fafc; border-radius: 18px; padding: 12px 18px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border: 2px solid transparent;"
+              :style="searchFocused 
+                ? { 
+                    backgroundColor: '#ffffff',
+                    borderColor: '#d1d5db',
+                    boxShadow: '0 0 0 3px rgba(31, 41, 55, 0.08), 0 8px 24px rgba(31, 41, 55, 0.08)',
+                    transform: 'scale(1.008)'
+                  }
+                : { borderColor: '#e2e8f0', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)' }">
+              
+              <!-- 🌟 左侧AI闪烁图标 -->
+              <span 
+                class="ai-sparkle"
+                style="width: 24px; height: 24px; margin-right: 12px; display: flex; align-items: center; justify-content: center; color: #cbd5e1; transition: all 0.3s; font-size: 18px; animation: sparkle 2.4s ease-in-out infinite;"
+                :style="searchFocused ? { color: '#374151', textShadow: '0 0 6px rgba(55, 65, 81, 0.3)' } : {}">
+                ✨
+              </span>
+              
+              <!-- 🔤 输入框 -->
+              <input
+                v-model="keyword"
+                type="text"
+                placeholder="向 AI 提问、搜索视频内容..."
+                style="flex: 1; background: transparent; border: none; outline: none; color: #1f2937; font-size: 15px; font-weight: 500; padding: 0;"
+                @focus="activateSearch; searchFocused = true;"
+                @blur="handleSearchBlur; searchFocused = false;"
+                @input="activateSearch"
+                @keyup.enter="goSearch"
+              />
+              
+              <!-- 🎯 AI搜索按钮（带渐变） -->
+              <button 
+                class="ai-search-btn"
+                @click="goSearch" 
+                @mousedown.prevent
+                style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); color: white; border: none; border-radius: 12px; padding: 8px 16px; margin-left: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 8px rgba(31, 41, 55, 0.15); letter-spacing: 0.3px;"
+                @mouseenter="(e) => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(31, 41, 55, 0.2)'; e.currentTarget.style.transform = 'translateY(-1px)'; }"
+                @mouseleave="(e) => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(31, 41, 55, 0.15)'; e.currentTarget.style.transform = 'translateY(0)'; }">
+                <span style="font-size: 14px;">🤖</span>
+                <span>AI搜索</span>
+              </button>
             </div>
 
-            <div class="panel-section">
-              <div class="panel-title-row">
-                <span class="panel-title">热门搜索</span>
+            <!-- 📋 AI推荐关键词面板 -->
+            <div 
+              v-if="showSearchPanel" 
+              class="search-panel"
+              @mousedown.prevent
+              style="position: absolute; top: calc(100% + 12px); left: 0; right: 0; background: white; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 12px 32px rgba(31, 41, 55, 0.08); z-index: 1000; max-height: 420px; overflow-y: auto; animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+              
+              <!-- 📌 搜索历史 -->
+              <div style="padding: 16px; border-bottom: 1px solid #faf8ff;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-weight: 700; font-size: 12px; color: #1f2937; text-transform: uppercase; letter-spacing: 0.5px;">📌 搜索历史</span>
+                  <button 
+                    class="panel-link" 
+                    @click="handleClearHistory" 
+                    style="color: #374151; border: none; background: none; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;"
+                    @mouseenter="(e) => { e.style.color = '#111827'; }"
+                    @mouseleave="(e) => { e.style.color = '#374151'; }">
+                    清空
+                  </button>
+                </div>
+                <div v-if="searchHistory.length" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <button
+                    v-for="item in searchHistory"
+                    :key="`history-${item}`"
+                    class="search-tag"
+                    @click="clickSuggest(item)"
+                    style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); color: #1f2937; border: 1px solid #d1d5db; border-radius: 9px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all 0.3s; font-weight: 500;"
+                    @mouseenter="(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(31, 41, 55, 0.1)'; e.currentTarget.style.transform = 'translateY(-1px)'; }"
+                    @mouseleave="(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'; e.currentTarget.style.color = '#1f2937'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }"
+                  >
+                    {{ item }}
+                  </button>
+                </div>
+                <div v-else style="color: #cbd5e1; font-size: 13px;">暂无搜索历史</div>
               </div>
-              <div v-if="hotSearches.length" class="hot-list">
-                <button
-                  v-for="(item, index) in hotSearches"
-                  :key="`hot-${item}`"
-                  class="hot-item"
-                  @click="clickSuggest(item)"
-                >
-                  <span class="rank">{{ index + 1 }}</span>
-                  <span class="hot-text">{{ item }}</span>
-                </button>
+
+              <!-- 🔥 热门搜索 -->
+              <div style="padding: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-weight: 700; font-size: 12px; color: #1f2937; text-transform: uppercase; letter-spacing: 0.5px;">🔥 热门推荐</span>
+                </div>
+                <div v-if="hotSearches.length" style="display: flex; flex-direction: column; gap: 10px;">
+                  <button
+                    v-for="(item, index) in hotSearches"
+                    :key="`hot-${item}`"
+                    class="hot-item"
+                    @click="clickSuggest(item)"
+                    style="display: flex; align-items: center; gap: 12px; background: transparent; border: 1px solid transparent; cursor: pointer; padding: 10px 12px; color: #475569; font-size: 13px; transition: all 0.3s; text-align: left; border-radius: 10px;"
+                    @mouseenter="(e) => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#1f2937'; }"
+                    @mouseleave="(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = '#475569'; }"
+                  >
+                    <span style="font-weight: 700; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; min-width: 20px; text-align: center;">{{ String(index + 1).padStart(2, '0') }}</span>
+                    <span style="flex: 1;">{{ item }}</span>
+                    <span style="font-size: 10px; color: #a855f7; opacity: 0.6;">✨</span>
+                  </button>
+                </div>
+                <div v-else style="color: #cbd5e1; font-size: 13px;">暂无热门推荐</div>
               </div>
-              <div v-else class="panel-empty">暂无热门搜索</div>
             </div>
           </div>
         </div>
 
-        <div class="actions">
+        <div class="actions" style="display: flex; align-items: center; gap: 16px; position: relative; z-index: 10; margin-left: 32px;">
           <template v-if="userStore.isLoggedIn">
-            <router-link to="/upload" class="btn btn-ghost">投稿</router-link>
-            <div class="user-area" @click="showUserMenu = !showUserMenu">
-              <img :src="resolveAvatar(userStore.userInfo?.avatar)" class="avatar" alt="avatar" />
-              <span class="username">{{ userStore.userInfo?.username || '用户' }}</span>
-              <div v-if="showUserMenu" class="user-menu" @click.stop>
-                <label class="menu-item avatar-upload" :class="{ disabled: isUploadingAvatar }">
-                  <input type="file" accept="image/*" @change="onAvatarChange" :disabled="isUploadingAvatar" />
+            <router-link to="/upload" style="padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; color: #475569; background: transparent; text-decoration: none; transition: all 0.3s; border: none; cursor: pointer;"
+              @mouseenter="(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#1f2937'; }"
+              @mouseleave="(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#475569'; }">投稿</router-link>
+            <div class="user-area" @click="showUserMenu = !showUserMenu" style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; cursor: pointer; transition: background 0.3s; position: relative;"
+              @mouseenter="(e) => { e.style.backgroundColor = '#f1f5f9'; }"
+              @mouseleave="(e) => { e.style.backgroundColor = 'transparent'; }">
+              <img :src="resolveAvatar(userStore.userInfo?.avatar)" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;" alt="avatar" />
+              <span style="font-weight: 600; font-size: 14px; color: #1f2937;">{{ userStore.userInfo?.username || '用户' }}</span>
+              <div v-if="showUserMenu" class="user-menu" @click.stop style="position: absolute; top: 100%; right: 0; background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10); margin-top: 8px; min-width: 180px; z-index: 1001;">
+                <label style="display: flex; align-items: center; padding: 12px 16px; cursor: pointer; font-size: 14px; color: #475569; transition: all 0.3s; border-bottom: 1px solid #f1f5f9;" :class="{ disabled: isUploadingAvatar }" @mouseenter="(e) => { e.parentElement.style.backgroundColor = '#f8fafc'; }" @mouseleave="(e) => { e.parentElement.style.backgroundColor = 'transparent'; }">
+                  <input type="file" accept="image/*" @change="onAvatarChange" :disabled="isUploadingAvatar" style="display: none;" />
                   {{ isUploadingAvatar ? '上传中...' : '修改头像' }}
                 </label>
-                <div class="menu-item" @click="goCreator">个人中心</div>
-                <div class="menu-item" @click="openMessageSidebar">消息中心</div>
-                <router-link v-if="isAdmin" class="menu-item" to="/admin" @click="showUserMenu = false">管理面板</router-link>
-                <div class="menu-divider"></div>
-                <div class="menu-item danger" @click="handleLogout">退出登录</div>
+                <div style="padding: 12px 16px; cursor: pointer; font-size: 14px; color: #475569; transition: all 0.3s; border-bottom: 1px solid #f1f5f9;" @click="goCreator" @mouseenter="(e) => { e.style.backgroundColor = '#f8fafc'; }" @mouseleave="(e) => { e.style.backgroundColor = 'transparent'; }">个人中心</div>
+                <div style="padding: 12px 16px; cursor: pointer; font-size: 14px; color: #475569; transition: all 0.3s; border-bottom: 1px solid #f1f5f9;" @click="openMessageSidebar" @mouseenter="(e) => { e.style.backgroundColor = '#f8fafc'; }" @mouseleave="(e) => { e.style.backgroundColor = 'transparent'; }">消息中心</div>
+                <router-link v-if="isAdmin" style="display: block; padding: 12px 16px; font-size: 14px; color: #475569; text-decoration: none; transition: all 0.3s; border-bottom: 1px solid #f1f5f9;" to="/admin" @click="showUserMenu = false" @mouseenter="(e) => { e.style.backgroundColor = '#f8fafc'; }" @mouseleave="(e) => { e.style.backgroundColor = 'transparent'; }">管理面板</router-link>
+                <div style="padding: 12px 16px; cursor: pointer; font-size: 14px; color: #dc2626; transition: all 0.3s; font-weight: 500;" @click="handleLogout" @mouseenter="(e) => { e.style.backgroundColor = '#fee2e2'; }" @mouseleave="(e) => { e.style.backgroundColor = 'transparent'; }">退出登录</div>
               </div>
             </div>
           </template>
 
           <template v-else>
-            <button class="btn btn-ghost" @click="openLogin">登录</button>
-            <button class="btn btn-primary" @click="openRegister">注册</button>
+            <button style="padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; color: #475569; background: transparent; border: none; cursor: pointer; transition: background 0.3s;" @click="openLogin" @mouseenter="(e) => { e.style.backgroundColor = '#f1f5f9'; }" @mouseleave="(e) => { e.style.backgroundColor = 'transparent'; }">登录</button>
+            <button style="padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: bold; color: white; background: #1f2937; border: none; cursor: pointer; transition: all 0.3s;" @click="openRegister" @mouseenter="(e) => { e.style.backgroundColor = '#4f46e5'; e.style.boxShadow = '0 6px 12px rgba(79, 70, 229, 0.3)'; }" @mouseleave="(e) => { e.style.backgroundColor = '#1f2937'; e.style.boxShadow = 'none'; }">注册</button>
           </template>
         </div>
       </header>
 
-      <main class="app-content">
+      <main class="app-content" style="flex: 1; overflow-y: auto; overflow-x: hidden;">
         <router-view />
       </main>
     </div>
@@ -203,6 +322,8 @@ const showSearchPanel = ref(false)
 const searchHistory = ref([])
 const hotSearches = ref([])
 const searchWrapRef = ref(null)
+const sidebarExpanded = ref(false)
+const searchFocused = ref(false)
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 const isUploadingAvatar = ref(false)
 const maxAvatarSize = 2 * 1024 * 1024
@@ -558,6 +679,10 @@ function formatDateTime(value) {
   })
 }
 
+function toggleSidebar() {
+  sidebarExpanded.value = !sidebarExpanded.value
+}
+
 watch(
   () => route.query,
   (query) => {
@@ -691,9 +816,14 @@ onUnmounted(() => {
 }
 
 .app-main-wrap {
-  margin-left: 88px;
-  width: calc(100% - 88px);
+  /* flex: 1 在 inline style 中已设置，这些旧值已无需要 */
   min-height: 100vh;
+  margin-left: 120px;
+  transition: margin-left 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-dock.expanded + .app-main-wrap {
+  margin-left: 260px;
 }
 
 .topbar {
@@ -1108,4 +1238,350 @@ onUnmounted(() => {
     padding: 14px;
   }
 }
+
+/* ==================== 新侧边栏样式 ==================== */
+
+/* 侧边栏主容器 */
+.sidebar-dock {
+  position: fixed;
+  top: 8px;
+  left: 4px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(32px);
+  border-radius: 24px 0 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-right: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 16px 0;
+  width: 120px;
+  overflow: hidden;
+  /* 关键：过渡只针对宽度，500ms持续时间 */
+  transition: width 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 20;
+}
+
+/* 展开时侧边栏宽度 */
+.sidebar-dock.expanded {
+  width: 260px;
+}
+
+/* Logo 区 */
+.sidebar-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-dock.expanded .sidebar-logo {
+  flex-direction: row;
+  gap: 12px;
+  padding-left: 16px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  background: #1f2937;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-weight: 900;
+  font-size: 10px;
+  white-space: nowrap;
+  color: #1f2937;
+  /* 文字始终显示，收起时很小，展开时变大 */
+  opacity: 1;
+  transition: font-size 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
+}
+
+.sidebar-dock.expanded .logo-text {
+  font-size: 18px;
+}
+
+/* 导航容器 */
+.sidebar-nav {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.sidebar-dock.expanded .sidebar-nav {
+  align-items: flex-start;
+  padding-left: 16px;
+}
+
+/* 导航项 */
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 300ms ease-out;
+  flex-shrink: 0;
+  text-decoration: none;
+  position: relative;
+  width: 88px;
+}
+
+.sidebar-dock.expanded .nav-item {
+  width: calc(100% - 32px);
+  justify-content: flex-start;
+  padding: 12px 16px;
+  color: #64748b;
+  background-color: transparent;
+  margin: 0;
+}
+
+/* 活跃的导航项样式 */
+.nav-item.active {
+  color: white;
+  background-color: #4338ca;
+}
+
+.sidebar-dock.expanded .nav-item.active {
+  color: white;
+  background-color: #4338ca;
+}
+
+/* 非活跃导航项的悬停状态 */
+.nav-item:not(.active):hover {
+  background-color: rgba(79, 70, 229, 0.08);
+  color: #4338ca;
+}
+
+/* 导航图标 - 收起时可见，带缩放效果 */
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* 导航标签 - 收起时悬停显示，展开时直接显示 */
+.nav-label {
+  font-weight: bold;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1) 150ms;
+  display: none;
+  margin-left: 8px;
+}
+
+/* 鼠标悬停时显示标签（仅在收起状态） */
+.sidebar-dock:not(.expanded) .nav-item:hover .nav-label {
+  opacity: 1;
+  display: inline;
+}
+
+/* 展开时直接显示标签 */
+.sidebar-dock.expanded .nav-label {
+  opacity: 1;
+  display: inline;
+}
+
+/* 导航分割线 */
+.nav-divider {
+  width: 24px;
+  height: 1px;
+  background: #e2e8f0;
+  margin: 16px 0;
+  transition: width 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-dock.expanded .nav-divider {
+  width: 100%;
+}
+
+/* 管理员导航项特殊样式 */
+.admin-item {
+  color: #dc2626;
+}
+
+.admin-item.active {
+  background-color: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+}
+
+/* 徽章样式 */
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 投稿按钮 */
+.sidebar-upload-btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 16px;
+  font-weight: bold;
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1f2937;
+  color: white;
+  flex-shrink: 0;
+  /* 初始状态 */
+  padding: 12px 16px;
+  width: calc(100% - 32px);
+  height: 48px;
+  margin: 0;
+}
+
+.sidebar-dock.expanded .sidebar-upload-btn {
+  padding: 12px 16px;
+  width: calc(100% - 32px);
+  margin: 0;
+}
+
+.sidebar-upload-btn:hover {
+  background-color: #4338ca;
+  box-shadow: 0 8px 16px rgba(67, 56, 202, 0.3);
+}
+
+/* 按钮图标 */
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 按钮标签 */
+.btn-label {
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1) 150ms;
+  display: none;
+}
+
+.sidebar-dock.expanded .btn-label {
+  opacity: 1;
+  display: inline;
+}
+
+/* 展开/收起按钮 */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 48px;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 300ms ease;
+  z-index: 10;
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-icon {
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 300ms ease;
+}
+
+.sidebar-dock.expanded .toggle-icon {
+  transform: scale(1.1);
+}
+
+/* ==================== AI Search Hub 动画 ==================== */
+
+/* ✨ AI图标闪烁动画 */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0.7;
+    transform: scale(1.04);
+  }
+}
+
+/* 闪烁文字动画 */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* 📋 搜索面板滑下动画 */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>
