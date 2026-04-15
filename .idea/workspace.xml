@@ -6,9 +6,34 @@
   <component name="ChangeListManager">
     <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/config/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/config/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/model/dto/VideoUploadDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/MessageNotifyConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/MessageNotifyConsumer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/NotifyConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/mq/NotifyConsumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/ws/MessageWebSocketServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/ws/MessageWebSocketServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/CommentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/DanmuServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/DanmuServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/FavoriteServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/FollowServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/FollowServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/LikeServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/MessageCenterServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/MessageCenterServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoCommandService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoCommandService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/axios.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/axios.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/pinia.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue-router.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/vue.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/LoginModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/LoginModal.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/RegisterModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/RegisterModal.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/stores/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/stores/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Layout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Layout.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/MessageCenter.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/VideoDetail.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -312,7 +337,8 @@
     <MESSAGE value="agent功能完善" />
     <MESSAGE value="bug修复" />
     <MESSAGE value="前端布局修改" />
-    <option name="LAST_COMMIT_MESSAGE" value="前端布局修改" />
+    <MESSAGE value="wb消息风险修复和通知事件落库" />
+    <option name="LAST_COMMIT_MESSAGE" value="wb消息风险修复和通知事件落库" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

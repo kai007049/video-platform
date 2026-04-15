@@ -49,7 +49,10 @@ public class FavoriteServiceImpl implements FavoriteService {
             redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_SAVE, 1);
             redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
 
-            mqService.sendNotify(new NotifyMessage("favorite", userId, videoId, "收藏视频"));
+            var video = videoMapper.selectById(videoId);
+            if (video != null && video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
+                mqService.sendNotify(new NotifyMessage("favorite", video.getAuthorId(), videoId, null));
+            }
             mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
             recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, 3.5D);
             redisTemplate.opsForZSet().incrementScore(

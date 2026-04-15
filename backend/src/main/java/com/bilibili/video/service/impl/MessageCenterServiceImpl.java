@@ -38,10 +38,14 @@ public class MessageCenterServiceImpl implements MessageCenterService {
         vo.setMessageUnread(msgUnread);
         vo.setNotificationUnread(notifyUnread);
         vo.setSystemUnread(systemUnread);
-        vo.setTotalUnread(msgUnread + notifyUnread + systemUnread);
+        vo.setTotalUnread(msgUnread + notifyUnread);
 
         List<Message> latestMessages = messageMapper.selectList(new LambdaQueryWrapper<Message>()
-                .eq(Message::getReceiverId, userId)
+                .and(w -> w.eq(Message::getReceiverId, userId)
+                                .eq(Message::getReceiverDeleted, 0)
+                        .or()
+                        .eq(Message::getSenderId, userId)
+                                .eq(Message::getSenderDeleted, 0))
                 .orderByDesc(Message::getCreateTime)
                 .last("limit 5"));
         List<Notification> latestNotifications = notificationMapper.selectList(new LambdaQueryWrapper<Notification>()

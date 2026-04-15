@@ -5,11 +5,12 @@ import com.bilibili.video.entity.Danmu;
 import com.bilibili.video.entity.User;
 import com.bilibili.video.mapper.DanmuMapper;
 import com.bilibili.video.mapper.UserMapper;
+import com.bilibili.video.mapper.VideoMapper;
 import com.bilibili.video.model.dto.DanmuDTO;
-import com.bilibili.video.model.vo.DanmuVO;
 import com.bilibili.video.model.mq.DanmuMessage;
 import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.model.mq.SearchSyncMessage;
+import com.bilibili.video.model.vo.DanmuVO;
 import com.bilibili.video.service.DanmuService;
 import com.bilibili.video.service.MQService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class DanmuServiceImpl implements DanmuService {
 
     private final DanmuMapper danmuMapper;
     private final UserMapper userMapper;
+    private final VideoMapper videoMapper;
     private final MQService mqService;
 
     @Override
@@ -40,7 +42,10 @@ public class DanmuServiceImpl implements DanmuService {
         dto.setId(danmu.getId());
 
         mqService.sendDanmu(new DanmuMessage(danmu.getVideoId(), danmu.getUserId(), danmu.getContent(), danmu.getTimePoint()));
-        mqService.sendNotify(new NotifyMessage("danmu", danmu.getUserId(), danmu.getVideoId(), danmu.getContent()));
+        var video = dto.getVideoId() == null ? null : videoMapper.selectById(dto.getVideoId());
+        if (video != null && video.getAuthorId() != null && !video.getAuthorId().equals(danmu.getUserId())) {
+            mqService.sendNotify(new NotifyMessage("danmu", video.getAuthorId(), danmu.getVideoId(), danmu.getContent()));
+        }
         mqService.sendSearchSync(new SearchSyncMessage("danmu", danmu.getId(), "create"));
     }
 

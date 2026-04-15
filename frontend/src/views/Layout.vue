@@ -349,7 +349,7 @@ const isAdmin = computed(() => {
 })
 
 const totalUnreadCount = computed(
-  () => messageUnreadCount.value + notificationUnreadCount.value + systemUnreadCount.value
+  () => messageUnreadCount.value + notificationUnreadCount.value
 )
 
 function resolveAvatar(avatar) {
@@ -385,10 +385,10 @@ function formatConversationPreview(content) {
 }
 
 function buildMessageWsUrl() {
-  const userId = userStore.userInfo?.id
-  if (!userId) return ''
+  const token = userStore.token
+  if (!token) return ''
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${protocol}//${location.host}/ws/message?userId=${encodeURIComponent(userId)}`
+  return `${protocol}//${location.host}/ws/message?token=${encodeURIComponent(token)}`
 }
 
 function scheduleMessageWsReconnect() {

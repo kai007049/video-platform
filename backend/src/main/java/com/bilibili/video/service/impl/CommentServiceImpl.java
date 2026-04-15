@@ -43,7 +43,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentVO add(CommentDTO dto, Long userId) {
-        if (videoMapper.selectById(dto.getVideoId()) == null) {
+        var video = videoMapper.selectById(dto.getVideoId());
+        if (video == null) {
             throw new BizException(404, "视频不存在");
         }
 
@@ -60,7 +61,9 @@ public class CommentServiceImpl implements CommentService {
         // 评论新增会影响视频详情页里的 commentCount，需要同步失效聚合详情缓存。
         videoCacheService.invalidateVideo(dto.getVideoId());
 
-        mqService.sendNotify(new NotifyMessage("comment", userId, dto.getVideoId(), comment.getContent()));
+        if (video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
+            mqService.sendNotify(new NotifyMessage("comment", video.getAuthorId(), dto.getVideoId(), comment.getContent()));
+        }
         mqService.sendSearchSync(new SearchSyncMessage("comment", comment.getId(), "create"));
         recommendationFeatureService.increaseUserInterestByVideo(userId, dto.getVideoId(), 2.5D);
         redisTemplate.opsForZSet().incrementScore(

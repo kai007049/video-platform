@@ -31,7 +31,7 @@
               <span class="author-fans">{{ formatCount(video.authorFans || 0) }} 粉丝</span>
             </div>
           </div>
-          <button class="btn-follow" @click="toggleFollow">
+          <button v-if="!isOwnVideo" class="btn-follow" @click="toggleFollow">
             {{ video.followed ? '已关注' : '关注' }}
           </button>
         </div>
@@ -134,6 +134,7 @@ import { getComments, addComment } from '../api/comment'
 import { getDanmus } from '../api/danmu'
 import { like, unlike } from '../api/like'
 import { addFavorite, removeFavorite } from '../api/favorite'
+import { follow, unfollow, getUpProfile } from '../api/user'
 import { useUserStore } from '../stores/user'
 import DanmuPlayer from '../utils/danmu-player-optimized.js'
 import DanmuControlPanel from '../utils/danmu-control-panel.js'
@@ -182,6 +183,7 @@ const danmuDedupSet = new Set()
 
 const videoId = computed(() => Number(route.params.id))
 const canSendDanmu = computed(() => userStore.isLoggedIn && wsState.value === 'open')
+const isOwnVideo = computed(() => !!video.value?.authorId && !!userStore.userInfo?.id && video.value.authorId === userStore.userInfo.id)
 const wsStatusText = computed(() => {
   if (wsState.value === 'open') return '已连接'
   if (wsState.value === 'connecting') return '连接中...'
@@ -193,6 +195,15 @@ async function loadVideo() {
   loadError.value = ''
   try {
     video.value = await getVideoDetail(videoId.value)
+    if (video.value?.authorId && userStore.isLoggedIn) {
+      try {
+        const profile = await getUpProfile(video.value.authorId)
+        video.value.followed = !!profile?.followed
+        video.value.authorFans = profile?.fanCount ?? (video.value.authorFans || 0)
+      } catch (profileError) {
+        console.error(profileError)
+      }
+    }
     await Promise.all([loadComments(), loadDanmus()])
   } catch (e) {
     console.error(e)
@@ -465,14 +476,14 @@ async function submitComment() {
 }
 
 async function toggleFollow() {
-  if (!userStore.isLoggedIn) return
+  if (!userStore.isLoggedIn || !video.value?.authorId) return
   try {
     if (video.value.followed) {
-      // 取消关注逻辑
+      await unfollow(video.value.authorId)
       video.value.followed = false
       video.value.authorFans = Math.max(0, (video.value.authorFans || 0) - 1)
     } else {
-      // 关注逻辑
+      await follow(video.value.authorId)
       video.value.followed = true
       video.value.authorFans = (video.value.authorFans || 0) + 1
     }
@@ -511,6 +522,18 @@ function formatCount(n) {
   if (!n) return '0'
   if (n >= 10000) return `${(n / 10000).toFixed(1)}万`
   return String(n)
+}
+
+function formatDuration(sec) {
+  if (sec == null) return '--:--'
+  const total = Math.max(0, Number(sec) || 0)
+  const h = Math.floor(total / 3600)
+  const m = Math.floor((total % 3600) / 60)
+  const s = total % 60
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 function formatTime(value) {

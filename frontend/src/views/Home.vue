@@ -126,8 +126,8 @@
 
         <!-- 12列网格：每4个卡片占12列 -->
         <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px;">
-          <div 
-            v-for="(item, index) in videoList.slice(4)" 
+          <div
+            v-for="item in videoList.slice(4)"
             :key="item.id"
             :data-video-id="item.id"
             style="grid-column: span 3; display: flex; flex-direction: column; gap: 12px; cursor: pointer;"
@@ -160,7 +160,11 @@
 
             <!-- 信息 -->
             <div style="display: flex; gap: 12px;">
-              <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%); flex-shrink: 0;"></div>
+              <img
+                :src="resolveAvatar(item.authorAvatar)"
+                alt="avatar"
+                @error="onAvatarError"
+                style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);" />
               <div style="flex: 1; min-width: 0;">
                 <h4 style="font-weight: 700; font-size: 13px; color: #1f2937; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; cursor: pointer;">
                   {{ item.title }}
@@ -395,6 +399,7 @@ const hasMore = ref(true)
 const pageSize = 16
 const error = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
+const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 let observer = null
 
 const fetchApi = (p) => {
@@ -450,6 +455,13 @@ function resolveCover(item) {
   return placeholderCover
 }
 function onCoverError(event) { event.target.src = placeholderCover }
+function resolveAvatar(avatar) {
+  if (!avatar) return avatarPlaceholder
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
+  if (avatar.startsWith('/api/file/avatar') || avatar.startsWith('/file/avatar')) return avatar
+  return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+function onAvatarError(event) { event.target.src = avatarPlaceholder }
 function formatCount(n) { if (!n) return '0'; if (n >= 10000) return `${(n / 10000).toFixed(1)}万`; return String(n) }
 function formatDuration(sec) { if (sec == null) return '--:--'; const m = Math.floor(sec / 60); const s = sec % 60; return `${m}:${String(s).padStart(2, '0')}` }
 function formatDate(value) { return value ? String(value).slice(5, 10) : '' }

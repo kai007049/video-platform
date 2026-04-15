@@ -1,6 +1,10 @@
 package com.bilibili.video.mq;
 
 import com.bilibili.video.common.MqTopics;
+import com.bilibili.video.entity.User;
+import com.bilibili.video.entity.Video;
+import com.bilibili.video.mapper.UserMapper;
+import com.bilibili.video.mapper.VideoMapper;
 import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.service.NotificationService;
 import com.bilibili.video.service.impl.MqReliabilityService;
@@ -23,6 +27,8 @@ public class NotifyConsumer implements RocketMQListener<NotifyMessage> {
 
     private final NotificationService notificationService;
     private final MqReliabilityService mqReliabilityService;
+    private final VideoMapper videoMapper;
+    private final UserMapper userMapper;
 
     @Override
     public void onMessage(NotifyMessage message) {
@@ -39,18 +45,27 @@ public class NotifyConsumer implements RocketMQListener<NotifyMessage> {
     }
 
     private String buildContent(NotifyMessage message) {
-        String content = StringUtils.trimWhitespace(message.getContent());
-        Long targetId = message.getTargetId();
-        String suffix = targetId == null ? "" : "（对象ID=" + targetId + "）";
-        if (StringUtils.hasText(content)) {
-            return content + suffix;
-        }
+        Video video = message.getTargetId() == null ? null : videoMapper.selectById(message.getTargetId());
+        String videoTitle = video != null && StringUtils.hasText(video.getTitle()) ? video.getTitle() : "你的视频";
+        String actorName = resolveActorName(message.getUserId());
+        String payload = StringUtils.trimWhitespace(message.getContent());
+
         return switch (message.getType()) {
-            case "like" -> "你收到了新的点赞" + suffix;
-            case "favorite" -> "你收到了新的收藏" + suffix;
-            case "comment" -> "你收到了新的评论" + suffix;
-            case "danmu" -> "你收到了新的弹幕" + suffix;
-            default -> "你收到了新的通知" + suffix;
+            case "like" -> actorName + " 点赞了你的视频《" + videoTitle + "》";
+            case "favorite" -> actorName + " 收藏了你的视频《" + videoTitle + "》";
+            case "comment" -> actorName + " 评论了你的视频《" + videoTitle + "》：" + firstNonBlank(payload, "快去看看吧");
+            case "danmu" -> actorName + " 在你的视频《" + videoTitle + "》发送了弹幕：" + firstNonBlank(payload, "快去看看吧");
+            case "follow" -> actorName + " 关注了你";
+            default -> StringUtils.hasText(payload) ? payload : "你收到了新的通知";
         };
+    }
+
+    private String resolveActorName(Long userId) {
+        User user = userMapper.selectById(userId);
+        return user != null && StringUtils.hasText(user.getUsername()) ? user.getUsername() : "有用户";
+    }
+
+    private String firstNonBlank(String value, String fallback) {
+        return StringUtils.hasText(value) ? value : fallback;
     }
 }

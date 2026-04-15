@@ -463,7 +463,8 @@ onUnmounted(() => {
 <style scoped>
 /* 整体布局 */
 .message-center {
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
   background: #f6f7f9;
   padding: 22px;
   display: flex;
@@ -595,6 +596,7 @@ onUnmounted(() => {
 /* 内容区域 */
 .content {
   flex: 1;
+  min-height: 0;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(32px);
   border-radius: 24px;
@@ -603,12 +605,17 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
+.panel {
+  height: 100%;
+  min-height: 0;
+}
+
 /* 消息布局 */
 .message-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
-  height: calc(100vh - 240px);
-  min-height: 500px;
+  height: 100%;
+  min-height: 0;
 }
 
 /* 会话列表 */
@@ -793,6 +800,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   background: #ffffff;
 }
 
@@ -828,6 +836,7 @@ onUnmounted(() => {
 
 .chat-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 20px;
   background: #f8fafc;
@@ -1105,8 +1114,9 @@ onUnmounted(() => {
 }
 
 .notification-list {
+  height: 100%;
+  min-height: 0;
   padding: 8px;
-  max-height: calc(100vh - 240px);
   overflow-y: auto;
   background: #ffffff;
 }
@@ -1217,7 +1227,7 @@ onUnmounted(() => {
 
   .message-layout {
     grid-template-columns: 1fr;
-    height: calc(100vh - 220px);
+    height: 100%;
   }
 
   .conversation-list {
@@ -1252,7 +1262,7 @@ onUnmounted(() => {
   }
 
   .notification-list {
-    max-height: calc(100vh - 220px);
+    height: 100%;
   }
 }
 </style>

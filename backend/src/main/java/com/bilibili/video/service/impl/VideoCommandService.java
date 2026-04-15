@@ -88,6 +88,7 @@ public class VideoCommandService {
             throw new BizException(400, "视频文件不能为空");
         }
         validateVideoFile(videoFile);
+        validateManualMetadata(dto);
 
         String videoUrl;
         String coverUrl;
@@ -226,6 +227,50 @@ public class VideoCommandService {
         String description = normalizeNullableText(dto.getDescription());
         boolean tagsMissing = dto.getTagIds() == null || dto.getTagIds().isEmpty();
         return title.isBlank() || description.isBlank() || dto.getCategoryId() == null || tagsMissing;
+    }
+
+    private void validateManualMetadata(VideoUploadDTO dto) {
+        if (dto == null) {
+            return;
+        }
+        String title = normalizeNullableText(dto.getTitle());
+        String description = normalizeNullableText(dto.getDescription());
+        List<Long> manualTagIds = dto.getTagIds() == null ? Collections.emptyList() : dto.getTagIds().stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Long manualCategoryId = dto.getCategoryId();
+        boolean manuallyComplete = !title.isBlank()
+                && !description.isBlank()
+                && manualCategoryId != null
+                && !manualTagIds.isEmpty();
+        if (!manuallyComplete) {
+            return;
+        }
+        validateManualMetadata(manualCategoryId, manualTagIds);
+    }
+
+    private void validateManualMetadata(Long categoryId, List<Long> tagIds) {
+        if (categoryMapper.selectById(categoryId) == null) {
+            throw new BizException(400, "分类不存在");
+        }
+        List<Long> uniqueTagIds = tagIds == null ? Collections.emptyList() : tagIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (uniqueTagIds.isEmpty()) {
+            return;
+        }
+        Set<Long> existingTagIds = tagMapper.selectBatchIds(uniqueTagIds).stream()
+                .map(Tag::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<Long> missingTagIds = uniqueTagIds.stream()
+                .filter(tagId -> !existingTagIds.contains(tagId))
+                .toList();
+        if (!missingTagIds.isEmpty()) {
+            throw new BizException(400, "标签不存在: " + missingTagIds);
+        }
     }
 
     /**

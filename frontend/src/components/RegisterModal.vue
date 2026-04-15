@@ -26,12 +26,6 @@
           </div>
           <div class="field">
             <div class="input-wrapper">
-              <span class="input-icon">✉</span>
-              <input v-model="form.email" type="email" placeholder="邮箱地址" required />
-            </div>
-          </div>
-          <div class="field">
-            <div class="input-wrapper">
               <span class="input-icon">🔑</span>
               <input v-model="form.password" type="password" placeholder="密码" required minlength="6" />
             </div>
@@ -42,19 +36,6 @@
           </div>
           <p v-if="error" class="error">{{ error }}</p>
           <button type="submit" class="btn-submit" :disabled="loading">创建账号 →</button>
-          <div class="third-party-login">
-            <p class="third-party-title">第三方登录</p>
-            <div class="third-party-buttons">
-              <button type="button" class="third-party-btn">
-                <span class="btn-icon">🔒</span>
-                <span>GitHub</span>
-              </button>
-              <button type="button" class="third-party-btn">
-                <span class="btn-icon">📱</span>
-                <span>手机号</span>
-              </button>
-            </div>
-          </div>
         </form>
       </div>
     </div>
@@ -75,13 +56,12 @@ const loading = ref(false)
 const error = ref('')
 const agreedToTerms = ref(false)
 const toast = reactive({ show: false, message: '', type: 'success', timer: null })
-const form = reactive({ username: '', email: '', password: '' })
+const form = reactive({ username: '', password: '' })
 
 watch(() => props.modelValue, (v) => {
   if (v) {
     error.value = ''
     form.username = ''
-    form.email = ''
     form.password = ''
     agreedToTerms.value = false
     hideToast()

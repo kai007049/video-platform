@@ -20,8 +20,8 @@
         <form class="form" @submit.prevent="handleSubmit">
           <div class="field">
             <div class="input-wrapper">
-              <span class="input-icon">✉</span>
-              <input v-model="form.account" type="email" placeholder="邮箱地址" required />
+              <span class="input-icon">👤</span>
+              <input v-model="form.account" type="text" placeholder="用户名" required />
             </div>
           </div>
           <div class="field">
@@ -30,24 +30,21 @@
               <input v-model="form.password" type="password" placeholder="密码" required />
             </div>
           </div>
+          <div class="field captcha-field">
+            <div class="input-wrapper captcha-input-wrap">
+              <span class="input-icon">🔐</span>
+              <input v-model="form.captchaValue" type="text" placeholder="验证码" required />
+            </div>
+            <button type="button" class="captcha-image-btn" @click="refreshCaptcha" :disabled="captchaLoading">
+              <img v-if="captchaImage" :src="captchaImage" alt="captcha" class="captcha-image" />
+              <span v-else>{{ captchaLoading ? '加载中...' : '获取验证码' }}</span>
+            </button>
+          </div>
           <div class="forgot-password">
             <a href="#" @click.prevent>忘记密码？</a>
           </div>
           <p v-if="error" class="error">{{ error }}</p>
-          <button type="submit" class="btn-submit" :disabled="loading">立即登录 →</button>
-          <div class="third-party-login">
-            <p class="third-party-title">第三方登录</p>
-            <div class="third-party-buttons">
-              <button type="button" class="third-party-btn">
-                <span class="btn-icon">🔒</span>
-                <span>GitHub</span>
-              </button>
-              <button type="button" class="third-party-btn">
-                <span class="btn-icon">📱</span>
-                <span>手机号</span>
-              </button>
-            </div>
-          </div>
+          <button type="submit" class="btn-submit" :disabled="loading || captchaLoading">立即登录 →</button>
         </form>
       </div>
     </div>
@@ -65,16 +62,22 @@ const emit = defineEmits(['update:modelValue'])
 const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
+const captchaLoading = ref(false)
+const captchaImage = ref('')
 const error = ref('')
 const toast = reactive({ show: false, message: '', type: 'success', timer: null })
-const form = reactive({ account: '', password: '' })
+const form = reactive({ account: '', password: '', captchaKey: '', captchaValue: '' })
 
-watch(() => props.modelValue, (v) => {
+watch(() => props.modelValue, async (v) => {
   if (v) {
     error.value = ''
     form.account = ''
     form.password = ''
+    form.captchaKey = ''
+    form.captchaValue = ''
+    captchaImage.value = ''
     hideToast()
+    await refreshCaptcha()
   }
 })
 
@@ -113,6 +116,22 @@ function hideToast() {
   toast.timer = null
 }
 
+async function refreshCaptcha() {
+  captchaLoading.value = true
+  try {
+    const data = await userStore.fetchCaptcha()
+    form.captchaKey = data?.captchaKey || ''
+    form.captchaValue = ''
+    captchaImage.value = data?.imageBase64 ? `data:image/png;base64,${data.imageBase64}` : ''
+  } catch (e) {
+    captchaImage.value = ''
+    form.captchaKey = ''
+    error.value = e.message || '验证码加载失败'
+  } finally {
+    captchaLoading.value = false
+  }
+}
+
 async function handleSubmit() {
   error.value = ''
   loading.value = true
@@ -125,6 +144,7 @@ async function handleSubmit() {
     }, 600)
   } catch (e) {
     error.value = e.message || '登录失败'
+    await refreshCaptcha()
   } finally {
     loading.value = false
   }
@@ -276,6 +296,44 @@ async function handleSubmit() {
 
 .field {
   width: 100%;
+}
+
+.captcha-field {
+  display: grid;
+  grid-template-columns: 1fr 124px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.captcha-input-wrap {
+  height: 100%;
+}
+
+.captcha-image-btn {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 52px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.captcha-image-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.captcha-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .input-wrapper {

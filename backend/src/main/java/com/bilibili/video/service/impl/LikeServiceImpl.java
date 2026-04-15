@@ -38,7 +38,8 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public void like(Long videoId, Long userId) {
-        if (videoMapper.selectById(videoId) == null) {
+        var video = videoMapper.selectById(videoId);
+        if (video == null) {
             throw new BizException(404, "视频不存在");
         }
 
@@ -59,7 +60,9 @@ public class LikeServiceImpl implements LikeService {
         redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_LIKE, 1);
         redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
 
-        mqService.sendNotify(new NotifyMessage("like", userId, videoId, "点赞视频"));
+        if (video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
+            mqService.sendNotify(new NotifyMessage("like", video.getAuthorId(), videoId, null));
+        }
         mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
         recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, 3.0D);
 

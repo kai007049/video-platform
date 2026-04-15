@@ -6,8 +6,10 @@ import com.bilibili.video.entity.User;
 import com.bilibili.video.exception.BizException;
 import com.bilibili.video.mapper.FollowMapper;
 import com.bilibili.video.mapper.UserMapper;
+import com.bilibili.video.model.mq.NotifyMessage;
 import com.bilibili.video.model.vo.FollowUserVO;
 import com.bilibili.video.service.FollowService;
+import com.bilibili.video.service.MQService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ public class FollowServiceImpl implements FollowService {
 
     private final FollowMapper followMapper;
     private final UserMapper userMapper;
+    private final MQService mqService;
 
     @Override
     public void follow(Long followerId, Long followingId) {
@@ -32,6 +35,7 @@ public class FollowServiceImpl implements FollowService {
             f.setFollowerId(followerId);
             f.setFollowingId(followingId);
             followMapper.insert(f);
+            mqService.sendNotify(new NotifyMessage("follow", followingId, followerId, null));
         }
     }
 

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,8 +31,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 视频控制器
@@ -52,20 +52,10 @@ public class VideoController {
     @PostMapping("/upload")
     @Operation(summary = "上传视频", description = "上传视频和封面，需要登录")
     public Result<VideoVO> upload(
-            @Parameter(description = "视频文件", required = true) @RequestParam("video") MultipartFile videoFile,
-            @Parameter(description = "封面文件") @RequestParam(value = "cover", required = false) MultipartFile coverFile,
-            @Parameter(description = "视频标题", required = false) @RequestParam(value = "title", required = false) String title,
-            @Parameter(description = "视频描述") @RequestParam(value = "description", required = false) String description,
-            @Parameter(description = "分类ID") @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @Parameter(description = "标签ID列表") @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
+            @Valid @ModelAttribute VideoUploadDTO dto,
             @Parameter(hidden = true) HttpServletRequest request) {
         Long userId = UserContext.get();
-        VideoUploadDTO dto = new VideoUploadDTO();
-        dto.setTitle(title);
-        dto.setDescription(description);
-        dto.setCategoryId(categoryId);
-        dto.setTagIds(tagIds == null ? new ArrayList<>() : tagIds);
-        return Result.success(videoService.upload(videoFile, coverFile, dto, userId));
+        return Result.success(videoService.upload(dto.getVideo(), dto.getCover(), dto, userId));
     }
 
     @GetMapping("/list")
