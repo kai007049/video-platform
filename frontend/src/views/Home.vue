@@ -23,23 +23,24 @@
 
       <!-- Bento Grid 首屏：主推视频 + AI 推荐区块 -->
       <!-- ========== Bento Grid 首屏布局（严格12列栅格） ========== -->
-      <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; margin-bottom: 48px;">
+      <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; margin-bottom: 48px; align-items: stretch;">
         
         <!-- 左侧：主推英雄视频 (col-span-8) -->
-        <div 
-          v-if="videoList.length > 0" 
-          :key="videoList[0].id"
+        <div
+          v-if="heroVideo"
+          :key="heroVideo.id"
+          ref="heroCardRef"
           class="bento-hero-card"
           style="grid-column: span 8; aspect-ratio: 16/9; border-radius: 48px; overflow: hidden; position: relative; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; border: 1px solid #f1f5f9; background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #06b6d4 100%);"
           @mouseenter="(e) => e.currentTarget.style.boxShadow = '0 20px 48px rgba(0, 0, 0, 0.20)'"
           @mouseleave="(e) => e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.12)'"
-          @click="goVideo(videoList[0].id)">
+          @click="goVideo(heroVideo.id)">
           
           <!-- 📸 主视频背景 -->
           <div style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden;">
             <img 
-              :src="resolveCover(videoList[0])" 
-              :alt="videoList[0].title" 
+              :src="resolveCover(heroVideo)"
+              :alt="heroVideo.title"
               @error="onCoverError"
               style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);"
               class="bento-hero-img" />
@@ -55,10 +56,10 @@
 
           <!-- 📝 底部信息 -->
           <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 32px; z-index: 10;">
-            <h2 style="font-size: 28px; font-weight: 900; color: white; margin-bottom: 12px; line-height: 1.2; max-width: 520px;">{{ videoList[0].title }}</h2>
+            <h2 style="font-size: 28px; font-weight: 900; color: white; margin-bottom: 12px; line-height: 1.2; max-width: 520px;">{{ heroVideo.title }}</h2>
             <div style="display: flex; align-items: center; gap: 16px; color: #cbd5e1; font-size: 13px; font-weight: 600;">
-              <span>👤 {{ videoList[0].authorName || '用户' }}</span>
-              <span>📈 {{ formatCount(videoList[0].playCount) }} 播放</span>
+              <span>👤 {{ heroVideo.authorName || '用户' }}</span>
+              <span>📈 {{ formatCount(heroVideo.playCount) }} 播放</span>
             </div>
           </div>
 
@@ -77,10 +78,11 @@
         </div>
 
         <!-- 右侧：AI 推荐面板 (col-span-4) -->
-        <div style="grid-column: span 4; border-radius: 48px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #f1f5f9; padding: 24px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);">
+        <div :style="aiPanelStyle">
+          <div style="border-radius: 48px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #f1f5f9; padding: 24px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); min-height: 0; height: 100%;">
           <!-- 装饰 -->
           <div style="position: absolute; right: -50px; top: -50px; width: 140px; height: 140px; background: #c7d2fe; filter: blur(48px); opacity: 0.4;"></div>
-          
+
           <!-- 标题栏 -->
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; position: relative; z-index: 1;">
             <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">✨</div>
@@ -88,31 +90,48 @@
           </div>
 
           <!-- 推荐卡片列表 -->
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; min-height: 0;">
-            <div 
-              v-for="(item, idx) in videoList.slice(1, 4)" 
-              :key="item.id" 
-              style="background: white; padding: 12px; border-radius: 14px; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.3s; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02); flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 0;"
+          <div style="flex: 1; display: grid; grid-template-rows: 1.35fr 1fr 1fr; gap: 12px; position: relative; z-index: 1; min-height: 0;">
+            <div
+              v-for="(item, idx) in aiPanelVideos"
+              :key="item.id"
+              style="position: relative; border-radius: 18px; overflow: hidden; cursor: pointer; border: 1px solid rgba(226, 232, 240, 0.95); box-shadow: 0 3px 14px rgba(15, 23, 42, 0.05); min-height: 0;"
               @mouseenter="(e) => {
-                e.currentTarget.style.borderColor = '#e5e7eb';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(31, 41, 55, 0.08)';
+                e.currentTarget.style.borderColor = '#dbe3f3';
+                e.currentTarget.style.boxShadow = '0 10px 24px rgba(31, 41, 55, 0.12)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
+                const img = e.currentTarget.querySelector('img');
+                if (img) img.style.transform = 'scale(1.04)';
               }"
               @mouseleave="(e) => {
-                e.currentTarget.style.borderColor = '#f1f5f9';
-                e.currentTarget.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.02)';
+                e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.95)';
+                e.currentTarget.style.boxShadow = '0 3px 14px rgba(15, 23, 42, 0.05)';
                 e.currentTarget.style.transform = 'translateY(0)';
+                const img = e.currentTarget.querySelector('img');
+                if (img) img.style.transform = 'scale(1)';
               }"
               @click="goVideo(item.id)">
-              <span style="font-size: 10px; font-weight: 900; padding: 3px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; width: fit-content;"
+              <img
+                :src="resolveCover(item)"
+                :alt="item.title"
+                @error="onCoverError"
+                style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease;" />
+              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.24) 48%, rgba(15, 23, 42, 0.05) 100%);"></div>
+              <span style="position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 6px; display: inline-block; backdrop-filter: blur(8px); box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12); z-index: 1;"
                 :style="{
                   color: idx === 0 ? '#16a34a' : idx === 1 ? '#2563eb' : '#a16207',
-                  backgroundColor: idx === 0 ? '#dcfce7' : idx === 1 ? '#dbeafe' : '#fed7aa'
+                  backgroundColor: idx === 0 ? 'rgba(220, 252, 231, 0.94)' : idx === 1 ? 'rgba(219, 234, 254, 0.94)' : 'rgba(254, 215, 170, 0.94)'
                 }">
                 {{ idx === 0 ? '精选' : idx === 1 ? '热门' : '进阶' }}
               </span>
-              <p style="font-weight: 700; font-size: 12px; color: #1f2937; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ item.title }}</p>
+              <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 12px 10px; z-index: 1;">
+                <p :style="idx === 0
+                    ? 'font-weight: 800; font-size: 14px; color: white; line-height: 1.32; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'
+                    : 'font-weight: 700; font-size: 12px; color: white; line-height: 1.34; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'">
+                  {{ item.title }}
+                </p>
+              </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -198,7 +217,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getVideoList, getRecommended, getHotList } from '../api/video'
 import SkeletonScreen from '../components/SkeletonScreen.vue'
@@ -207,6 +226,8 @@ const router = useRouter()
 const route = useRoute()
 const activeTab = ref('recommend')
 const videoCards = ref([])
+const heroCardRef = ref(null)
+const heroCardHeight = ref(0)
 
 // 测试数据
 const mockVideoData = [
@@ -400,7 +421,30 @@ const pageSize = 16
 const error = ref('')
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
+const aiPanelStyle = computed(() => ({
+  gridColumn: 'span 4',
+  height: heroCardHeight.value > 0 ? `${heroCardHeight.value}px` : 'auto',
+  marginLeft: '12px'
+}))
 let observer = null
+let heroResizeObserver = null
+
+const bentoVideos = computed(() => {
+  const list = [...(videoList.value || [])]
+  if (activeTab.value === 'recommend') {
+    return list.sort((a, b) => {
+      const recommendDiff = Number(Boolean(b?.isRecommended)) - Number(Boolean(a?.isRecommended))
+      if (recommendDiff !== 0) return recommendDiff
+      const playDiff = Number(b?.playCount || 0) - Number(a?.playCount || 0)
+      if (playDiff !== 0) return playDiff
+      return new Date(b?.createTime || 0).getTime() - new Date(a?.createTime || 0).getTime()
+    })
+  }
+  return list
+})
+
+const heroVideo = computed(() => bentoVideos.value[0] || null)
+const aiPanelVideos = computed(() => bentoVideos.value.slice(1, 4))
 
 const fetchApi = (p) => {
   if (activeTab.value === 'hot') return getHotList(p, pageSize)
@@ -472,7 +516,7 @@ function initObserver() {
   if (observer) {
     observer.disconnect()
   }
-  
+
   // 创建新的 observer
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -494,7 +538,7 @@ function initObserver() {
     rootMargin: '200px', // 提前200px开始加载
     threshold: 0.1
   })
-  
+
   // 观察所有视频卡片
   setTimeout(() => {
     videoCards.value.forEach((card) => {
@@ -505,15 +549,46 @@ function initObserver() {
   }, 100)
 }
 
+function syncHeroCardHeight() {
+  const el = heroCardRef.value
+  heroCardHeight.value = el ? el.getBoundingClientRect().height : 0
+}
+
+function initHeroResizeObserver() {
+  if (heroResizeObserver) {
+    heroResizeObserver.disconnect()
+  }
+  if (!heroCardRef.value || typeof ResizeObserver === 'undefined') {
+    return
+  }
+  heroResizeObserver = new ResizeObserver(() => {
+    syncHeroCardHeight()
+  })
+  heroResizeObserver.observe(heroCardRef.value)
+}
+
 onMounted(() => {
   initObserver()
+  nextTick(() => {
+    syncHeroCardHeight()
+    initHeroResizeObserver()
+  })
 })
 
 onUnmounted(() => {
   if (observer) {
     observer.disconnect()
   }
+  if (heroResizeObserver) {
+    heroResizeObserver.disconnect()
+  }
 })
+
+watch(videoList, async () => {
+  await nextTick()
+  syncHeroCardHeight()
+  initHeroResizeObserver()
+}, { deep: true })
 
 watch(() => route.query, () => {
   syncFromQuery()

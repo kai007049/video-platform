@@ -22,4 +22,6 @@ public class Constants {
     public static final double HOT_WEIGHT_COMMENT = 8.0;
     /** 收藏数热度排行权重 */
     public static final double HOT_WEIGHT_FAVORITE = 6.0;
+    /** 本地 Caffeine 仅缓存热榜前 N 视频详情 */
+    public static final int LOCAL_CACHE_HOT_VIDEO_TOP_N = 500;
 }

@@ -1,15 +1,20 @@
 package com.bilibili.video.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.video.common.Constants;
+import com.bilibili.video.entity.Comment;
 import com.bilibili.video.entity.Favorite;
+import com.bilibili.video.entity.User;
 import com.bilibili.video.entity.Video;
 import com.bilibili.video.entity.VideoLike;
 import com.bilibili.video.entity.WatchHistory;
 import com.bilibili.video.exception.BizException;
+import com.bilibili.video.mapper.CommentMapper;
 import com.bilibili.video.mapper.FavoriteMapper;
+import com.bilibili.video.mapper.UserMapper;
 import com.bilibili.video.mapper.VideoLikeMapper;
 import com.bilibili.video.mapper.VideoMapper;
 import com.bilibili.video.mapper.WatchHistoryMapper;
@@ -45,6 +50,8 @@ public class VideoQueryService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RecommendationService recommendationService;
     private final RecExposureLogService recExposureLogService;
+    private final UserMapper userMapper;
+    private final CommentMapper commentMapper;
 
     /**
      * 查询最新视频列表
@@ -175,8 +182,43 @@ public class VideoQueryService {
             if (video == null) {
                 throw new BizException(404, "视频不存在");
             }
-            return videoViewAssembler.toVideoVO(video, null);
+            return buildBaseDetail(video);
         });
+    }
+
+    private VideoVO buildBaseDetail(Video video) {
+        VideoVO vo = new VideoVO();
+        vo.setId(video.getId());
+        vo.setTitle(video.getTitle());
+        vo.setDescription(video.getDescription());
+        vo.setAuthorId(video.getAuthorId());
+        vo.setCoverUrl(video.getCoverUrl());
+        vo.setPreviewUrl(video.getPreviewUrl());
+        vo.setVideoUrl(video.getVideoUrl());
+        vo.setDurationSeconds(video.getDurationSeconds());
+        vo.setIsRecommended(video.getIsRecommended());
+        vo.setCategoryId(video.getCategoryId());
+        vo.setCreateTime(video.getCreateTime());
+        vo.setPlayCount(video.getPlayCount());
+        vo.setLikeCount(video.getLikeCount());
+        vo.setSaveCount(video.getSaveCount());
+
+        User author = video.getAuthorId() == null ? null : userMapper.selectById(video.getAuthorId());
+        if (author != null) {
+            vo.setAuthorName(author.getUsername());
+            vo.setAuthorAvatar(author.getAvatar());
+        }
+
+        vo.setCommentCount(countComments(video.getId()));
+        return vo;
+    }
+
+    private Long countComments(Long videoId) {
+        if (videoId == null) {
+            return 0L;
+        }
+        return commentMapper.selectCount(new LambdaQueryWrapper<Comment>()
+                .eq(Comment::getVideoId, videoId));
     }
 
     /**

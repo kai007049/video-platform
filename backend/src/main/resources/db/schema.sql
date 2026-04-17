@@ -433,4 +433,3 @@ insert into tag (name) values
 ('摄影'),
 ('绘画');
 
-

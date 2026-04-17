@@ -29,7 +29,7 @@
       </div>
 
       <!-- 右侧：AI 推荐面板 -->
-      <div style="grid-column: span 4; border-radius: 48px; border: 1px solid #f1f5f9; padding: 24px; position: relative; overflow: hidden; display: flex; flex-direction: column;">
+      <div style="grid-column: span 4; border-radius: 48px; border: 1px solid #f1f5f9; padding: 24px; position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 0;">
         <div style="position: absolute; right: -50px; top: -50px; width: 140px; height: 140px; background: #c7d2fe; filter: blur(48px); opacity: 0.4;"></div>
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; position: relative; z-index: 1;">
           <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -37,10 +37,14 @@
           </div>
           <div class="skeleton-ai-title" style="font-weight: 900; font-size: 16px;"></div>
         </div>
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; min-height: 0;">
-          <div v-for="i in 3" :key="i" style="background: white; padding: 12px; border-radius: 14px; border: 1px solid #f1f5f9; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 0;">
-            <div class="skeleton-ai-tag" style="font-size: 10px; font-weight: 900; padding: 3px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; width: fit-content;"></div>
-            <div class="skeleton-ai-item-title" style="font-weight: 700; font-size: 12px; line-height: 1.3; height: 32px;"></div>
+        <div style="flex: 1; display: grid; grid-template-rows: 1.35fr 1fr 1fr; gap: 12px; position: relative; z-index: 1; min-height: 0;">
+          <div v-for="i in 3" :key="i" style="position: relative; border-radius: 18px; overflow: hidden; border: 1px solid rgba(226, 232, 240, 0.95); min-height: 0; box-shadow: 0 3px 14px rgba(15, 23, 42, 0.05);">
+            <div class="skeleton-cover"></div>
+            <div class="skeleton-overlay"></div>
+            <div class="skeleton-ai-tag" style="position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 6px; display: inline-block; width: fit-content; z-index: 1;"></div>
+            <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 12px 10px; z-index: 1;">
+              <div class="skeleton-ai-item-title" :style="i === 1 ? 'height: 38px; width: 100%;' : 'height: 32px; width: 100%;'"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -96,6 +100,7 @@
 .skeleton-ai-item-title,
 .skeleton-section-title,
 .skeleton-cover,
+.skeleton-overlay,
 .skeleton-duration,
 .skeleton-avatar,
 .skeleton-video-title,
@@ -188,6 +193,13 @@
 .skeleton-cover {
   width: 100%;
   height: 100%;
+}
+
+.skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.24) 48%, rgba(15, 23, 42, 0.05) 100%);
+  animation: none;
 }
 
 .skeleton-duration {

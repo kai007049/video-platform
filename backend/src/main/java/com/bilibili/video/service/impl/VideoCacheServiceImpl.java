@@ -1,15 +1,20 @@
 package com.bilibili.video.service.impl;
 
+import com.bilibili.video.common.Constants;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.model.vo.VideoVO;
 import com.bilibili.video.service.VideoCacheService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -17,8 +22,10 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 public class VideoCacheServiceImpl implements VideoCacheService {
 
-    /** Redis 视频详情缓存 key 前缀：video:info:{videoId} */
-    private static final String REDIS_KEY_PREFIX = "video:info:";
+    /** Redis 视频基础详情缓存 key 前缀：video:base:v2:{videoId} */
+    private static final String REDIS_BASE_KEY_PREFIX = "video:base:v2:";
+    /** Redis 视频统计缓存 key 前缀：video:stat:{videoId} */
+    private static final String REDIS_STATS_KEY_PREFIX = RedisConstants.VIDEO_STATS_KEY_PREFIX;
     /** 本地 Caffeine 缓存 key 前缀 */
     private static final String LOCAL_KEY_PREFIX = "video:";
     /** Redis 分布式锁 key 前缀，用于防止缓存击穿 */
@@ -33,94 +40,87 @@ public class VideoCacheServiceImpl implements VideoCacheService {
     private static final Duration NULL_TTL = Duration.ofSeconds(60);
     /** 分布式锁 TTL */
     private static final Duration LOCK_TTL = Duration.ofSeconds(5);
+    private static final List<Object> VIDEO_STATS_FIELDS = List.of(
+            RedisConstants.VIDEO_STAT_PLAY,
+            RedisConstants.VIDEO_STAT_LIKE,
+            RedisConstants.VIDEO_STAT_SAVE
+    );
 
     private final Cache<String, Object> localVideoCache;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
     private final java.util.concurrent.ExecutorService cacheDelayExecutor;
 
     /**
      * 从缓存中获取视频详情
-     * @param videoId
-     * @return
      */
     @Override
     public VideoVO getVideoFromCache(Long videoId) {
-        // 本地缓存
         String localKey = LOCAL_KEY_PREFIX + videoId;
         Object localCached = localVideoCache.getIfPresent(localKey);
-        if (localCached instanceof VideoVO) {
-            return (VideoVO) localCached;
+        if (localCached instanceof VideoBaseCache base) {
+            return mergeVideoVO(base, loadStats(videoId));
         }
 
-        // Redis 缓存
-        String redisKey = REDIS_KEY_PREFIX + videoId;
-        Object redisCached = redisTemplate.opsForValue().get(redisKey);
-        if (redisCached != null) {
-            if (NULL_PLACEHOLDER.equals(redisCached)) {
-                // 空值命中：判定为缓存穿透
-                return null;
-            }
-            VideoVO vo = objectMapper.convertValue(redisCached, VideoVO.class);
-            // 回填本地缓存，加速后续访问
-            localVideoCache.put(localKey, vo);
-            return vo;
+        String baseKey = buildBaseKey(videoId);
+        Object baseCached = redisTemplate.opsForValue().get(baseKey);
+        if (baseCached == null) {
+            return null;
         }
-        return null;
+        if (NULL_PLACEHOLDER.equals(baseCached)) {
+            return null;
+        }
+        if (!(baseCached instanceof VideoBaseCache base)) {
+            return null;
+        }
+
+        if (isLocalCacheEligible(videoId)) {
+            localVideoCache.put(localKey, base);
+        }
+        return mergeVideoVO(base, loadStats(videoId));
     }
-
 
     /**
      * 设置缓存
-     * @param videoId
-     * @param videoVO
      */
     @Override
     public void setVideoCache(Long videoId, VideoVO videoVO) {
         if (videoVO == null) {
-            // 缓存空对象，防止缓存穿透
-            String redisKey = REDIS_KEY_PREFIX + videoId;
-            redisTemplate.opsForValue().set(redisKey, NULL_PLACEHOLDER, NULL_TTL);
+            redisTemplate.opsForValue().set(buildBaseKey(videoId), NULL_PLACEHOLDER, NULL_TTL);
             return;
         }
-        String localKey = LOCAL_KEY_PREFIX + videoId;
-        String redisKey = REDIS_KEY_PREFIX + videoId;
-        // 同步写入本地缓存
-        localVideoCache.put(localKey, videoVO);
 
-        // 通过 TTL 抖动避免同一时刻大量 key 过期造成雪崩
+        String localKey = LOCAL_KEY_PREFIX + videoId;
+        String baseKey = buildBaseKey(videoId);
+        VideoBaseCache baseCache = toBaseCache(videoVO);
+
+        if (isLocalCacheEligible(videoId)) {
+            localVideoCache.put(localKey, baseCache);
+        }
+
         long jitterSeconds = ThreadLocalRandom.current().nextLong(0, REDIS_TTL_JITTER.toSeconds() + 1);
         Duration ttl = REDIS_TTL.plusSeconds(jitterSeconds);
-        redisTemplate.opsForValue().set(redisKey, videoVO, ttl);
+        redisTemplate.opsForValue().set(baseKey, baseCache, ttl);
     }
 
     /**
      * 删除缓存
-     * @param videoId
      */
     @Override
     public void evictVideoCache(Long videoId) {
-        String localKey = LOCAL_KEY_PREFIX + videoId;
-        String redisKey = REDIS_KEY_PREFIX + videoId;
-        // 先清本地，再清 Redis
-        localVideoCache.invalidate(localKey);
-        redisTemplate.delete(redisKey);
+        localVideoCache.invalidate(LOCAL_KEY_PREFIX + videoId);
+        redisTemplate.delete(buildBaseKey(videoId));
     }
-
 
     /**
      * 删除缓存（双删）
-     * @param videoId
      */
     @Override
     public void doubleDeleteVideoCache(Long videoId) {
-        // 双删策略：先删缓存 -> 延迟再删一次，防止并发读写导致脏数据
         evictVideoCache(videoId);
         cacheDelayExecutor.submit(() -> {
             try {
                 Thread.sleep(500);
-                String redisKey = REDIS_KEY_PREFIX + videoId;
-                redisTemplate.delete(redisKey);
+                redisTemplate.delete(buildBaseKey(videoId));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -129,19 +129,14 @@ public class VideoCacheServiceImpl implements VideoCacheService {
 
     /**
      * 获取视频详情（带缓存穿透）
-     * @param videoId
-     * @param loader
-     * @return
      */
     @Override
     public VideoVO getOrLoadVideo(Long videoId, java.util.function.Supplier<VideoVO> loader) {
-        // 先读缓存
         VideoVO cached = getVideoFromCache(videoId);
         if (cached != null) {
             return cached;
         }
 
-        // 通过 Redis 分布式锁限制回源
         String lockKey = LOCK_KEY_PREFIX + videoId;
         Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_TTL);
         if (Boolean.TRUE.equals(locked)) {
@@ -149,10 +144,10 @@ public class VideoCacheServiceImpl implements VideoCacheService {
                 VideoVO loaded = loader.get();
                 if (loaded == null) {
                     setVideoCache(videoId, null);
-                } else {
-                    setVideoCache(videoId, loaded);
+                    return null;
                 }
-                return loaded;
+                setVideoCache(videoId, loaded);
+                return getVideoFromCache(videoId);
             } finally {
                 redisTemplate.delete(lockKey);
             }
@@ -169,6 +164,124 @@ public class VideoCacheServiceImpl implements VideoCacheService {
     @Override
     public void invalidateVideo(Long videoId) {
         doubleDeleteVideoCache(videoId);
+    }
+
+    private VideoStatsCache loadStats(Long videoId) {
+        List<Object> values = redisTemplate.opsForHash().multiGet(buildStatsKey(videoId), VIDEO_STATS_FIELDS);
+        if (values == null) {
+            values = Collections.emptyList();
+        }
+        long playDelta = values.size() > 0 ? toLong(values.get(0)) : 0L;
+        long likeDelta = values.size() > 1 ? toLong(values.get(1)) : 0L;
+        long saveDelta = values.size() > 2 ? toLong(values.get(2)) : 0L;
+        return new VideoStatsCache(playDelta, likeDelta, saveDelta);
+    }
+
+    private VideoVO mergeVideoVO(VideoBaseCache base, VideoStatsCache stats) {
+        VideoVO vo = new VideoVO();
+        vo.setId(base.getId());
+        vo.setTitle(base.getTitle());
+        vo.setDescription(base.getDescription());
+        vo.setAuthorId(base.getAuthorId());
+        vo.setAuthorName(base.getAuthorName());
+        vo.setAuthorAvatar(base.getAuthorAvatar());
+        vo.setCoverUrl(base.getCoverUrl());
+        vo.setPreviewUrl(base.getPreviewUrl());
+        vo.setVideoUrl(base.getVideoUrl());
+        vo.setDurationSeconds(base.getDurationSeconds());
+        vo.setIsRecommended(base.getIsRecommended());
+        vo.setCategoryId(base.getCategoryId());
+        vo.setCreateTime(base.getCreateTime());
+        vo.setCommentCount(defaultLong(base.getCommentCount()));
+        vo.setPlayUrl("/api/video/" + base.getId() + "/stream");
+        vo.setPlayCount(defaultLong(base.getPlayCount()) + stats.playDelta());
+        vo.setLikeCount(defaultLong(base.getLikeCount()) + stats.likeDelta());
+        vo.setSaveCount(defaultLong(base.getSaveCount()) + stats.saveDelta());
+        return vo;
+    }
+
+    private VideoBaseCache toBaseCache(VideoVO videoVO) {
+        VideoBaseCache base = new VideoBaseCache();
+        base.setId(videoVO.getId());
+        base.setTitle(videoVO.getTitle());
+        base.setDescription(videoVO.getDescription());
+        base.setAuthorId(videoVO.getAuthorId());
+        base.setAuthorName(videoVO.getAuthorName());
+        base.setAuthorAvatar(videoVO.getAuthorAvatar());
+        base.setCoverUrl(videoVO.getCoverUrl());
+        base.setPreviewUrl(videoVO.getPreviewUrl());
+        base.setVideoUrl(videoVO.getVideoUrl());
+        base.setDurationSeconds(videoVO.getDurationSeconds());
+        base.setIsRecommended(videoVO.getIsRecommended());
+        base.setCategoryId(videoVO.getCategoryId());
+        base.setCreateTime(videoVO.getCreateTime());
+        base.setCommentCount(videoVO.getCommentCount() == null ? 0L : videoVO.getCommentCount());
+        base.setPlayCount(videoVO.getPlayCount() == null ? 0L : videoVO.getPlayCount());
+        base.setLikeCount(videoVO.getLikeCount() == null ? 0L : videoVO.getLikeCount());
+        base.setSaveCount(videoVO.getSaveCount() == null ? 0L : videoVO.getSaveCount());
+        return base;
+    }
+
+    private boolean isLocalCacheEligible(Long videoId) {
+        if (videoId == null) {
+            return false;
+        }
+        Long rank = redisTemplate.opsForZSet().reverseRank(buildHotRankKey(), String.valueOf(videoId));
+        return rank != null && rank < Constants.LOCAL_CACHE_HOT_VIDEO_TOP_N;
+    }
+
+    private String buildBaseKey(Long videoId) {
+        return REDIS_BASE_KEY_PREFIX + videoId;
+    }
+
+    private String buildStatsKey(Long videoId) {
+        return REDIS_STATS_KEY_PREFIX + videoId;
+    }
+
+    private String buildHotRankKey() {
+        return Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h";
+    }
+
+    private long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        try {
+            return Long.parseLong(String.valueOf(value));
+        } catch (NumberFormatException ex) {
+            return 0L;
+        }
+    }
+
+    private long defaultLong(Long value) {
+        return value == null ? 0L : value;
+    }
+
+    @Data
+    public static class VideoBaseCache {
+        private Long id;
+        private String title;
+        private String description;
+        private Long authorId;
+        private String authorName;
+        private String authorAvatar;
+        private String coverUrl;
+        private String previewUrl;
+        private String videoUrl;
+        private Integer durationSeconds;
+        private Boolean isRecommended;
+        private Long categoryId;
+        private LocalDateTime createTime;
+        private Long commentCount;
+        private Long playCount;
+        private Long likeCount;
+        private Long saveCount;
+    }
+
+    public record VideoStatsCache(long playDelta, long likeDelta, long saveDelta) {
     }
 }
 
