@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,6 @@ public class RecExposureLogServiceImpl implements RecExposureLogService {
         if (candidates == null || candidates.isEmpty()) {
             return null;
         }
-        // 每次推荐响应生成统一 reqId，便于将同批曝光关联到一次请求。
         String reqId = UUID.randomUUID().toString().replace("-", "");
         int baseRank = Math.max(page - 1, 0) * Math.max(size, 1);
         for (int i = 0; i < candidates.size(); i++) {
@@ -54,6 +54,43 @@ public class RecExposureLogServiceImpl implements RecExposureLogService {
                 recExposureLogMapper.insert(row);
             } catch (Exception e) {
                 log.debug("recommendation exposure insert failed, reqId={}, videoId={}", reqId, candidate.getVideo().getId(), e);
+            }
+        }
+        return reqId;
+    }
+
+    @Override
+    public String logRecommendationExposureFromVideos(Long userId,
+                                                      String scene,
+                                                      int page,
+                                                      int size,
+                                                      List<VideoVO> videos,
+                                                      Map<Long, CachedRecommendationMeta> metaMap,
+                                                      String strategyVersion) {
+        if (videos == null || videos.isEmpty()) {
+            return null;
+        }
+        String reqId = UUID.randomUUID().toString().replace("-", "");
+        int baseRank = Math.max(page - 1, 0) * Math.max(size, 1);
+        for (int i = 0; i < videos.size(); i++) {
+            VideoVO vo = videos.get(i);
+            if (vo == null || vo.getId() == null) {
+                continue;
+            }
+            try {
+                CachedRecommendationMeta meta = metaMap == null ? null : metaMap.get(vo.getId());
+                RecExposureLog row = new RecExposureLog();
+                row.setUserId(userId);
+                row.setVideoId(vo.getId());
+                row.setReqId(reqId);
+                row.setScene(scene == null || scene.isBlank() ? "recommended" : scene);
+                row.setRank(baseRank + i + 1);
+                row.setScore(meta == null ? null : meta.getScore());
+                row.setChannels(meta == null || meta.getChannels() == null ? null : String.join(",", meta.getChannels()));
+                row.setStrategyVersion(strategyVersion);
+                recExposureLogMapper.insert(row);
+            } catch (Exception e) {
+                log.debug("cached recommendation exposure insert failed, reqId={}, videoId={}", reqId, vo.getId(), e);
             }
         }
         return reqId;

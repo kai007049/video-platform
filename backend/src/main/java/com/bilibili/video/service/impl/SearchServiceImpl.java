@@ -15,27 +15,37 @@ import com.bilibili.video.search.VideoDocument;
 import com.bilibili.video.search.VideoSearchService;
 import com.bilibili.video.service.SearchService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SearchServiceImpl implements SearchService {
 
     private static final DateTimeFormatter HOT_SEARCH_BUCKET_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
+    private static final Set<Integer> CACHEABLE_PAGE_SIZES = Set.of(10, 12, 20);
+    private static final int MIN_CACHEABLE_QUERY_LENGTH = 2;
+    private static final int MAX_CACHEABLE_QUERY_LENGTH = 20;
 
     private final VideoMapper videoMapper;
     private final UserMapper userMapper;
@@ -46,53 +56,43 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public IPage<VideoVO> searchVideos(String keyword, int page, int size, String sortBy) {
-        if (keyword == null || keyword.isBlank()) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        if (normalizedKeyword.isBlank()) {
             return new Page<>(page, size, 0);
         }
+
+        int safePage = Math.max(1, page);
+        int safeSize = Math.min(50, Math.max(1, size));
+        String normalizedSortBy = normalizeSortBy(sortBy);
+        boolean cacheEligible = isSearchResultCacheEligible(normalizedKeyword, safePage, safeSize);
+
+        if (cacheEligible) {
+            CachedSearchResult cached = getCachedSearchResult(normalizedKeyword, safePage, safeSize, normalizedSortBy);
+            if (cached != null) {
+                return buildSearchPageFromIds(cached.getIds(), cached.getTotal() == null ? 0L : cached.getTotal(), safePage, safeSize, normalizedSortBy);
+            }
+        }
+
         Query query = NativeQuery.builder()
                 .withQuery(QueryBuilders.multiMatch(m -> m
                         .fields("title", "description")
-                        .query(keyword)
+                        .query(normalizedKeyword)
                 ))
-                .withPageable(PageRequest.of(Math.max(0, page - 1), Math.min(50, size)))
+                .withPageable(PageRequest.of(safePage - 1, safeSize))
                 .build();
 
         SearchHits<VideoDocument> result = elasticsearchOperations.search(query, VideoDocument.class);
-        List<VideoVO> records = new ArrayList<>();
-        for (SearchHit<VideoDocument> hit : result) {
-            VideoDocument doc = hit.getContent();
-            Video video = videoMapper.selectById(doc.getId());
-            if (video != null) {
-                VideoVO vo = new VideoVO();
-                vo.setId(video.getId());
-                vo.setTitle(video.getTitle());
-                vo.setDescription(video.getDescription());
-                vo.setAuthorId(video.getAuthorId());
-                vo.setCoverUrl(video.getCoverUrl());
-                vo.setPreviewUrl(video.getPreviewUrl());
-                vo.setVideoUrl(video.getVideoUrl());
-                vo.setPlayCount(video.getPlayCount());
-                vo.setLikeCount(video.getLikeCount());
-                vo.setSaveCount(video.getSaveCount());
-                if (video.getSaveCount() != null && "save".equalsIgnoreCase(sortBy)) {
-                    // saveCount 无 ES 字段，补充内存排序在后面统一处理
-                }
-                vo.setDurationSeconds(video.getDurationSeconds());
-                vo.setCategoryId(video.getCategoryId());
-                vo.setCreateTime(video.getCreateTime());
-                records.add(vo);
-            }
-        }
-        if ("save".equalsIgnoreCase(sortBy)) {
-            records.sort((a, b) -> Long.compare(
-                    b.getSaveCount() == null ? 0L : b.getSaveCount(),
-                    a.getSaveCount() == null ? 0L : a.getSaveCount()
-            ));
+        List<Long> ids = result.stream()
+                .map(hit -> hit.getContent().getId())
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (cacheEligible) {
+            cacheSearchResult(normalizedKeyword, safePage, safeSize, normalizedSortBy,
+                    new CachedSearchResult(ids, result.getTotalHits(), Instant.now().getEpochSecond()));
         }
 
-        Page<VideoVO> resultPage = new Page<>(page, size, result.getTotalHits());
-        resultPage.setRecords(records);
-        return resultPage;
+        return buildSearchPageFromIds(ids, result.getTotalHits(), safePage, safeSize, normalizedSortBy);
     }
 
     @Override
@@ -241,12 +241,104 @@ public class SearchServiceImpl implements SearchService {
         List<Long> ids = result.stream()
                 .map(hit -> hit.getContent().getId())
                 .collect(Collectors.toList());
-        List<Video> videos = ids.isEmpty() ? List.of() : videoMapper.selectBatchIds(ids);
+        List<Video> videos = loadVideosByIds(ids);
         List<VideoVO> records = videos.isEmpty() ? List.of() : videoViewAssembler.toVideoVOList(videos, userId);
 
         Page<VideoVO> pageResult = new Page<>(safePage, safeSize, result.getTotalHits());
         pageResult.setRecords(records);
         return pageResult;
+    }
+
+    private IPage<VideoVO> buildSearchPageFromIds(List<Long> ids, long total, int page, int size, String sortBy) {
+        List<Video> videos = loadVideosByIds(ids);
+        List<VideoVO> records = videos.isEmpty() ? List.of() : videoViewAssembler.toVideoVOList(videos, null);
+        if ("save".equalsIgnoreCase(sortBy)) {
+            records = new ArrayList<>(records);
+            records.sort((a, b) -> Long.compare(
+                    b.getSaveCount() == null ? 0L : b.getSaveCount(),
+                    a.getSaveCount() == null ? 0L : a.getSaveCount()
+            ));
+        }
+        Page<VideoVO> resultPage = new Page<>(page, size, total);
+        resultPage.setRecords(records);
+        return resultPage;
+    }
+
+    private List<Video> loadVideosByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, Video> videoMap = videoMapper.selectBatchIds(ids).stream()
+                .filter(video -> video.getId() != null)
+                .collect(Collectors.toMap(Video::getId, video -> video, (left, right) -> left, LinkedHashMap::new));
+        return ids.stream()
+                .map(videoMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private boolean isSearchResultCacheEligible(String normalizedKeyword, int page, int size) {
+        return page == 1
+                && CACHEABLE_PAGE_SIZES.contains(size)
+                && normalizedKeyword.length() >= MIN_CACHEABLE_QUERY_LENGTH
+                && normalizedKeyword.length() <= MAX_CACHEABLE_QUERY_LENGTH
+                && isMeaningfulQuery(normalizedKeyword);
+    }
+
+    private boolean isMeaningfulQuery(String normalizedKeyword) {
+        return normalizedKeyword != null
+                && !normalizedKeyword.isBlank()
+                && normalizedKeyword.codePoints().anyMatch(Character::isLetterOrDigit);
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return "";
+        }
+        return keyword.trim()
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("\\s+", " ");
+    }
+
+    private String normalizeSortBy(String sortBy) {
+        if (sortBy == null || sortBy.isBlank()) {
+            return "comprehensive";
+        }
+        return sortBy.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private CachedSearchResult getCachedSearchResult(String normalizedKeyword, int page, int size, String sortBy) {
+        String key = buildSearchResultKey(normalizedKeyword, page, size, sortBy);
+        try {
+            Object cached = redisTemplate.opsForValue().get(key);
+            if (cached instanceof CachedSearchResult result) {
+                return result;
+            }
+            return null;
+        } catch (Exception e) {
+            log.warn("search result cache deserialize failed, evict corrupted key={}", key, e);
+            redisTemplate.delete(key);
+            return null;
+        }
+    }
+
+    private void cacheSearchResult(String normalizedKeyword, int page, int size, String sortBy, CachedSearchResult result) {
+        if (result == null) {
+            return;
+        }
+        Duration ttl = (result.getIds() == null || result.getIds().isEmpty())
+                ? RedisConstants.SEARCH_RESULT_EMPTY_TTL
+                : RedisConstants.SEARCH_RESULT_TTL;
+        redisTemplate.opsForValue().set(buildSearchResultKey(normalizedKeyword, page, size, sortBy), result, ttl);
+    }
+
+    private String buildSearchResultKey(String normalizedKeyword, int page, int size, String sortBy) {
+        return RedisConstants.SEARCH_RESULT_KEY_PREFIX
+                + normalizedKeyword.replace(' ', '_')
+                + ":sort:" + sortBy
+                + ":page:" + page
+                + ":size:" + size
+                + ":v1";
     }
 
     private String getHotSearchBucketKey(LocalDate date) {

@@ -64,6 +64,25 @@ public class RedisConstants {
     public static final String HOT_SEARCH_WINDOW_KEY = "search:hot:window:7d";
     /** 热搜聚合临时 key TTL */
     public static final Duration HOT_SEARCH_WINDOW_TTL = Duration.ofSeconds(60);
+    /** 搜索结果缓存 key 前缀：search:video:* */
+    public static final String SEARCH_RESULT_KEY_PREFIX = "search:video:";
+    /** 搜索结果缓存 TTL */
+    public static final Duration SEARCH_RESULT_TTL = Duration.ofSeconds(60);
+    /** 搜索空结果缓存 TTL */
+    public static final Duration SEARCH_RESULT_EMPTY_TTL = Duration.ofSeconds(30);
+
+    /** 推荐结果窗口缓存 key 前缀：rec:* */
+    public static final String RECOMMEND_RESULT_KEY_PREFIX = "rec:";
+    /** 游客推荐结果窗口 TTL */
+    public static final Duration RECOMMEND_GUEST_WINDOW_TTL = Duration.ofSeconds(60);
+    /** 登录用户推荐结果窗口 TTL */
+    public static final Duration RECOMMEND_USER_WINDOW_TTL = Duration.ofSeconds(15);
+    /** 推荐结果窗口长度 */
+    public static final int RECOMMEND_RESULT_WINDOW_SIZE = 50;
+    /** 推荐结果缓存重建锁前缀 */
+    public static final String RECOMMEND_RESULT_LOCK_PREFIX = "lock:rec:";
+    /** 推荐结果缓存重建锁 TTL */
+    public static final Duration RECOMMEND_RESULT_LOCK_TTL = Duration.ofSeconds(5);
 
     /** 统计刷盘分布式锁 key */
     public static final String VIDEO_STATS_SYNC_LOCK = "lock:video:stat:sync";

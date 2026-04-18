@@ -85,6 +85,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (path.equals("/captcha")) return true;
         if (path.equals("/user/login") || path.equals("/user/register")) return true;
         if (path.equals("/search")) return true;
+        if (path.equals("/search/users")) return true;
         if (path.startsWith("/file/")) return true;
         if (path.startsWith("/video/") && !path.equals("/video/upload")) return true;
         return false;

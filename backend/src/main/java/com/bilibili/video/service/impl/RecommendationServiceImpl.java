@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bilibili.video.common.Constants;
+import com.bilibili.video.common.RedisConstants;
 import com.bilibili.video.entity.Favorite;
 import com.bilibili.video.entity.Follow;
-import com.bilibili.video.entity.RecExposureLog;
 import com.bilibili.video.entity.Video;
 import com.bilibili.video.entity.VideoLike;
 import com.bilibili.video.entity.VideoTagFeature;
@@ -23,12 +23,15 @@ import com.bilibili.video.service.RecExposureLogService;
 import com.bilibili.video.service.RecommendationFeatureService;
 import com.bilibili.video.service.RecommendationService;
 import com.bilibili.video.service.UserProfileSummaryService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,10 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecommendationServiceImpl implements RecommendationService {
 
     private static final String STRATEGY_VERSION = "backend-v2";
@@ -111,8 +116,41 @@ public class RecommendationServiceImpl implements RecommendationService {
     public IPage<VideoVO> listRecommended(int page, int size, Long userId) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.max(1, Math.min(size, 50));
+        int windowSize = RedisConstants.RECOMMEND_RESULT_WINDOW_SIZE;
 
-        // 候选池：先收集多路召回结果，再统一做特征打分与页面级重排。
+        CachedRecommendationWindow cachedWindow = getCachedWindow(userId, windowSize);
+        if (cachedWindow != null) {
+            return buildPageFromCachedWindow(cachedWindow, safePage, safeSize, userId);
+        }
+
+        String lockKey = buildRecommendLockKey(userId, windowSize);
+        Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", RedisConstants.RECOMMEND_RESULT_LOCK_TTL);
+        if (Boolean.TRUE.equals(locked)) {
+            try {
+                CachedRecommendationWindow rebuilt = buildRecommendationWindow(userId, windowSize);
+                cacheRecommendationWindow(userId, windowSize, rebuilt);
+                return buildPageFromCachedWindow(rebuilt, safePage, safeSize, userId);
+            } finally {
+                redisTemplate.delete(lockKey);
+            }
+        }
+
+        try {
+            Thread.sleep(80);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        CachedRecommendationWindow retryWindow = getCachedWindow(userId, windowSize);
+        if (retryWindow != null) {
+            return buildPageFromCachedWindow(retryWindow, safePage, safeSize, userId);
+        }
+
+        CachedRecommendationWindow fallbackWindow = buildRecommendationWindow(userId, windowSize);
+        return buildPageFromCachedWindow(fallbackWindow, safePage, safeSize, userId);
+    }
+
+    private CachedRecommendationWindow buildRecommendationWindow(Long userId, int windowSize) {
         Map<Long, RecommendationCandidate> candidateMap = new LinkedHashMap<>();
         List<Long> recentWatchedIds = userId == null
                 ? Collections.emptyList()
@@ -129,7 +167,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         List<Long> candidateIds = candidateMap.keySet().stream().toList();
         if (candidateIds.isEmpty()) {
-            return fallbackRecommended(safePage, safeSize, userId);
+            return fallbackRecommendationWindow(windowSize);
         }
 
         Map<Long, Video> videoMap = loadVideoMap(candidateIds);
@@ -142,27 +180,144 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .sorted(Comparator.comparingDouble(RecommendationCandidate::getFinalScore).reversed())
                 .toList();
         if (rankedCandidates.isEmpty()) {
-            return fallbackRecommended(safePage, safeSize, userId);
+            return fallbackRecommendationWindow(windowSize);
         }
 
         List<RecommendationCandidate> rerankedCandidates = rerankCandidates(rankedCandidates, recentWatchedIds);
-        int from = (safePage - 1) * safeSize;
-        if (from >= rerankedCandidates.size()) {
-            return new Page<>(safePage, safeSize, rerankedCandidates.size());
+        List<RecommendationCandidate> windowCandidates = rerankedCandidates.stream()
+                .limit(windowSize)
+                .toList();
+        boolean hasMore = rerankedCandidates.size() > windowCandidates.size();
+        return buildCachedWindow(windowCandidates, hasMore);
+    }
+
+    private CachedRecommendationWindow fallbackRecommendationWindow(int windowSize) {
+        Map<Long, RecommendationCandidate> candidateMap = new LinkedHashMap<>();
+        recallFromHot(candidateMap);
+        recallFromFresh(candidateMap);
+        recallFromEditorial(candidateMap);
+        List<Long> candidateIds = candidateMap.keySet().stream().toList();
+        if (candidateIds.isEmpty()) {
+            return new CachedRecommendationWindow(Collections.emptyList(), 0, false, Instant.now().getEpochSecond(), Collections.emptyMap());
         }
-        int to = Math.min(from + safeSize, rerankedCandidates.size());
-        List<RecommendationCandidate> pageCandidates = rerankedCandidates.subList(from, to);
-        List<Video> pageVideos = pageCandidates.stream()
-                .map(candidate -> candidate.video)
+        Map<Long, Video> videoMap = loadVideoMap(candidateIds);
+        enrichVideoMetadata(candidateMap, videoMap);
+        scoreCandidates(candidateMap);
+        List<RecommendationCandidate> ranked = candidateMap.values().stream()
+                .filter(item -> item.video != null)
+                .sorted(Comparator.comparingDouble(RecommendationCandidate::getFinalScore).reversed())
+                .toList();
+        List<RecommendationCandidate> windowCandidates = ranked.stream().limit(windowSize).toList();
+        boolean hasMore = ranked.size() > windowCandidates.size();
+        return buildCachedWindow(windowCandidates, hasMore);
+    }
+
+    private CachedRecommendationWindow buildCachedWindow(List<RecommendationCandidate> candidates, boolean hasMore) {
+        List<Long> ids = candidates.stream()
+                .map(RecommendationCandidate::getVideoId)
                 .filter(Objects::nonNull)
                 .toList();
+        Map<String, CachedRecommendationMeta> meta = new LinkedHashMap<>();
+        for (int i = 0; i < candidates.size(); i++) {
+            RecommendationCandidate candidate = candidates.get(i);
+            if (candidate == null || candidate.getVideoId() == null) {
+                continue;
+            }
+            CachedRecommendationMeta item = new CachedRecommendationMeta();
+            item.setScore(candidate.getFinalScore());
+            item.setChannels(candidate.getRecallChannels().stream().sorted().toList());
+            item.setRank(i + 1);
+            meta.put(String.valueOf(candidate.getVideoId()), item);
+        }
+        return new CachedRecommendationWindow(ids, ids.size(), hasMore, Instant.now().getEpochSecond(), meta);
+    }
 
+    private IPage<VideoVO> buildPageFromCachedWindow(CachedRecommendationWindow window, int page, int size, Long userId) {
+        if (window == null || window.getIds() == null || window.getIds().isEmpty()) {
+            Page<VideoVO> empty = new Page<>(page, size, 0);
+            empty.setRecords(Collections.emptyList());
+            return empty;
+        }
+        int from = Math.max(page - 1, 0) * Math.max(size, 1);
+        if (from >= window.getIds().size()) {
+            return new Page<>(page, size, window.getWindowSize() == null ? 0 : window.getWindowSize());
+        }
+        int to = Math.min(from + size, window.getIds().size());
+        List<Long> pageIds = window.getIds().subList(from, to);
+        List<Video> pageVideos = loadVideosByIds(pageIds);
         List<VideoVO> records = videoViewAssembler.toVideoVOList(pageVideos, userId);
-        Page<VideoVO> result = new Page<>(safePage, safeSize, rerankedCandidates.size());
+        Page<VideoVO> result = new Page<>(page, size, window.getWindowSize() == null ? records.size() : window.getWindowSize());
         result.setRecords(records);
-
-        recExposureLogService.logRecommendationExposureBatch(userId, "recommended", safePage, safeSize, pageCandidates, STRATEGY_VERSION);
+        recExposureLogService.logRecommendationExposureFromVideos(
+                userId,
+                "recommended",
+                page,
+                size,
+                records,
+                toMetaByVideoId(window),
+                STRATEGY_VERSION
+        );
         return result;
+    }
+
+    private Map<Long, CachedRecommendationMeta> toMetaByVideoId(CachedRecommendationWindow window) {
+        if (window == null || window.getMeta() == null || window.getMeta().isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Long, CachedRecommendationMeta> result = new HashMap<>();
+        for (Map.Entry<String, CachedRecommendationMeta> entry : window.getMeta().entrySet()) {
+            try {
+                result.put(Long.valueOf(entry.getKey()), entry.getValue());
+            } catch (NumberFormatException ignore) {
+            }
+        }
+        return result;
+    }
+
+    private CachedRecommendationWindow getCachedWindow(Long userId, int windowSize) {
+        String key = buildRecommendWindowKey(userId, windowSize);
+        try {
+            Object cached = redisTemplate.opsForValue().get(key);
+            if (cached instanceof CachedRecommendationWindow window) {
+                return window;
+            }
+            return null;
+        } catch (Exception e) {
+            log.warn("recommendation cache deserialize failed, evict corrupted key={}", key, e);
+            redisTemplate.delete(key);
+            return null;
+        }
+    }
+
+    private void cacheRecommendationWindow(Long userId, int windowSize, CachedRecommendationWindow window) {
+        if (window == null) {
+            return;
+        }
+        Duration ttl = userId == null
+                ? withJitter(RedisConstants.RECOMMEND_GUEST_WINDOW_TTL)
+                : withJitter(RedisConstants.RECOMMEND_USER_WINDOW_TTL);
+        redisTemplate.opsForValue().set(buildRecommendWindowKey(userId, windowSize), window, ttl);
+    }
+
+    private Duration withJitter(Duration base) {
+        long seconds = base.toSeconds();
+        long jitter = Math.max(1L, Math.round(seconds * 0.2D));
+        long extra = ThreadLocalRandom.current().nextLong(0, jitter + 1);
+        return base.plusSeconds(extra);
+    }
+
+    private String buildRecommendWindowKey(Long userId, int windowSize) {
+        if (userId == null) {
+            return RedisConstants.RECOMMEND_RESULT_KEY_PREFIX + "guest:home:v1:window:" + windowSize;
+        }
+        return RedisConstants.RECOMMEND_RESULT_KEY_PREFIX + "user:" + userId + ":home:v1:window:" + windowSize;
+    }
+
+    private String buildRecommendLockKey(Long userId, int windowSize) {
+        if (userId == null) {
+            return RedisConstants.RECOMMEND_RESULT_LOCK_PREFIX + "guest:home:v1:window:" + windowSize;
+        }
+        return RedisConstants.RECOMMEND_RESULT_LOCK_PREFIX + "user:" + userId + ":home:v1:window:" + windowSize;
     }
 
     /**
@@ -399,44 +554,12 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (out.isEmpty()) {
             return rankedCandidates;
         }
-        // 若约束过严导致候选数量减少，则补回剩余高分内容，确保分页稳定。
         Set<Long> selectedIds = out.stream().map(item -> item.video.getId()).collect(Collectors.toCollection(HashSet::new));
         for (RecommendationCandidate candidate : rankedCandidates) {
             if (candidate.video != null && selectedIds.add(candidate.video.getId())) {
                 out.add(candidate);
             }
         }
-        return out;
-    }
-
-    private IPage<VideoVO> fallbackRecommended(int page, int size, Long userId) {
-        Map<Long, RecommendationCandidate> candidateMap = new LinkedHashMap<>();
-        recallFromHot(candidateMap);
-        recallFromFresh(candidateMap);
-        recallFromEditorial(candidateMap);
-        List<Long> candidateIds = candidateMap.keySet().stream().toList();
-        if (candidateIds.isEmpty()) {
-            Page<VideoVO> empty = new Page<>(page, size, 0);
-            empty.setRecords(Collections.emptyList());
-            return empty;
-        }
-        Map<Long, Video> videoMap = loadVideoMap(candidateIds);
-        enrichVideoMetadata(candidateMap, videoMap);
-        scoreCandidates(candidateMap);
-        List<RecommendationCandidate> ranked = candidateMap.values().stream()
-                .filter(item -> item.video != null)
-                .sorted(Comparator.comparingDouble(RecommendationCandidate::getFinalScore).reversed())
-                .toList();
-        int from = Math.max(page - 1, 0) * Math.max(size, 1);
-        if (from >= ranked.size()) {
-            return new Page<>(page, size, ranked.size());
-        }
-        int to = Math.min(from + size, ranked.size());
-        List<RecommendationCandidate> pageCandidates = ranked.subList(from, to);
-        List<VideoVO> records = videoViewAssembler.toVideoVOList(pageCandidates.stream().map(item -> item.video).toList(), userId);
-        Page<VideoVO> out = new Page<>(page, size, ranked.size());
-        out.setRecords(records);
-        recExposureLogService.logRecommendationExposureBatch(userId, "recommended", page, size, pageCandidates, STRATEGY_VERSION);
         return out;
     }
 
@@ -451,6 +574,17 @@ public class RecommendationServiceImpl implements RecommendationService {
         return videoMapper.selectBatchIds(ids).stream()
                 .filter(video -> video.getId() != null)
                 .collect(Collectors.toMap(Video::getId, video -> video, (a, b) -> a, LinkedHashMap::new));
+    }
+
+    private List<Video> loadVideosByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, Video> videoMap = loadVideoMap(ids);
+        return ids.stream()
+                .map(videoMap::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private void enrichVideoMetadata(Map<Long, RecommendationCandidate> candidateMap, Map<Long, Video> videoMap) {
@@ -591,9 +725,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
     }
 
-    /**
-     * 推荐候选对象：承载多路召回产生的特征，便于统一打分和曝光分析。
-     */
+    @Data
     public static class RecommendationCandidate {
         private final Long videoId;
         private final Set<String> recallChannels = new LinkedHashSet<>();
@@ -612,22 +744,6 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         public RecommendationCandidate(Long videoId) {
             this.videoId = videoId;
-        }
-
-        public Long getVideoId() {
-            return videoId;
-        }
-
-        public Set<String> getRecallChannels() {
-            return recallChannels;
-        }
-
-        public Video getVideo() {
-            return video;
-        }
-
-        public double getFinalScore() {
-            return finalScore;
         }
     }
 }
