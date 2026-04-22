@@ -27,7 +27,7 @@ public class VideoDeleteConsumer implements RocketMQListener<VideoDeleteMessage>
 
     @Override
     public void onMessage(VideoDeleteMessage message) {
-        mqReliabilityService.consumeWithIdempotency(MqTopics.VIDEO_DELETE, message, () -> {
+        mqReliabilityService.consumeWithIdempotency(MqTopics.VIDEO_DELETE, "video-delete-consumer", message, () -> {
             log.info("[MQ] delete video resources: {}", message);
             try {
                 minioUtils.deleteVideoByUrl(message.getVideoUrl());

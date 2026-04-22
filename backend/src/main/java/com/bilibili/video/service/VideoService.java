@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface VideoService {
 
-    VideoVO upload(MultipartFile videoFile, MultipartFile coverFile, VideoUploadDTO dto, Long authorId);
+    VideoVO upload(VideoUploadDTO dto, Long authorId);
 
     IPage<VideoVO> list(int page, int size, Long userId);
 

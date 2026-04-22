@@ -43,7 +43,7 @@
         <div v-else-if="activeTab === 'video'" class="video-list">
           <div v-for="video in videos" :key="video.id" class="video-item" @click="goVideo(video.id)">
             <div class="video-cover">
-              <img :src="resolveCover(video)" alt="视频封面" />
+              <img :src="resolveCover(video)" alt="视频封面" @error="onCoverError" />
               <span class="video-duration">{{ formatDuration(video.durationSeconds) }}</span>
             </div>
             <div class="video-info">
@@ -59,7 +59,7 @@
 
         <div v-else class="user-list">
           <div v-for="user in users" :key="user.id" class="user-item" @click="goUser(user.id)">
-            <img :src="resolveAvatar(user.avatar)" alt="头像" class="user-avatar" />
+            <img :src="resolveAvatar(user.avatar)" alt="头像" class="user-avatar" @error="onAvatarError" />
             <div class="user-info">
               <div class="user-name">{{ user.username }}</div>
               <div class="user-extra">{{ user.signature || '这个用户还没有简介' }}</div>
@@ -75,6 +75,7 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { searchUsers, searchVideos } from '../api/video'
+import { applyImageFallbackOnce } from '../utils/imageFallback'
 
 const route = useRoute()
 const router = useRouter()
@@ -200,6 +201,14 @@ function resolveAvatar(avatar) {
     return avatar
   }
   return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
+}
+
+function onCoverError(event) {
+  applyImageFallbackOnce(event, defaultCover)
+}
+
+function onAvatarError(event) {
+  applyImageFallbackOnce(event, avatarPlaceholder)
 }
 
 function formatDuration(seconds) {

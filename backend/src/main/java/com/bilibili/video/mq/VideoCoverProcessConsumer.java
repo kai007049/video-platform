@@ -25,7 +25,7 @@ public class VideoCoverProcessConsumer implements RocketMQListener<VideoProcessM
 
     @Override
     public void onMessage(VideoProcessMessage message) {
-        mqReliabilityService.consumeWithIdempotency(MqTopics.VIDEO_COVER_PROCESS, message, () -> {
+        mqReliabilityService.consumeWithIdempotency(MqTopics.VIDEO_COVER_PROCESS, "video-cover-process-consumer", message, () -> {
             log.info("[MQ] video cover process: {}", message);
             videoCoverProcessService.processByVideoId(message.getVideoId());
         });

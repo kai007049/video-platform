@@ -35,7 +35,9 @@ public class FollowServiceImpl implements FollowService {
             f.setFollowerId(followerId);
             f.setFollowingId(followingId);
             followMapper.insert(f);
-            mqService.sendNotify(new NotifyMessage("follow", followingId, followerId, null));
+            NotifyMessage notifyMessage = new NotifyMessage("follow", followingId, followerId, null);
+            notifyMessage.setBizKey("notify:user:" + followingId + ":follow:" + followerId);
+            mqService.sendNotify(notifyMessage);
         }
     }
 

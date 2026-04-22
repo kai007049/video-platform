@@ -128,6 +128,7 @@ import {
 } from '../api/video'
 import { useUserStore } from '../stores/user'
 import EmptyState from '../components/EmptyState.vue'
+import { applyImageFallbackOnce } from '../utils/imageFallback'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -344,11 +345,11 @@ function resolveAvatar(avatar) {
 }
 
 function onAvatarError(event) {
-  event.target.src = avatarPlaceholder
+  applyImageFallbackOnce(event, avatarPlaceholder)
 }
 
 function onCoverError(event) {
-  event.target.src = defaultCover
+  applyImageFallbackOnce(event, defaultCover)
 }
 
 watch(

@@ -1,5 +1,6 @@
 package com.bilibili.video.service.impl;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@Schema(description = "缓存的推荐窗口")
 public class CachedRecommendationWindow {
 
     private List<Long> ids = Collections.emptyList();

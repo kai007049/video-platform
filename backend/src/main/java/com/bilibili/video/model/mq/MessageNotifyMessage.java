@@ -2,12 +2,14 @@ package com.bilibili.video.model.mq;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageNotifyMessage {
+@EqualsAndHashCode(callSuper = true)
+public class MessageNotifyMessage extends BaseMqMessage {
     private Long receiverId;
     private String type; // message / notification
     private Long refId;

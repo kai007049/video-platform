@@ -238,6 +238,7 @@ import {
   getNotifications,
   readNotificationApi
 } from '../api/message'
+import { applyImageFallbackOnce } from '../utils/imageFallback'
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -378,7 +379,7 @@ function resolveAvatar(avatar) {
 }
 
 function onAvatarError(event) {
-  event.target.src = avatarPlaceholder
+  applyImageFallbackOnce(event, avatarPlaceholder)
 }
 
 function isImageMessage(content) {

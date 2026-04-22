@@ -4,6 +4,8 @@ import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -185,6 +187,31 @@ public class MinioUtils {
                 .bucket(bucketAndObject[0])
                 .object(bucketAndObject[1])
                 .build());
+    }
+
+    public InputStream getVideoStream(String videoUrl, long offset, long length) throws Exception {
+        String[] bucketAndObject = parseBucketAndObject(videoUrl);
+        if (bucketAndObject == null) {
+            throw new IllegalArgumentException("无效的视频URL: " + videoUrl);
+        }
+        return minioClient.getObject(GetObjectArgs.builder()
+                .bucket(bucketAndObject[0])
+                .object(bucketAndObject[1])
+                .offset(offset)
+                .length(length)
+                .build());
+    }
+
+    public long getVideoSize(String videoUrl) throws Exception {
+        String[] bucketAndObject = parseBucketAndObject(videoUrl);
+        if (bucketAndObject == null) {
+            throw new IllegalArgumentException("无效的视频URL: " + videoUrl);
+        }
+        StatObjectResponse response = minioClient.statObject(StatObjectArgs.builder()
+                .bucket(bucketAndObject[0])
+                .object(bucketAndObject[1])
+                .build());
+        return response.size();
     }
 
     /** 从 MinIO 获取对象流（视频/封面通用） */

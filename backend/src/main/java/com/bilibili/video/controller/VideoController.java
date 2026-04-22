@@ -16,6 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,15 +50,14 @@ public class VideoController {
     private final WatchHistoryService watchHistoryService;
 
     /**
-     * 上传视频（分类/标签可不填，后端可走本地规则自动补全）。
+     * 上传视频（标题/简介/分类/标签必填，封面可选）。
      */
     @PostMapping("/upload")
     @Operation(summary = "上传视频", description = "上传视频和封面，需要登录")
     public Result<VideoVO> upload(
-            @Valid @ModelAttribute VideoUploadDTO dto,
-            @Parameter(hidden = true) HttpServletRequest request) {
+            @Valid @ModelAttribute VideoUploadDTO dto) {
         Long userId = UserContext.get();
-        return Result.success(videoService.upload(dto.getVideo(), dto.getCover(), dto, userId));
+        return Result.success(videoService.upload(dto, userId));
     }
 
     @GetMapping("/list")
@@ -72,8 +74,7 @@ public class VideoController {
     @Operation(summary = "创作者作品列表")
     public Result<IPage<VideoVO>> creatorVideos(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            HttpServletRequest request) {
+            @RequestParam(defaultValue = "12") int size) {
         Long userId = UserContext.get();
         return Result.success(videoService.listCreatorVideos(userId, page, size));
     }
@@ -82,8 +83,7 @@ public class VideoController {
     @Operation(summary = "点赞视频列表")
     public Result<IPage<VideoVO>> likedVideos(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            HttpServletRequest request) {
+            @RequestParam(defaultValue = "12") int size) {
         Long userId = UserContext.get();
         return Result.success(videoService.listLikedVideos(userId, page, size));
     }
@@ -92,8 +92,7 @@ public class VideoController {
     @Operation(summary = "收藏视频列表")
     public Result<IPage<VideoVO>> favoriteVideos(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            HttpServletRequest request) {
+            @RequestParam(defaultValue = "12") int size) {
         Long userId = UserContext.get();
         return Result.success(videoService.listFavoriteVideos(userId, page, size));
     }
@@ -102,18 +101,16 @@ public class VideoController {
     @Operation(summary = "观看历史列表")
     public Result<IPage<VideoVO>> historyVideos(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            HttpServletRequest request) {
+            @RequestParam(defaultValue = "12") int size) {
         Long userId = UserContext.get();
         return Result.success(videoService.listHistoryVideos(userId, page, size));
     }
 
     @GetMapping("/recommended")
-    @Operation(summary = "推荐流", description = "热门 + 最新 + 兴趣 + AI 混合推荐")
+    @Operation(summary = "推荐流", description = "热门 + 最新 + 兴趣")
     public Result<IPage<VideoVO>> recommended(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            HttpServletRequest request) {
+            @RequestParam(defaultValue = "12") int size) {
         Long userId = UserContext.get();
         return Result.success(videoService.listRecommended(page, size, userId));
     }
@@ -122,8 +119,7 @@ public class VideoController {
     @Operation(summary = "热榜", description = "基于播放/点赞/评论/收藏的热榜")
     public Result<IPage<VideoVO>> hot(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
-            HttpServletRequest request) {
+            @RequestParam(defaultValue = "12") int size) {
         Long userId = UserContext.get();
         return Result.success(videoService.listHot(page, size, userId));
     }
@@ -142,8 +138,7 @@ public class VideoController {
     @GetMapping("/{id}")
     @Operation(summary = "视频详情")
     public Result<VideoVO> getById(
-            @Parameter(description = "视频ID", required = true) @PathVariable Long id,
-            @Parameter(hidden = true) HttpServletRequest request) {
+            @Parameter(description = "视频ID", required = true) @PathVariable Long id) {
         Long userId = UserContext.get();
         return Result.success(videoService.getById(id, userId));
     }
@@ -151,29 +146,65 @@ public class VideoController {
     @GetMapping("/{id}/stream")
     @Operation(summary = "视频流", description = "后端从 MinIO 转发视频流")
     public ResponseEntity<StreamingResponseBody> stream(
-            @Parameter(description = "视频ID", required = true) @PathVariable Long id) {
+            @Parameter(description = "视频ID", required = true) @PathVariable Long id,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) {
         var vo = videoService.getById(id, null);
         if (vo == null || vo.getVideoUrl() == null) {
             throw new BizException(404, "视频不存在");
         }
 
-        StreamingResponseBody body = outputStream -> {
-            try (InputStream in = minioUtils.getVideoStream(vo.getVideoUrl())) {
-                in.transferTo(outputStream);
-            } catch (Exception e) {
-                if (isClientDisconnected(e)) {
-                    log.debug("client disconnected while streaming, videoId={}", id);
-                    return;
-                }
-                throw new RuntimeException(e);
-            }
-        };
+        try {
+            long totalSize = minioUtils.getVideoSize(vo.getVideoUrl());
+            String contentType = getVideoContentType(vo.getVideoUrl());
 
-        String contentType = getVideoContentType(vo.getVideoUrl());
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header("Accept-Ranges", "bytes")
-                .body(body);
+            if (rangeHeader == null || rangeHeader.isBlank()) {
+                StreamingResponseBody body = outputStream -> {
+                    try (InputStream in = minioUtils.getVideoStream(vo.getVideoUrl())) {
+                        in.transferTo(outputStream);
+                    } catch (Exception e) {
+                        if (isClientDisconnected(e)) {
+                            log.debug("client disconnected while streaming, videoId={}", id);
+                            return;
+                        }
+                        throw new RuntimeException(e);
+                    }
+                };
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                        .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(totalSize))
+                        .body(body);
+            }
+
+            HttpRange range = HttpRange.parseRanges(rangeHeader).get(0);
+            long start = range.getRangeStart(totalSize);
+            long end = range.getRangeEnd(totalSize);
+            long contentLength = end - start + 1;
+
+            StreamingResponseBody body = outputStream -> {
+                try (InputStream in = minioUtils.getVideoStream(vo.getVideoUrl(), start, contentLength)) {
+                    in.transferTo(outputStream);
+                } catch (Exception e) {
+                    if (isClientDisconnected(e)) {
+                        log.debug("client disconnected while streaming range, videoId={}, range={}", id, rangeHeader);
+                        return;
+                    }
+                    throw new RuntimeException(e);
+                }
+            };
+
+            return ResponseEntity.status(206)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .header(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + totalSize)
+                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength))
+                    .body(body);
+        } catch (BizException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BizException(500, "视频流读取失败: " + e.getMessage());
+        }
     }
 
     @PostMapping("/{id}/progress")

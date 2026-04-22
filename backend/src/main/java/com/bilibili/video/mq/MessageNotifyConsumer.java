@@ -30,7 +30,7 @@ public class MessageNotifyConsumer implements RocketMQListener<MessageNotifyMess
 
     @Override
     public void onMessage(MessageNotifyMessage message) {
-        mqReliabilityService.consumeWithIdempotency(MqTopics.MESSAGE_NOTIFY, message, () -> {
+        mqReliabilityService.consumeWithIdempotency(MqTopics.MESSAGE_NOTIFY, "message-notify-consumer", message, () -> {
             log.info("[MQ] message notify: {}", message);
             messageWebSocketServer.push(message.getReceiverId(), toJson(message));
         });

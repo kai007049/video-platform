@@ -61,9 +61,13 @@ public class LikeServiceImpl implements LikeService {
         redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
 
         if (video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
-            mqService.sendNotify(new NotifyMessage("like", video.getAuthorId(), videoId, null));
+            NotifyMessage notifyMessage = new NotifyMessage("like", video.getAuthorId(), videoId, null);
+            notifyMessage.setBizKey("notify:user:" + video.getAuthorId() + ":like:" + videoId + ":actor:" + userId);
+            mqService.sendNotify(notifyMessage);
         }
-        mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
+        SearchSyncMessage searchSyncMessage = new SearchSyncMessage("video", videoId, "update");
+        searchSyncMessage.setBizKey("search:video:" + videoId + ":update");
+        mqService.sendSearchSync(searchSyncMessage);
         recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, 3.0D);
 
         redisTemplate.opsForZSet().incrementScore(

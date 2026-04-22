@@ -221,6 +221,7 @@ import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getVideoList, getRecommended, getHotList } from '../api/video'
 import SkeletonScreen from '../components/SkeletonScreen.vue'
+import { applyImageFallbackOnce } from '../utils/imageFallback'
 
 const router = useRouter()
 const route = useRoute()
@@ -498,14 +499,14 @@ function resolveCover(item) {
   if (item.coverUrl) return `/api/file/cover?url=${encodeURIComponent(item.coverUrl)}`
   return placeholderCover
 }
-function onCoverError(event) { event.target.src = placeholderCover }
+function onCoverError(event) { applyImageFallbackOnce(event, placeholderCover) }
 function resolveAvatar(avatar) {
   if (!avatar) return avatarPlaceholder
   if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar
   if (avatar.startsWith('/api/file/avatar') || avatar.startsWith('/file/avatar')) return avatar
   return `/api/file/avatar?url=${encodeURIComponent(avatar)}`
 }
-function onAvatarError(event) { event.target.src = avatarPlaceholder }
+function onAvatarError(event) { applyImageFallbackOnce(event, avatarPlaceholder) }
 function formatCount(n) { if (!n) return '0'; if (n >= 10000) return `${(n / 10000).toFixed(1)}万`; return String(n) }
 function formatDuration(sec) { if (sec == null) return '--:--'; const m = Math.floor(sec / 60); const s = sec % 60; return `${m}:${String(s).padStart(2, '0')}` }
 function formatDate(value) { return value ? String(value).slice(5, 10) : '' }

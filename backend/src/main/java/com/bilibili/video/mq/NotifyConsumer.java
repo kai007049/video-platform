@@ -32,7 +32,7 @@ public class NotifyConsumer implements RocketMQListener<NotifyMessage> {
 
     @Override
     public void onMessage(NotifyMessage message) {
-        mqReliabilityService.consumeWithIdempotency(MqTopics.NOTIFY_EVENT, message, () -> {
+        mqReliabilityService.consumeWithIdempotency(MqTopics.NOTIFY_EVENT, "notify-event-consumer", message, () -> {
             if (message == null || message.getUserId() == null) {
                 return;
             }

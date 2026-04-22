@@ -3,12 +3,14 @@ package com.bilibili.video.model.mq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VideoDeleteMessage {
+@EqualsAndHashCode(callSuper = true)
+public class VideoDeleteMessage extends BaseMqMessage {
     @Schema(description = "视频ID")
     private Long videoId;
     @Schema(description = "视频URL")

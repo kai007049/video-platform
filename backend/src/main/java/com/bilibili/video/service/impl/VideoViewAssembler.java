@@ -60,7 +60,7 @@ public class VideoViewAssembler {
     }
 
     /**
-     * 批量组装视频展示对象。
+     * 批量组装视频展示对象。entity->vo
      * 这里统一批量查询作者、评论数、点赞/收藏状态和观看进度，避免列表场景的 N+1 查询。
      */
     public List<VideoVO> toVideoVOList(List<Video> videos, Long userId) {
@@ -125,9 +125,9 @@ public class VideoViewAssembler {
             return source;
         }
 
-        Map<Long, Boolean> likedMap = loadLikedState(userId, Collections.singletonList(source.getId()));
-        Map<Long, Boolean> favoritedMap = loadFavoritedState(userId, Collections.singletonList(source.getId()));
-        Map<Long, Integer> watchProgressMap = loadWatchProgress(userId, Collections.singletonList(source.getId()));
+        Map<Long, Boolean> likedMap = loadLikedState(userId, Collections.singletonList(source.getId()));//批量加载点赞状态
+        Map<Long, Boolean> favoritedMap = loadFavoritedState(userId, Collections.singletonList(source.getId()));//批量加载收藏状态
+        Map<Long, Integer> watchProgressMap = loadWatchProgress(userId, Collections.singletonList(source.getId()));//批量加载观看进度
 
         VideoVO copy = new VideoVO();
         BeanUtils.copyProperties(source, copy);

@@ -1,6 +1,5 @@
 <template>
   <div class="upload-page">
-    <!-- 页面标题区 -->
     <div class="page-header">
       <div class="header-left">
         <div class="header-icon">➕</div>
@@ -18,9 +17,7 @@
     </div>
 
     <form class="upload-layout" @submit.prevent="submit">
-      <!-- 左侧：媒体上传区 -->
       <div class="left-panel">
-        <!-- 视频上传卡片 -->
         <div class="panel-card">
           <div class="card-header">
             <span class="card-icon">🎬</span>
@@ -53,7 +50,6 @@
           </div>
         </div>
 
-        <!-- 封面上传卡片 -->
         <div class="panel-card">
           <div class="card-header">
             <span class="card-icon">🖼️</span>
@@ -80,21 +76,17 @@
           </div>
         </div>
 
-        <!-- 上传进度提示 -->
         <div v-if="loading" class="upload-progress-card">
           <div class="progress-spinner"></div>
           <span class="progress-text">正在上传，请稍候...</span>
         </div>
       </div>
 
-      <!-- 右侧：表单信息区 -->
       <div class="right-panel">
-        <!-- 标题 -->
         <div class="panel-card">
           <div class="card-header">
             <span class="card-icon">✏️</span>
             <span class="card-title">视频标题</span>
-            <span class="card-tip">选填</span>
           </div>
           <div class="input-with-btn">
             <input
@@ -102,21 +94,11 @@
               class="form-input"
               type="text"
               maxlength="80"
-              placeholder="可留空，上传时后端会自动补全"
+              placeholder="请输入清晰准确的视频标题"
             />
-            <button
-              type="button"
-              class="ai-btn"
-              :disabled="loadingAiAssist"
-              @click="runUploadAssist({ applyGeneratedTitle: true })"
-            >
-              <span>🤖</span>
-              <span>{{ loadingAiAssist ? 'AI 生成中...' : 'AI 助攻' }}</span>
-            </button>
           </div>
         </div>
 
-        <!-- 简介 -->
         <div class="panel-card">
           <div class="card-header">
             <span class="card-icon">📝</span>
@@ -128,7 +110,7 @@
               class="form-textarea"
               rows="4"
               maxlength="500"
-              placeholder="补充视频亮点、信息来源或观看提示（选填）"
+              placeholder="请填写视频亮点、信息来源或观看提示"
             />
             <button
               type="button"
@@ -137,12 +119,62 @@
               @click="recommendTags"
             >
               <span>✨</span>
-              <span>{{ loadingSuggest ? '生成中...' : 'AI 生成建议' }}</span>
+              <span>{{ loadingSuggest ? '生成中...' : '智能推荐' }}</span>
             </button>
           </div>
         </div>
 
-        <!-- 标签 -->
+        <div class="panel-card">
+          <div class="card-header card-header--stacked">
+            <div class="card-header-main">
+              <span class="card-icon">📂</span>
+              <span class="card-title">分类选择</span>
+              <span v-if="selectedCategoryLabel" class="card-selected-label">{{ selectedCategoryLabel }}</span>
+            </div>
+            <p v-if="categoryHintText" class="card-helper-text">{{ categoryHintText }}</p>
+          </div>
+
+          <div v-if="parentCategories.length > 0" class="category-section">
+            <div class="tag-group">
+              <div class="tag-group-header">
+                <span class="tag-group-label">一级分区</span>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="parent in parentCategories"
+                  :key="parent.id"
+                  type="button"
+                  class="tag-chip category-chip"
+                  :class="{ active: selectedParentCategoryId === parent.id }"
+                  @click="selectParentCategory(parent)"
+                >
+                  {{ parent.name }}
+                </button>
+              </div>
+            </div>
+
+            <div v-if="activeChildCategories.length > 0" class="tag-group">
+              <div class="tag-group-header">
+                <span class="tag-group-label">二级分区（推荐）</span>
+                <button type="button" class="link-btn" @click="selectCurrentParentAsCategory">直接使用一级分类</button>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="child in activeChildCategories"
+                  :key="child.id"
+                  type="button"
+                  class="tag-chip"
+                  :class="{ active: form.categoryId === child.id }"
+                  @click="selectChildCategory(child)"
+                >
+                  {{ child.name }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <p v-else class="empty-tip">暂无分类数据，请先在后台维护分类。</p>
+        </div>
+
         <div class="panel-card">
           <div class="card-header">
             <span class="card-icon">🏷️</span>
@@ -151,7 +183,6 @@
           </div>
 
           <div v-if="tags.length > 0" class="tag-section">
-            <!-- 已选标签 -->
             <div v-if="selectedTags.length > 0" class="tag-group">
               <div class="tag-group-header">
                 <span class="tag-group-label">已选标签</span>
@@ -170,10 +201,9 @@
               </div>
             </div>
 
-            <!-- AI 推荐标签 -->
             <div v-if="recommendedTags.length > 0" class="tag-group">
               <div class="tag-group-header">
-                <span class="tag-group-label ai-label">✨ AI 推荐</span>
+                <span class="tag-group-label ai-label">智能推荐</span>
               </div>
               <div class="tag-list">
                 <button
@@ -188,10 +218,29 @@
               </div>
             </div>
 
-            <!-- 搜索 + 全部标签 -->
+            <div v-if="categoryRelatedTags.length > 0" class="tag-group">
+              <div class="tag-group-header">
+                <span class="tag-group-label">当前分类相关标签</span>
+              </div>
+              <div class="tag-list">
+                <button
+                  v-for="tag in categoryRelatedTags"
+                  :key="`category-${tag.id}`"
+                  type="button"
+                  class="tag-chip"
+                  @click="toggleTag(tag.id)"
+                >
+                  {{ tag.name }}
+                </button>
+              </div>
+            </div>
+
             <div class="tag-group">
               <div class="tag-group-header">
-                <span class="tag-group-label">选择标签</span>
+                <span class="tag-group-label">更多标签</span>
+                <button v-if="hasMoreTags" type="button" class="expand-btn" @click="showAllTags = !showAllTags">
+                  {{ showAllTags ? '▲ 收起' : '▼ 展开更多' }}
+                </button>
               </div>
               <input
                 v-model.trim="tagKeyword"
@@ -200,102 +249,29 @@
                 maxlength="20"
                 placeholder="🔍 搜索标签..."
               />
-              <div class="tag-list">
-                <button
-                  v-for="tag in visibleAvailableTags"
-                  :key="tag.id"
-                  type="button"
-                  class="tag-chip"
-                  :class="{
-                    active: form.tagIds.includes(tag.id),
-                    suggested: aiSuggestedTagIds.includes(tag.id) && !form.tagIds.includes(tag.id)
-                  }"
-                  @click="toggleTag(tag.id)"
-                >
-                  {{ tag.name }}
-                </button>
+
+              <div v-if="groupedMoreTags.length > 0" class="tag-group-list">
+                <div v-for="group in groupedMoreTags" :key="group.key" class="nested-tag-group">
+                  <p class="nested-tag-group-label">{{ group.label }}</p>
+                  <div class="tag-list">
+                    <button
+                      v-for="tag in group.tags"
+                      :key="`${group.key}-${tag.id}`"
+                      type="button"
+                      class="tag-chip"
+                      @click="toggleTag(tag.id)"
+                    >
+                      {{ tag.name }}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div v-if="filteredAvailableTags.length > defaultVisibleTagCount" class="expand-row">
-                <button type="button" class="expand-btn" @click="showAllTags = !showAllTags">
-                  {{ showAllTags ? '▲ 收起标签' : '▼ 展开更多标签' }}
-                </button>
-              </div>
+              <p v-else class="empty-tip">没有匹配的更多标签，试试换个关键词。</p>
             </div>
           </div>
           <p v-else class="empty-tip">暂无标签数据，请先在后台维护标签。</p>
         </div>
 
-        <!-- 分类 -->
-        <div class="panel-card">
-          <div class="card-header">
-            <span class="card-icon">📂</span>
-            <span class="card-title">分类选择</span>
-            <span v-if="selectedCategoryLabel" class="card-selected-label">{{ selectedCategoryLabel }}</span>
-          </div>
-
-          <div v-if="parentCategories.length > 0" class="category-section">
-            <!-- 一级分区 -->
-            <div class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">一级分区</span>
-              </div>
-              <div class="tag-list">
-                <button
-                  v-for="parent in parentCategories"
-                  :key="parent.id"
-                  type="button"
-                  class="tag-chip category-chip"
-                  :class="{
-                    active: selectedParentCategoryId === parent.id &&
-                      (!activeChildCategories.length || !form.categoryId ||
-                       form.categoryId === parent.id ||
-                       activeChildCategories.some(item => item.id === form.categoryId))
-                  }"
-                  @click="selectParentCategory(parent)"
-                >
-                  {{ parent.name }}
-                </button>
-              </div>
-            </div>
-
-            <!-- 二级分区 -->
-            <div v-if="activeChildCategories.length > 0" class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">二级分区</span>
-              </div>
-              <div class="tag-list">
-                <button
-                  v-for="child in activeChildCategories"
-                  :key="child.id"
-                  type="button"
-                  class="tag-chip"
-                  :class="{ active: form.categoryId === child.id }"
-                  @click="selectChildCategory(child)"
-                >
-                  {{ child.name }}
-                </button>
-              </div>
-            </div>
-            <div v-else-if="selectedParentCategoryId" class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">当前分区</span>
-              </div>
-              <div class="tag-list">
-                <button
-                  type="button"
-                  class="tag-chip"
-                  :class="{ active: form.categoryId === selectedParentCategoryId }"
-                  @click="selectCurrentParentAsCategory"
-                >
-                  {{ activeParentCategory?.name || '请选择一级分区' }}
-                </button>
-              </div>
-            </div>
-          </div>
-          <p v-else class="empty-tip">暂无分类数据，请先在后台维护分类。</p>
-        </div>
-
-        <!-- 错误提示 + 提交 -->
         <div class="submit-section">
           <p v-if="error" class="error-msg">
             <span>⚠️</span>
@@ -315,11 +291,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { uploadVideo } from '../api/video'
 import { getCategoryTree } from '../api/category'
 import { getTagList, recommendTags as recommendTagsApi } from '../api/tag'
+import { validateUploadForm } from './uploadValidation'
+import {
+  buildUploadTagSections,
+  resolveCategorySelectionState
+} from './uploadTagCategoryState.js'
 
 const router = useRouter()
 const videoInput = ref(null)
@@ -348,59 +329,37 @@ const form = reactive({
 
 const parentCategories = computed(() => categories.value || [])
 
-const activeParentCategory = computed(() =>
-  parentCategories.value.find(item => item.id === selectedParentCategoryId.value) || null
-)
+const categoryState = computed(() => resolveCategorySelectionState({
+  categories: parentCategories.value,
+  selectedParentCategoryId: selectedParentCategoryId.value,
+  categoryId: form.categoryId
+}))
 
-const activeChildCategories = computed(() =>
-  Array.isArray(activeParentCategory.value?.children) ? activeParentCategory.value.children : []
-)
+const selectedCategoryLabel = computed(() => categoryState.value.selectedCategoryLabel)
+const activeChildCategories = computed(() => categoryState.value.activeChildCategories)
+const categoryHintText = computed(() => categoryState.value.categoryHintText)
 
-const selectedTags = computed(() => tags.value.filter(tag => form.tagIds.includes(tag.id)))
+const tagSections = computed(() => buildUploadTagSections({
+  tags: tags.value,
+  selectedTagIds: form.tagIds,
+  suggestedTagIds: aiSuggestedTagIds.value,
+  categoryLabel: selectedCategoryLabel.value,
+  keyword: tagKeyword.value,
+  showAllTags: showAllTags.value,
+  defaultVisibleCount: defaultVisibleTagCount
+}))
 
-const recommendedTags = computed(() =>
-  tags.value.filter(tag => aiSuggestedTagIds.value.includes(tag.id) && !form.tagIds.includes(tag.id))
-)
+const selectedTags = computed(() => tagSections.value.selectedTags)
+const recommendedTags = computed(() => tagSections.value.recommendedTags)
+const categoryRelatedTags = computed(() => tagSections.value.categoryTags)
+const groupedMoreTags = computed(() => tagSections.value.moreTagGroups)
+const hasMoreTags = computed(() => tagSections.value.hasMoreTags)
 
-const filteredAvailableTags = computed(() => {
-  const keyword = tagKeyword.value.trim().toLowerCase()
-  let available = tags.value.filter(tag => !form.tagIds.includes(tag.id))
-  if (keyword) {
-    available = available.filter(tag => tag.name.toLowerCase().includes(keyword))
-  }
-  const recommendedIds = new Set(aiSuggestedTagIds.value)
-  return [...available].sort((a, b) => {
-    const aPriority = recommendedIds.has(a.id) ? 0 : 1
-    const bPriority = recommendedIds.has(b.id) ? 0 : 1
-    if (aPriority !== bPriority) return aPriority - bPriority
-    return a.id - b.id
-  })
-})
-
-const visibleAvailableTags = computed(() =>
-  showAllTags.value ? filteredAvailableTags.value : filteredAvailableTags.value.slice(0, defaultVisibleTagCount)
-)
-
-const flattenedCategories = computed(() => {
-  const flat = []
-  parentCategories.value.forEach(parent => {
-    flat.push({ id: parent.id, name: parent.name })
-    ;(parent.children || []).forEach(child => {
-      flat.push({ id: child.id, name: child.name })
-    })
-  })
-  return flat
-})
-
-const selectedCategoryLabel = computed(() => {
-  if (!form.categoryId) return ''
-  for (const parent of parentCategories.value) {
-    if (parent.id === form.categoryId) return parent.name
-    const child = (parent.children || []).find(item => item.id === form.categoryId)
-    if (child) return `${parent.name} / ${child.name}`
-  }
-  return ''
-})
+function resetCategoryDerivedState() {
+  aiSuggestedTagIds.value = []
+  tagKeyword.value = ''
+  showAllTags.value = false
+}
 
 function syncSelectedCategory(categoryId) {
   if (!categoryId) {
@@ -408,31 +367,20 @@ function syncSelectedCategory(categoryId) {
     form.categoryId = ''
     return
   }
-  for (const parent of parentCategories.value) {
-    if (parent.id === categoryId) {
-      selectedParentCategoryId.value = parent.id
-      form.categoryId = parent.id
-      return
-    }
-    const child = (parent.children || []).find(item => item.id === categoryId)
-    if (child) {
-      selectedParentCategoryId.value = parent.id
-      form.categoryId = child.id
-      return
-    }
-  }
+
+  const resolvedState = resolveCategorySelectionState({
+    categories: parentCategories.value,
+    selectedParentCategoryId: selectedParentCategoryId.value,
+    categoryId
+  })
+
+  selectedParentCategoryId.value = resolvedState.selectedParentCategoryId
+  form.categoryId = categoryId
 }
 
 function selectParentCategory(parent) {
   selectedParentCategoryId.value = parent.id
-  if (!Array.isArray(parent.children) || parent.children.length === 0) {
-    form.categoryId = parent.id
-    return
-  }
-  const stillSelected = parent.children.some(item => item.id === form.categoryId)
-  if (!stillSelected) {
-    form.categoryId = ''
-  }
+  form.categoryId = parent.id
 }
 
 function selectChildCategory(child) {
@@ -444,6 +392,17 @@ function selectCurrentParentAsCategory() {
     form.categoryId = selectedParentCategoryId.value
   }
 }
+
+watch(
+  () => form.categoryId,
+  (newCategoryId, oldCategoryId) => {
+    if (!oldCategoryId || newCategoryId === oldCategoryId) {
+      return
+    }
+
+    resetCategoryDerivedState()
+  }
+)
 
 function prettySize(bytes = 0) {
   if (bytes < 1024) return `${bytes} B`
@@ -525,10 +484,7 @@ async function recommendTags() {
       title: form.title || '',
       description: form.description || ''
     })
-    if (Array.isArray(ids) && ids.length > 0) {
-      aiSuggestedTagIds.value = [...new Set(ids)]
-      form.tagIds = [...new Set([...form.tagIds, ...ids])]
-    }
+    aiSuggestedTagIds.value = Array.isArray(ids) ? [...new Set(ids)] : []
   } catch (e) {
     error.value = e.message || '推荐标签失败'
   } finally {
@@ -538,8 +494,15 @@ async function recommendTags() {
 
 async function submit() {
   error.value = ''
-  if (!videoFile.value) {
-    error.value = '请选择视频文件'
+  const validationError = validateUploadForm({
+    videoFile: videoFile.value,
+    title: form.title,
+    description: form.description,
+    categoryId: form.categoryId,
+    tagIds: form.tagIds
+  })
+  if (validationError) {
+    error.value = validationError
     return
   }
 
@@ -549,9 +512,8 @@ async function submit() {
     fd.append('video', videoFile.value)
     if (coverFile.value) fd.append('cover', coverFile.value)
     fd.append('title', form.title.trim())
-    if (form.description.trim()) fd.append('description', form.description.trim())
-
-    if (form.categoryId) fd.append('categoryId', String(form.categoryId))
+    fd.append('description', form.description.trim())
+    fd.append('categoryId', String(form.categoryId))
     form.tagIds.forEach(tagId => fd.append('tagIds', String(tagId)))
 
     const res = await uploadVideo(fd)
@@ -571,14 +533,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ===== 页面容器 ===== */
 .upload-page {
   min-height: 100vh;
   background: #f8fafc;
   padding: 32px 40px 48px;
 }
 
-/* ===== 页面标题 ===== */
 .page-header {
   display: flex;
   align-items: center;
@@ -647,7 +607,6 @@ onMounted(() => {
   50% { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* ===== 双栏布局 ===== */
 .upload-layout {
   display: grid;
   grid-template-columns: 360px 1fr;
@@ -662,7 +621,6 @@ onMounted(() => {
   gap: 16px;
 }
 
-/* ===== 通用卡片 ===== */
 .panel-card {
   background: #ffffff;
   border-radius: 16px;
@@ -676,12 +634,23 @@ onMounted(() => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
 }
 
-/* ===== 卡片头部 ===== */
 .card-header {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.card-header--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.card-header-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .card-icon {
@@ -727,7 +696,12 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-/* ===== 视频拖拽区 ===== */
+.card-helper-text {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
 .video-drop-zone {
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
@@ -1072,10 +1046,17 @@ onMounted(() => {
   gap: 10px;
 }
 
+.tag-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .tag-group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .tag-group-label {
@@ -1102,6 +1083,19 @@ onMounted(() => {
 
 .clear-btn:hover {
   color: #dc2626;
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  color: #4f46e5;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.link-btn:hover {
+  color: #3730a3;
 }
 
 .tag-list {
@@ -1156,11 +1150,6 @@ onMounted(() => {
   font-weight: 700;
 }
 
-.expand-row {
-  display: flex;
-  justify-content: flex-start;
-}
-
 .expand-btn {
   border: none;
   background: transparent;
@@ -1174,6 +1163,19 @@ onMounted(() => {
 
 .expand-btn:hover {
   color: #1f2937;
+}
+
+.nested-tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nested-tag-group-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .submit-section {

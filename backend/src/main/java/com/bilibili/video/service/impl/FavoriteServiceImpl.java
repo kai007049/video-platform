@@ -51,9 +51,13 @@ public class FavoriteServiceImpl implements FavoriteService {
 
             var video = videoMapper.selectById(videoId);
             if (video != null && video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
-                mqService.sendNotify(new NotifyMessage("favorite", video.getAuthorId(), videoId, null));
+                NotifyMessage notifyMessage = new NotifyMessage("favorite", video.getAuthorId(), videoId, null);
+                notifyMessage.setBizKey("notify:user:" + video.getAuthorId() + ":favorite:" + videoId + ":actor:" + userId);
+                mqService.sendNotify(notifyMessage);
             }
-            mqService.sendSearchSync(new SearchSyncMessage("video", videoId, "update"));
+            SearchSyncMessage searchSyncMessage = new SearchSyncMessage("video", videoId, "update");
+            searchSyncMessage.setBizKey("search:video:" + videoId + ":update");
+            mqService.sendSearchSync(searchSyncMessage);
             recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, 3.5D);
             redisTemplate.opsForZSet().incrementScore(
                     Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h",

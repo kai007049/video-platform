@@ -41,12 +41,18 @@ public class DanmuServiceImpl implements DanmuService {
         danmuMapper.insert(danmu);
         dto.setId(danmu.getId());
 
-        mqService.sendDanmu(new DanmuMessage(danmu.getVideoId(), danmu.getUserId(), danmu.getContent(), danmu.getTimePoint()));
+        DanmuMessage danmuMessage = new DanmuMessage(danmu.getVideoId(), danmu.getUserId(), danmu.getContent(), danmu.getTimePoint());
+        danmuMessage.setBizKey("danmu:video:" + danmu.getVideoId() + ":user:" + danmu.getUserId() + ":" + danmu.getTimePoint());
+        mqService.sendDanmu(danmuMessage);
         var video = dto.getVideoId() == null ? null : videoMapper.selectById(dto.getVideoId());
         if (video != null && video.getAuthorId() != null && !video.getAuthorId().equals(danmu.getUserId())) {
-            mqService.sendNotify(new NotifyMessage("danmu", video.getAuthorId(), danmu.getVideoId(), danmu.getContent()));
+            NotifyMessage notifyMessage = new NotifyMessage("danmu", video.getAuthorId(), danmu.getVideoId(), danmu.getContent());
+            notifyMessage.setBizKey("notify:user:" + video.getAuthorId() + ":danmu:" + danmu.getId());
+            mqService.sendNotify(notifyMessage);
         }
-        mqService.sendSearchSync(new SearchSyncMessage("danmu", danmu.getId(), "create"));
+        SearchSyncMessage searchSyncMessage = new SearchSyncMessage("danmu", danmu.getId(), "create");
+        searchSyncMessage.setBizKey("search:danmu:" + danmu.getId() + ":create");
+        mqService.sendSearchSync(searchSyncMessage);
     }
 
     @Override

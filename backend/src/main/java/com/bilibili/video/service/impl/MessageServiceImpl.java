@@ -46,7 +46,9 @@ public class MessageServiceImpl implements MessageService {
 
         redisTemplate.opsForValue().increment(UNREAD_KEY + dto.getReceiverId(), 1);
 
-        mqService.sendMessageNotify(new MessageNotifyMessage(dto.getReceiverId(), "message", message.getId(), dto.getContent()));
+        MessageNotifyMessage messageNotify = new MessageNotifyMessage(dto.getReceiverId(), "message", message.getId(), dto.getContent());
+        messageNotify.setBizKey("message:user:" + dto.getReceiverId() + ":message:" + message.getId());
+        mqService.sendMessageNotify(messageNotify);
     }
 
     @Override

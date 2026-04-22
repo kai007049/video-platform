@@ -1,6 +1,7 @@
 package com.bilibili.video.service.impl;
 
 import com.bilibili.video.common.MqTopics;
+import com.bilibili.video.model.mq.BaseMqMessage;
 import com.bilibili.video.model.mq.DanmuMessage;
 import com.bilibili.video.model.mq.MessageNotifyMessage;
 import com.bilibili.video.model.mq.NotifyMessage;
@@ -11,6 +12,7 @@ import com.bilibili.video.service.MQService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -18,12 +20,15 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.time.ZoneId;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,11 +38,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MQServiceImpl implements MQService {
 
-    private static final String LOG_TEMPLATE = "[MQ] {} message send failed, topic={}, payload={}, attempt={}";
+    private static final int MESSAGE_VERSION = 1;
 
     private final ObjectProvider<RocketMQTemplate> rocketMQTemplateProvider;
     private final ObjectProvider<RedisTemplate<String, Object>> redisTemplateProvider;
     private final ObjectMapper objectMapper;
+    private MQStructuredLogger loggerDelegate = new MQStructuredLogger();
 
     @Value("${mq.reliability.producer.max-retries:3}")
     private int maxRetries;
@@ -105,14 +111,19 @@ public class MQServiceImpl implements MQService {
         sendAsyncWithRetry(MqTopics.MESSAGE_NOTIFY, message, "message notify");
     }
 
-    private void sendAsyncWithRetry(String topic, Object payload, String scene) {
+    @Scheduled(fixedDelayString = "${mq.reliability.producer.compensation-interval-ms:5000}")
+    public void retryDueDeadLetters() {
+        retryDueDeadLetters(System.currentTimeMillis());
+    }
+
+    private void sendAsyncWithRetry(String topic, BaseMqMessage payload, String scene) {
+        fillMessageMetadata(topic, payload);
         sendAsyncWithRetry(topic, payload, scene, 1);
     }
 
-    private void sendAsyncWithRetry(String topic, Object payload, String scene, int attempt) {
+    private void sendAsyncWithRetry(String topic, BaseMqMessage payload, String scene, int attempt) {
         RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
         if (template == null) {
-            log.warn("[MQ] skip send because RocketMQTemplate unavailable, topic={}, payload={}", topic, payload);
             persistProducerDeadLetter(topic, payload, scene, attempt, "template unavailable");
             return;
         }
@@ -121,10 +132,7 @@ public class MQServiceImpl implements MQService {
             template.asyncSend(topic, payload, new SendCallback() {
                 @Override
                 public void onSuccess(SendResult sendResult) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("[MQ] {} async send success, topic={}, payload={}, attempt={}, result={}",
-                                scene, topic, payload, attempt, sendResult);
-                    }
+                    loggerDelegate.logProducerSuccess(topic, scene, payload, attempt);
                 }
 
                 @Override
@@ -137,8 +145,8 @@ public class MQServiceImpl implements MQService {
         }
     }
 
-    private void handleSendFailure(String topic, Object payload, String scene, int attempt, Throwable e) {
-        log.error(LOG_TEMPLATE, scene, topic, payload, attempt, e);
+    private void handleSendFailure(String topic, BaseMqMessage payload, String scene, int attempt, Throwable e) {
+        loggerDelegate.logProducerFailure(topic, scene, payload, attempt, e);
         if (attempt < maxRetries) {
             long nextDelay = retryDelayMs * (1L << (attempt - 1));
             retryScheduler.schedule(
@@ -151,23 +159,170 @@ public class MQServiceImpl implements MQService {
         persistProducerDeadLetter(topic, payload, scene, attempt, e.getMessage());
     }
 
-    private void persistProducerDeadLetter(String topic, Object payload, String scene, int attempt, String reason) {
+    private void fillMessageMetadata(String topic, BaseMqMessage message) {
+        if (message.getEventId() == null || message.getEventId().isBlank()) {
+            message.setEventId(UUID.randomUUID().toString());
+        }
+        if (message.getTraceId() == null || message.getTraceId().isBlank()) {
+            message.setTraceId(message.getEventId());
+        }
+        if (message.getOccurredAt() == null) {
+            message.setOccurredAt(LocalDateTime.now());
+        }
+        if (message.getVersion() == null) {
+            message.setVersion(MESSAGE_VERSION);
+        }
+        if (message.getEventType() == null || message.getEventType().isBlank()) {
+            message.setEventType(resolveEventType(topic, message));
+        }
+        if (message.getBizKey() == null || message.getBizKey().isBlank()) {
+            message.setBizKey(resolveBizKey(topic, message));
+        }
+    }
+
+    private String resolveEventType(String topic, BaseMqMessage message) {
+        if (message instanceof SearchSyncMessage searchSyncMessage && searchSyncMessage.getAction() != null) {
+            return searchSyncMessage.getAction();
+        }
+        if (message instanceof NotifyMessage notifyMessage && notifyMessage.getType() != null) {
+            return notifyMessage.getType();
+        }
+        if (message instanceof MessageNotifyMessage messageNotifyMessage && messageNotifyMessage.getType() != null) {
+            return messageNotifyMessage.getType();
+        }
+        return topic;
+    }
+
+    private String resolveBizKey(String topic, BaseMqMessage message) {
+        if (message instanceof SearchSyncMessage searchSyncMessage) {
+            return "search:" + searchSyncMessage.getEntityType() + ":" + searchSyncMessage.getEntityId() + ":" + searchSyncMessage.getAction();
+        }
+        if (message instanceof VideoProcessMessage videoProcessMessage) {
+            return topic + ":video:" + videoProcessMessage.getVideoId();
+        }
+        if (message instanceof VideoDeleteMessage videoDeleteMessage) {
+            return "video:" + videoDeleteMessage.getVideoId() + ":delete";
+        }
+        if (message instanceof NotifyMessage notifyMessage) {
+            return "notify:user:" + notifyMessage.getUserId() + ":" + notifyMessage.getType() + ":" + notifyMessage.getTargetId();
+        }
+        if (message instanceof MessageNotifyMessage messageNotifyMessage) {
+            return "message:user:" + messageNotifyMessage.getReceiverId() + ":" + messageNotifyMessage.getType() + ":" + messageNotifyMessage.getRefId();
+        }
+        if (message instanceof DanmuMessage danmuMessage) {
+            return "danmu:video:" + danmuMessage.getVideoId() + ":user:" + danmuMessage.getUserId() + ":" + danmuMessage.getTimePoint();
+        }
+        return topic + ":" + message.getEventId();
+    }
+
+    private void persistProducerDeadLetter(String topic, BaseMqMessage payload, String scene, int attempt, String reason) {
         RedisTemplate<String, Object> redisTemplate = redisTemplateProvider.getIfAvailable();
+        loggerDelegate.logProducerDeadLetter(topic, scene, payload, attempt, reason);
         if (redisTemplate == null) {
             return;
         }
         try {
-            Map<String, Object> record = new LinkedHashMap<>();
-            record.put("scene", scene);
-            record.put("topic", topic);
-            record.put("attempt", attempt);
-            record.put("reason", reason);
-            record.put("occurredAt", LocalDateTime.now().toString());
-            record.put("payload", payload);
-            redisTemplate.opsForList().leftPush(producerDeadLetterKey, objectMapper.writeValueAsString(record));
-            redisTemplate.opsForList().trim(producerDeadLetterKey, 0, 1999);
+            DeadLetterRecord record = new DeadLetterRecord();
+            record.setEventId(payload.getEventId());
+            record.setBizKey(payload.getBizKey());
+            record.setTraceId(payload.getTraceId());
+            record.setTopic(topic);
+            record.setScene(scene);
+            record.setPayloadClass(payload.getClass().getName());
+            record.setPayloadJson(objectMapper.writeValueAsString(payload));
+            record.setStatus("PENDING");
+            record.setRetryCount(attempt);
+            record.setCompensationAttempts(0);
+            record.setReason(reason);
+            record.setOccurredAt(LocalDateTime.now());
+            record.setNextRetryAt(LocalDateTime.now().plusSeconds(Math.max(5, retryDelayMs / 1000)));
+
+            HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+            String hashKey = producerDeadLetterKey + ":records";
+            String scheduleKey = producerDeadLetterKey + ":schedule";
+            hashOperations.put(hashKey, record.getEventId(), objectMapper.writeValueAsString(record));
+            redisTemplate.opsForZSet().add(scheduleKey, record.getEventId(), toScore(record.getNextRetryAt()));
         } catch (Exception ex) {
-            log.warn("[MQ] failed to persist producer dead letter, topic={}, payload={}", topic, payload, ex);
+            loggerDelegate.logProducerFailure(topic, scene, payload, attempt, ex);
         }
+    }
+
+    private void retryDueDeadLetters(long nowMillis) {
+        RedisTemplate<String, Object> redisTemplate = redisTemplateProvider.getIfAvailable();
+        RocketMQTemplate template = rocketMQTemplateProvider.getIfAvailable();
+        if (redisTemplate == null || template == null) {
+            return;
+        }
+        String hashKey = producerDeadLetterKey + ":records";
+        String scheduleKey = producerDeadLetterKey + ":schedule";
+        Set<Object> dueEventIds = redisTemplate.opsForZSet().rangeByScore(scheduleKey, 0, nowMillis, 0, 20);
+        if (dueEventIds == null || dueEventIds.isEmpty()) {
+            return;
+        }
+        HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+        for (Object rawEventId : dueEventIds) {
+            String eventId = String.valueOf(rawEventId);
+            Object rawRecord = hashOperations.get(hashKey, eventId);
+            if (rawRecord == null) {
+                redisTemplate.opsForZSet().remove(scheduleKey, eventId);
+                continue;
+            }
+            try {
+                DeadLetterRecord record = objectMapper.readValue(String.valueOf(rawRecord), DeadLetterRecord.class);
+                BaseMqMessage payload = (BaseMqMessage) objectMapper.readValue(record.getPayloadJson(), Class.forName(record.getPayloadClass()));
+                template.syncSend(record.getTopic(), payload);
+                hashOperations.delete(hashKey, eventId);
+                redisTemplate.opsForZSet().remove(scheduleKey, eventId);
+                logDeadLetterReplaySuccess(record.getTopic(), record, payload);
+            } catch (Exception ex) {
+                try {
+                    DeadLetterRecord record = objectMapper.readValue(String.valueOf(rawRecord), DeadLetterRecord.class);
+                    record.setCompensationAttempts(record.getCompensationAttempts() + 1);
+                    record.setReason(ex.getMessage());
+                    record.setOccurredAt(LocalDateTime.now());
+                    BaseMqMessage payload = null;
+                    try {
+                        payload = (BaseMqMessage) objectMapper.readValue(record.getPayloadJson(), Class.forName(record.getPayloadClass()));
+                    } catch (Exception ignored) {
+                    }
+                    loggerDelegate.logCompensationFailure(record.getTopic(), record.getScene(), payload, record.getCompensationAttempts(), ex);
+                    if (record.getCompensationAttempts() >= maxRetries) {
+                        record.setStatus("FINAL_FAILED");
+                        redisTemplate.opsForZSet().remove(scheduleKey, eventId);
+                    } else {
+                        record.setNextRetryAt(LocalDateTime.now().plusSeconds(Math.max(5, retryDelayMs / 1000)));
+                        redisTemplate.opsForZSet().add(scheduleKey, eventId, toScore(record.getNextRetryAt()));
+                    }
+                    hashOperations.put(hashKey, eventId, objectMapper.writeValueAsString(record));
+                } catch (Exception nestedEx) {
+                    log.warn("[MQ] dead letter replay failed to update state, eventId={}", eventId, nestedEx);
+                }
+            }
+        }
+    }
+
+    private void logDeadLetterReplaySuccess(String topic, DeadLetterRecord record, BaseMqMessage payload) {
+        loggerDelegate.logCompensationSuccess(topic, record.getScene(), payload);
+    }
+
+    private double toScore(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    @Data
+    static class DeadLetterRecord {
+        private String eventId;
+        private String bizKey;
+        private String traceId;
+        private String topic;
+        private String scene;
+        private String payloadClass;
+        private String payloadJson;
+        private String status;
+        private Integer retryCount;
+        private Integer compensationAttempts;
+        private String reason;
+        private LocalDateTime occurredAt;
+        private LocalDateTime nextRetryAt;
     }
 }

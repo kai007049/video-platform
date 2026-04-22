@@ -23,7 +23,7 @@ public class DanmuConsumer implements RocketMQListener<DanmuMessage> {
 
     @Override
     public void onMessage(DanmuMessage message) {
-        mqReliabilityService.consumeWithIdempotency(MqTopics.DANMU_PROCESS, message, () -> {
+        mqReliabilityService.consumeWithIdempotency(MqTopics.DANMU_PROCESS, "danmu-process-consumer", message, () -> {
             log.info("[MQ] danmu process: {}", message);
             // TODO: process danmu filtering/audit/statistics/notification logic.
         });

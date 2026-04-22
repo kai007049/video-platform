@@ -36,7 +36,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         redisTemplate.opsForValue().increment(UNREAD_KEY + userId, 1);
 
-        mqService.sendMessageNotify(new MessageNotifyMessage(userId, "notification", n.getId(), content));
+        MessageNotifyMessage message = new MessageNotifyMessage(userId, "notification", n.getId(), content);
+        message.setBizKey("message:user:" + userId + ":notification:" + n.getId());
+        mqService.sendMessageNotify(message);
     }
 
     @Override

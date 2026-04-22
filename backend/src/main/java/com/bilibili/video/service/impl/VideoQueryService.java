@@ -166,6 +166,7 @@ public class VideoQueryService {
      * 查询视频详情，并补充当前用户状态
      */
     public VideoVO getById(Long videoId, Long userId) {
+        //从缓存查询
         VideoVO video = getVideoById(videoId);
         if (video == null || userId == null) {
             return video;

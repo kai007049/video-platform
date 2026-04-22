@@ -77,9 +77,11 @@ mq:
       max-retries: 3
       retry-delay-ms: 1500
       dead-letter-key: mq:producer:dead-letter
+      compensation-interval-ms: 5000
     consumer:
       dedup-prefix: mq:consume:done
       dedup-ttl-hours: 168
+      failure-record-key: mq:consumer:failures
 
 # 播放量同步定时任务 (每分钟)
 play-count:

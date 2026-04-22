@@ -62,9 +62,13 @@ public class CommentServiceImpl implements CommentService {
         videoCacheService.invalidateVideo(dto.getVideoId());
 
         if (video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
-            mqService.sendNotify(new NotifyMessage("comment", video.getAuthorId(), dto.getVideoId(), comment.getContent()));
+            NotifyMessage notifyMessage = new NotifyMessage("comment", video.getAuthorId(), dto.getVideoId(), comment.getContent());
+            notifyMessage.setBizKey("notify:user:" + video.getAuthorId() + ":comment:" + comment.getId());
+            mqService.sendNotify(notifyMessage);
         }
-        mqService.sendSearchSync(new SearchSyncMessage("comment", comment.getId(), "create"));
+        SearchSyncMessage searchSyncMessage = new SearchSyncMessage("comment", comment.getId(), "create");
+        searchSyncMessage.setBizKey("search:comment:" + comment.getId() + ":create");
+        mqService.sendSearchSync(searchSyncMessage);
         recommendationFeatureService.increaseUserInterestByVideo(userId, dto.getVideoId(), 2.5D);
         redisTemplate.opsForZSet().incrementScore(
                 Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h",

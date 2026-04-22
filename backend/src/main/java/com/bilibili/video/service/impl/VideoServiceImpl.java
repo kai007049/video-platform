@@ -22,15 +22,13 @@ public class VideoServiceImpl implements VideoService {
 
     /**
      * 上传视频
-     * @param videoFile 视频文件
-     * @param coverFile 封面文件
      * @param dto 上传参数
      * @param authorId 作者ID
      * @return 视频展示对象
      */
     @Override
-    public VideoVO upload(MultipartFile videoFile, MultipartFile coverFile, VideoUploadDTO dto, Long authorId) {
-        return videoCommandService.upload(videoFile, coverFile, dto, authorId);
+    public VideoVO upload(VideoUploadDTO dto, Long authorId) {
+        return videoCommandService.upload(dto, authorId);
     }
 
     /**

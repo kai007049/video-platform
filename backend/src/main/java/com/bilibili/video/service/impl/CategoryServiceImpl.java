@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +30,14 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryVO> tree() {
         Object cached = redisTemplate.opsForValue().get(RedisConstants.CATEGORY_TREE_KEY);
         if (cached != null) {
-            return objectMapper.convertValue(
+            List<CategoryVO> cachedTree = objectMapper.convertValue(
                     cached,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, CategoryVO.class)
             );
+            if (isValidCategoryTree(cachedTree)) {
+                return cachedTree;
+            }
+            redisTemplate.delete(RedisConstants.CATEGORY_TREE_KEY);
         }
 
         List<Category> categories = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
@@ -80,6 +86,50 @@ public class CategoryServiceImpl implements CategoryService {
         }
         redisTemplate.opsForValue().set(RedisConstants.CATEGORY_LIST_KEY, list, RedisConstants.METADATA_CACHE_TTL);
         return list;
+    }
+
+    private boolean isValidCategoryTree(List<CategoryVO> tree) {
+        if (tree == null || tree.isEmpty()) {
+            return true;
+        }
+        Set<Long> seenIds = new HashSet<>();
+        for (CategoryVO root : tree) {
+            if (root == null || root.getId() == null) {
+                return false;
+            }
+            Long parentId = root.getParentId();
+            if (parentId != null && parentId != 0) {
+                return false;
+            }
+            if (!seenIds.add(root.getId())) {
+                return false;
+            }
+            if (!isValidCategoryChildren(root.getChildren(), root.getId(), seenIds)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidCategoryChildren(List<CategoryVO> children, Long expectedParentId, Set<Long> seenIds) {
+        if (children == null || children.isEmpty()) {
+            return true;
+        }
+        for (CategoryVO child : children) {
+            if (child == null || child.getId() == null) {
+                return false;
+            }
+            if (child.getParentId() == null || !child.getParentId().equals(expectedParentId)) {
+                return false;
+            }
+            if (!seenIds.add(child.getId())) {
+                return false;
+            }
+            if (!isValidCategoryChildren(child.getChildren(), child.getId(), seenIds)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private CategoryVO toVO(Category category) {

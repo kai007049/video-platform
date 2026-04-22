@@ -85,6 +85,7 @@ import { getUpProfile, updateAvatar } from '../api/user'
 import { getVideoByAuthor } from '../api/video'
 import { follow, unfollow } from '../api/follow'
 import { useUserStore } from '../stores/user'
+import { applyImageFallbackOnce } from '../utils/imageFallback'
 
 const route = useRoute()
 const router = useRouter()
@@ -182,7 +183,7 @@ function resolveAvatar(avatar) {
 }
 
 function onAvatarError(event) {
-  event.target.src = avatarPlaceholder
+  applyImageFallbackOnce(event, avatarPlaceholder)
 }
 
 function goVideo(id) {
@@ -213,7 +214,7 @@ function resolveCover(item) {
 }
 
 function onCoverError(event) {
-  event.target.src = placeholderCover
+  applyImageFallbackOnce(event, placeholderCover)
 }
 
 function formatCount(n) {

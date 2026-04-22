@@ -55,25 +55,26 @@ public class VideoCacheServiceImpl implements VideoCacheService {
      */
     @Override
     public VideoVO getVideoFromCache(Long videoId) {
+        //  本地缓存
         String localKey = LOCAL_KEY_PREFIX + videoId;
         Object localCached = localVideoCache.getIfPresent(localKey);
         if (localCached instanceof VideoBaseCache base) {
             return mergeVideoVO(base, loadStats(videoId));
         }
-
+        // Redis缓存
         String baseKey = buildBaseKey(videoId);
         Object baseCached = redisTemplate.opsForValue().get(baseKey);
-        if (baseCached == null) {
+        if (baseCached == null) { // 未缓存
             return null;
         }
-        if (NULL_PLACEHOLDER.equals(baseCached)) {
+        if (NULL_PLACEHOLDER.equals(baseCached)) {// 空值缓存
             return null;
         }
-        if (!(baseCached instanceof VideoBaseCache base)) {
+        if (!(baseCached instanceof VideoBaseCache base)) { // 非缓存对象
             return null;
         }
 
-        if (isLocalCacheEligible(videoId)) {
+        if (isLocalCacheEligible(videoId)) { // 本地缓存有效
             localVideoCache.put(localKey, base);
         }
         return mergeVideoVO(base, loadStats(videoId));

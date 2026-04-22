@@ -25,7 +25,7 @@ public class SearchSyncConsumer implements RocketMQListener<SearchSyncMessage> {
 
     @Override
     public void onMessage(SearchSyncMessage message) {
-        mqReliabilityService.consumeWithIdempotency(MqTopics.SEARCH_SYNC, message, () -> {
+        mqReliabilityService.consumeWithIdempotency(MqTopics.SEARCH_SYNC, "search-sync-consumer", message, () -> {
             if (message == null || message.getEntityId() == null) {
                 return;
             }

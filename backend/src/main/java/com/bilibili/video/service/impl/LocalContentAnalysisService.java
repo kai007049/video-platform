@@ -24,6 +24,32 @@ public class LocalContentAnalysisService {
     private static final String DEFAULT_TITLE = "未命名视频";
     private static final double DEFAULT_MATCH_CONFIDENCE = 0.6D;
     private static final double DEFAULT_FALLBACK_CONFIDENCE = 0.45D;
+    private static final List<CategoryKeywordRule> CATEGORY_KEYWORD_RULES = List.of(
+            new CategoryKeywordRule(
+                    List.of("java", "springboot", "springcloud", "vue", "react", "mysql", "redis", "docker", "linux", "git", "kafka", "nginx", "elasticsearch", "netty"),
+                    List.of("编程开发", "科技")
+            ),
+            new CategoryKeywordRule(
+                    List.of("人工智能", "机器学习", "算法"),
+                    List.of("人工智能", "科技")
+            ),
+            new CategoryKeywordRule(
+                    List.of("数码", "开箱", "评测", "测评"),
+                    List.of("数码评测", "科技")
+            ),
+            new CategoryKeywordRule(
+                    List.of("学习方法"),
+                    List.of("学习方法", "知识")
+            ),
+            new CategoryKeywordRule(
+                    List.of("科普"),
+                    List.of("科普", "知识")
+            ),
+            new CategoryKeywordRule(
+                    List.of("nba", "篮球", "足球"),
+                    List.of("体育")
+            )
+    );
 
     public List<Long> recommendTagIds(String title, String description, List<TagVO> allTags) {
         if (allTags == null || allTags.isEmpty()) {
@@ -104,7 +130,7 @@ public class LocalContentAnalysisService {
         if (textCategoryId != null) {
             return textCategoryId;
         }
-        return findCategoryIdByPreferredNames(allCategories, List.of("科技", "数码", "知识", "体育"));
+        return findCategoryIdByPreferredNames(allCategories, List.of("科技", "知识", "体育"));
     }
 
     private List<Tag> matchTags(String source, List<Tag> allTags) {
@@ -184,16 +210,15 @@ public class LocalContentAnalysisService {
         if (matchedTags == null || matchedTags.isEmpty()) {
             return null;
         }
-        for (Tag tag : matchedTags) {
-            if (tag == null || isBlank(tag.getName())) {
-                continue;
-            }
-            String name = normalize(tag.getName());
-            if (List.of("java", "springboot", "vue", "react").contains(name)) {
-                return findCategoryIdByPreferredNames(allCategories, List.of("科技", "数码", "知识"));
-            }
-            if (List.of("nba", "篮球", "足球").contains(name)) {
-                return findCategoryIdByPreferredNames(allCategories, List.of("体育"));
+        Set<String> matchedTagNames = matchedTags.stream()
+                .filter(Objects::nonNull)
+                .map(Tag::getName)
+                .filter(Objects::nonNull)
+                .map(this::normalize)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        for (CategoryKeywordRule rule : CATEGORY_KEYWORD_RULES) {
+            if (rule.matchesAnyTag(matchedTagNames)) {
+                return findCategoryIdByPreferredNames(allCategories, rule.preferredCategoryNames());
             }
         }
         return null;
@@ -203,11 +228,17 @@ public class LocalContentAnalysisService {
         if (isBlank(source)) {
             return null;
         }
-        if (containsAny(source, List.of("java", "springboot", "vue", "react"))) {
-            return findCategoryIdByPreferredNames(allCategories, List.of("科技", "数码", "知识"));
+        return resolveCategoryIdByTextContent(normalize(source), allCategories);
+    }
+
+    private Long resolveCategoryIdByTextContent(String normalizedContent, List<Category> allCategories) {
+        if (isBlank(normalizedContent)) {
+            return null;
         }
-        if (containsAny(source, List.of("nba", "篮球", "足球"))) {
-            return findCategoryIdByPreferredNames(allCategories, List.of("体育"));
+        for (CategoryKeywordRule rule : CATEGORY_KEYWORD_RULES) {
+            if (rule.matchesText(normalizedContent)) {
+                return findCategoryIdByPreferredNames(allCategories, rule.preferredCategoryNames());
+            }
         }
         return null;
     }
@@ -249,6 +280,38 @@ public class LocalContentAnalysisService {
             }
         }
         return false;
+    }
+
+    private record CategoryKeywordRule(List<String> keywords, List<String> preferredCategoryNames) {
+
+        private CategoryKeywordRule {
+            keywords = keywords.stream().map(LocalContentAnalysisService::normalizeKeyword).toList();
+        }
+
+        private boolean matchesAnyTag(Set<String> normalizedTagNames) {
+            return keywords.stream().anyMatch(normalizedTagNames::contains);
+        }
+
+        private boolean matchesTag(String normalizedContent) {
+            return matchesText(normalizedContent);
+        }
+
+        private boolean matchesText(String normalizedContent) {
+            return containsAnyNormalized(normalizedContent, keywords);
+        }
+    }
+
+    private static boolean containsAnyNormalized(String source, List<String> keywords) {
+        for (String keyword : keywords) {
+            if (source.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String normalizeKeyword(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", "");
     }
 
     private String safeTrim(String value) {
