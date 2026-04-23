@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 /**
@@ -45,6 +47,11 @@ public class VideoServiceImpl implements VideoService {
     @Override
     public IPage<VideoVO> listRecommended(int page, int size, Long userId) {
         return videoQueryService.listRecommended(page, size, userId);
+    }
+
+    @Override
+    public IPage<VideoVO> listRecommended(int page, int size, Long userId, Set<Long> excludeVideoIds) {
+        return videoQueryService.listRecommended(page, size, userId, excludeVideoIds);
     }
 
     /**

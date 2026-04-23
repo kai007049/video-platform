@@ -6,6 +6,8 @@ import com.bilibili.video.model.vo.VideoVO;
 import com.bilibili.video.entity.Video;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 /**
  * 视频服务接口
  */
@@ -17,6 +19,8 @@ public interface VideoService {
 
     /** 推荐流：热门+最新混合排序 */
     IPage<VideoVO> listRecommended(int page, int size, Long userId);
+
+    IPage<VideoVO> listRecommended(int page, int size, Long userId, Set<Long> excludeVideoIds);
 
     /** 热榜列表 */
     IPage<VideoVO> listHot(int page, int size, Long userId);

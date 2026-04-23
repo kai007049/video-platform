@@ -4,22 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="视频详情缓存重构">
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/ClassDemo.java" afterDir="false" />
+    <list default="true" id="2e92157d-8d66-416d-8b28-d09a51483d9e" name="更改" comment="视频标签、分类功能完善">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/349b0447-9c5f-4090-9f83-370354abb7f2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/349b0447-9c5f-4090-9f83-370354abb7f2.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/common/RedisConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/common/RedisConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/RecExposureLogService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/RecExposureLogService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/RecExposureLogServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/RecExposureLogServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/VideoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/controller/VideoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/RecommendationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/RecommendationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/VideoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/VideoService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/RecommendationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/RecommendationServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/SearchServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/utils/AuthInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/utils/AuthInterceptor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/controller/VideoControllerValidationTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/mq/MessageNotifyConsumerTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/service/impl/LocalContentAnalysisServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/service/impl/MessageCenterServiceImplTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/service/impl/VideoCacheServiceImplTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/service/impl/VideoCommandServiceTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/service/impl/VideoQueryServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoQueryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoQueryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bilibili/video/service/impl/VideoServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/controller/VideoControllerStreamRangeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/bilibili/video/controller/VideoControllerStreamRangeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/video.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/video.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/SearchPage.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/SearchPage.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +115,7 @@
     "project.structure.last.edited": "项目",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.23665893",
-    "settings.editor.selected.configurable": "MavenSettings",
+    "settings.editor.selected.configurable": "terminal",
     "vue.rearranger.settings.migration": "true",
     "应用程序.ClassDemo.executor": "Run"
   },
@@ -136,7 +135,7 @@
       <recent name="E:\Java-Project\Bilibili\Video-Platform" />
     </key>
   </component>
-  <component name="RunManager" selected="应用程序.ClassDemo">
+  <component name="RunManager" selected="Spring Boot.VideoPlatformApplication">
     <configuration name="ClassDemo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.bilibili.video.ClassDemo" />
       <module name="video-platform" />
@@ -257,6 +256,9 @@
       <workItem from="1775610738363" duration="770000" />
       <workItem from="1776005698265" duration="9334000" />
       <workItem from="1776327584020" duration="24600000" />
+      <workItem from="1776643519292" duration="17797000" />
+      <workItem from="1776730895464" duration="6144000" />
+      <workItem from="1776827446739" duration="13833000" />
     </task>
     <task id="LOCAL-00001" summary="增加管理员管理面板、新注册用户默认头像、视频弹幕等">
       <option name="closed" value="true" />
@@ -306,7 +308,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776393890510</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="视频标签、分类功能完善">
+      <option name="closed" value="true" />
+      <created>1776856303538</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1776856303538</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,7 +353,8 @@
     <MESSAGE value="前端布局修改" />
     <MESSAGE value="wb消息风险修复和通知事件落库" />
     <MESSAGE value="视频详情缓存重构" />
-    <option name="LAST_COMMIT_MESSAGE" value="视频详情缓存重构" />
+    <MESSAGE value="视频标签、分类功能完善" />
+    <option name="LAST_COMMIT_MESSAGE" value="视频标签、分类功能完善" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

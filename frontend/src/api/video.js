@@ -3,8 +3,16 @@ import request from './request'
 export const getVideoList = (page = 1, size = 12) =>
   request.get('/video/list', { params: { page, size } })
 
-export const getRecommended = (page = 1, size = 12) =>
-  request.get('/video/recommended', { params: { page, size } })
+export const getRecommended = (page = 1, size = 12, excludeVideoIds = []) =>
+  request.get('/video/recommended', {
+    params: {
+      page,
+      size,
+      excludeVideoIds: Array.isArray(excludeVideoIds) && excludeVideoIds.length > 0
+        ? excludeVideoIds.join(',')
+        : undefined
+    }
+  })
 
 export const getHotList = (page = 1, size = 12) =>
   request.get('/video/hot', { params: { page, size } })

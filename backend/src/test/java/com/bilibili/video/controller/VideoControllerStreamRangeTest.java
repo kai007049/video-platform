@@ -15,9 +15,11 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -75,9 +77,38 @@ class VideoControllerStreamRangeTest {
         assertThat(writeBody(response.getBody())).isEqualTo("0123456789".getBytes(StandardCharsets.UTF_8));
     }
 
+    @Test
+    void shouldIgnoreWindowsClientAbortDuringStreaming() throws Exception {
+        VideoVO video = new VideoVO();
+        video.setId(1L);
+        video.setVideoUrl("http://minio.test/video/demo.mp4");
+        when(videoService.getById(1L, null)).thenReturn(video);
+        when(minioUtils.getVideoSize(video.getVideoUrl())).thenReturn(10L);
+        when(minioUtils.getVideoStream(video.getVideoUrl()))
+                .thenReturn(new ClientAbortInputStream("你的主机中的软件中止了一个已建立的连接。"));
+
+        ResponseEntity<StreamingResponseBody> response = controller.stream(1L, null);
+
+        assertThatCode(() -> writeBody(response.getBody())).doesNotThrowAnyException();
+    }
+
     private byte[] writeBody(StreamingResponseBody body) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         body.writeTo(outputStream);
         return outputStream.toByteArray();
+    }
+
+    private static final class ClientAbortInputStream extends ByteArrayInputStream {
+        private final String message;
+
+        private ClientAbortInputStream(String message) {
+            super("0123456789".getBytes(StandardCharsets.UTF_8));
+            this.message = message;
+        }
+
+        @Override
+        public long transferTo(java.io.OutputStream out) throws IOException {
+            throw new IOException(message);
+        }
     }
 }

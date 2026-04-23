@@ -34,6 +34,12 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 视频控制器
@@ -110,9 +116,10 @@ public class VideoController {
     @Operation(summary = "推荐流", description = "热门 + 最新 + 兴趣")
     public Result<IPage<VideoVO>> recommended(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String excludeVideoIds) {
         Long userId = UserContext.get();
-        return Result.success(videoService.listRecommended(page, size, userId));
+        return Result.success(videoService.listRecommended(page, size, userId, parseExcludeIds(excludeVideoIds)));
     }
 
     @GetMapping("/hot")
@@ -258,7 +265,11 @@ public class VideoController {
                 String msg = current.getMessage();
                 if (msg != null) {
                     String lower = msg.toLowerCase();
-                    if (lower.contains("broken pipe") || lower.contains("connection reset by peer")) {
+                    if (lower.contains("broken pipe")
+                            || lower.contains("connection reset by peer")
+                            || lower.contains("connection reset")
+                            || lower.contains("clientabortexception")
+                            || lower.contains("你的主机中的软件中止了一个已建立的连接")) {
                         return true;
                     }
                 }
@@ -266,6 +277,25 @@ public class VideoController {
             current = current.getCause();
         }
         return false;
+    }
+
+    private Set<Long> parseExcludeIds(String excludeVideoIds) {
+        if (excludeVideoIds == null || excludeVideoIds.isBlank()) {
+            return Collections.emptySet();
+        }
+        return Arrays.stream(excludeVideoIds.split(","))
+                .map(String::trim)
+                .filter(item -> !item.isEmpty())
+                .limit(200)
+                .map(item -> {
+                    try {
+                        return Long.valueOf(item);
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
 

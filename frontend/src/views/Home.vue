@@ -7,7 +7,7 @@
     <template v-else>
       <!-- 简洁的分类 Tab （下划线设计） -->
       <div style="display: flex; align-items: center; gap: 28px; margin-bottom: 32px; animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1); animation-delay: 0.1s; overflow-x: auto; padding-bottom: 12px;">
-        <button 
+        <button
           v-for="tab in ['推荐', '最新', '热门']"
           :key="tab"
           @click="switchTab(tab === '推荐' ? 'recommend' : tab === '最新' ? 'latest' : 'hot')"
@@ -16,8 +16,17 @@
           @mouseenter="(e) => { if(activeTab !== (tab === '推荐' ? 'recommend' : tab === '最新' ? 'latest' : 'hot')) e.currentTarget.style.color = '#475569'; }"
           @mouseleave="(e) => { if(activeTab !== (tab === '推荐' ? 'recommend' : tab === '最新' ? 'latest' : 'hot')) e.currentTarget.style.color = '#64748b'; }">
           {{ tab }}
-          <span v-if="activeTab === (tab === '推荐' ? 'recommend' : tab === '最新' ? 'latest' : 'hot')" 
+          <span v-if="activeTab === (tab === '推荐' ? 'recommend' : tab === '最新' ? 'latest' : 'hot')"
             style="position: absolute; bottom: 0; left: 0; right: 0; height: 2.5px; background: linear-gradient(90deg, #1f2937 0%, #374151 100%); border-radius: 1px;"></span>
+        </button>
+
+        <button
+          v-if="activeTab === 'recommend'"
+          @click="refreshRecommendBatch"
+          :disabled="refreshingRecommend"
+          class="refresh-batch-btn"
+        >
+          {{ refreshingRecommend ? '刷新中...' : '换一批' }}
         </button>
       </div>
 
@@ -222,6 +231,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { getVideoList, getRecommended, getHotList } from '../api/video'
 import SkeletonScreen from '../components/SkeletonScreen.vue'
 import { applyImageFallbackOnce } from '../utils/imageFallback'
+import { appendSeenIds, replaceRecommendationBatch } from '../utils/recommendationRefresh'
 
 const router = useRouter()
 const route = useRoute()
@@ -420,6 +430,8 @@ const page = ref(1)
 const hasMore = ref(true)
 const pageSize = 16
 const error = ref('')
+const seenRecommendedIds = ref([])
+const refreshingRecommend = ref(false)
 const placeholderCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
 const aiPanelStyle = computed(() => ({
@@ -447,22 +459,29 @@ const bentoVideos = computed(() => {
 const heroVideo = computed(() => bentoVideos.value[0] || null)
 const aiPanelVideos = computed(() => bentoVideos.value.slice(1, 4))
 
-const fetchApi = (p) => {
+const fetchApi = (p, excludeIds = []) => {
   if (activeTab.value === 'hot') return getHotList(p, pageSize)
-  return activeTab.value === 'recommend' ? getRecommended(p, pageSize) : getVideoList(p, pageSize)
+  return activeTab.value === 'recommend'
+    ? getRecommended(p, pageSize, excludeIds)
+    : getVideoList(p, pageSize)
 }
 
-async function fetchList(isMore = false) {
+async function fetchList(isMore = false, excludeIds = []) {
   if (loading.value) return
   loading.value = true
   if (!isMore) error.value = ''
   try {
-    const res = await fetchApi(isMore ? page.value : 1)
+    const res = await fetchApi(isMore ? page.value : 1, excludeIds)
     const list = res.records || []
     // 为新数据添加 isLoaded 属性
     const newList = list.map(item => ({ ...item, isLoaded: false }))
     if (isMore) videoList.value.push(...newList)
     else videoList.value = newList
+
+    if (activeTab.value === 'recommend') {
+      seenRecommendedIds.value = appendSeenIds(seenRecommendedIds.value, newList)
+    }
+
     hasMore.value = res.current < res.pages
     page.value = isMore ? page.value + 1 : 2
   } catch (e) {
@@ -483,6 +502,9 @@ async function fetchList(isMore = false) {
 function switchTab(tab) {
   activeTab.value = tab
   page.value = 1
+  if (tab !== 'recommend') {
+    seenRecommendedIds.value = []
+  }
   fetchList(false)
 }
 
@@ -491,7 +513,31 @@ function syncFromQuery() {
   if (tab && ['recommend', 'latest', 'hot'].includes(tab)) activeTab.value = tab
 }
 
-function loadMore() { fetchList(true) }
+function loadMore() {
+  if (refreshingRecommend.value) return
+  const excludeIds = activeTab.value === 'recommend' ? seenRecommendedIds.value : []
+  fetchList(true, excludeIds)
+}
+
+async function refreshRecommendBatch() {
+  if (activeTab.value !== 'recommend' || refreshingRecommend.value || loading.value) return
+  refreshingRecommend.value = true
+  try {
+    const res = await getRecommended(1, pageSize, seenRecommendedIds.value)
+    const nextRecords = Array.isArray(res?.records) ? res.records : []
+    const nextBatch = nextRecords.map(item => ({ ...item, isLoaded: false }))
+    videoList.value = replaceRecommendationBatch(videoList.value, nextBatch)
+    seenRecommendedIds.value = appendSeenIds(seenRecommendedIds.value, nextBatch)
+    hasMore.value = res.current < res.pages
+    page.value = 2
+  } catch (e) {
+    console.error('Failed to refresh recommendation batch:', e)
+  } finally {
+    refreshingRecommend.value = false
+    initObserver()
+  }
+}
+
 function goVideo(id) { router.push(`/video/${id}`) }
 function goProfile(authorId) { if (authorId) router.push(`/user/${authorId}`) }
 function resolveCover(item) {
@@ -594,6 +640,9 @@ watch(videoList, async () => {
 watch(() => route.query, () => {
   syncFromQuery()
   page.value = 1
+  if (activeTab.value !== 'recommend') {
+    seenRecommendedIds.value = []
+  }
   fetchList(false)
 }, { immediate: true })
 </script>
@@ -632,6 +681,20 @@ watch(() => route.query, () => {
 }
 
 /* ==================== 通用样式 ==================== */
+.refresh-batch-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  background: #fb7299;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.refresh-batch-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 .animate-enter {
   animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;

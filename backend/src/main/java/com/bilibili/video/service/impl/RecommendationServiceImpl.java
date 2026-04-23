@@ -116,23 +116,36 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Value("${recommend.rerank.max-consecutive-same-category:2}")
     private int maxConsecutiveSameCategory;
 
+    @Value("${recommend.result.window-size:256}")
+    private int recommendResultWindowSize = 256;
+
+    @Value("${recommend.result.max-window-size:1000}")
+    private int recommendResultMaxWindowSize = 1000;
+
     /**
      * 获取分页推荐结果。
      * 优先读取 Redis 中的推荐窗口缓存，未命中时通过分布式锁重建窗口，避免并发回源。
      */
     @Override
     public IPage<VideoVO> listRecommended(int page, int size, Long userId) {
+        return listRecommended(page, size, userId, Collections.emptySet());
+    }
+
+    @Override
+    public IPage<VideoVO> listRecommended(int page, int size, Long userId, Set<Long> excludeVideoIds) {
         // 统一收敛分页参数，避免前端传入异常值后把查询窗口放得过大。
         int safePage = Math.max(page, 1);
         int safeSize = Math.max(1, Math.min(size, 50));
+        Set<Long> safeExcludeIds = excludeVideoIds == null ? Collections.emptySet() : excludeVideoIds;
+        boolean refreshRequest = !safeExcludeIds.isEmpty();
         // 推荐结果不是“每页单独算一次”，而是先算一整个推荐窗口，再在窗口里分页切片。
-        int windowSize = RedisConstants.RECOMMEND_RESULT_WINDOW_SIZE;
+        int windowSize = resolveRecommendationWindowSize(safeSize, safeExcludeIds);
 
         // 第一步：优先读缓存。
         // 如果当前用户（或游客）的推荐窗口已经算好，直接按页截取即可，不再重新召回和打分。
         CachedRecommendationWindow cachedWindow = getCachedWindow(userId, windowSize);
         if (cachedWindow != null) {
-            return buildPageFromCachedWindow(cachedWindow, safePage, safeSize, userId);
+            return buildResponseFromCachedWindow(cachedWindow, safePage, safeSize, userId, safeExcludeIds, refreshRequest);
         }
 
         // 第二步：缓存未命中时，尝试抢“重建推荐窗口”的锁。
@@ -146,7 +159,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 // 构建完成后写入缓存，后续请求都可以直接复用这份结果。
                 cacheRecommendationWindow(userId, windowSize, rebuilt);
                 // 当前请求本身也直接使用刚构建出的窗口返回结果。
-                return buildPageFromCachedWindow(rebuilt, safePage, safeSize, userId);
+                return buildResponseFromCachedWindow(rebuilt, safePage, safeSize, userId, safeExcludeIds, refreshRequest);
             } finally {
                 // 无论成功还是失败，都释放锁，避免后续请求一直卡住。
                 redisTemplate.delete(lockKey);
@@ -165,13 +178,22 @@ public class RecommendationServiceImpl implements RecommendationService {
         // 大多数情况下，这里已经能读到别的请求刚刚写入的推荐窗口。
         CachedRecommendationWindow retryWindow = getCachedWindow(userId, windowSize);
         if (retryWindow != null) {
-            return buildPageFromCachedWindow(retryWindow, safePage, safeSize, userId);
+            return buildResponseFromCachedWindow(retryWindow, safePage, safeSize, userId, safeExcludeIds, refreshRequest);
         }
 
         // 第五步：如果极端情况下还是没有缓存，就本地直接构建一份结果兜底。
         // 这样即使锁持有方失败或超时，请求也不会直接返回空结果。
         CachedRecommendationWindow fallbackWindow = buildRecommendationWindow(userId, windowSize);
-        return buildPageFromCachedWindow(fallbackWindow, safePage, safeSize, userId);
+        return buildResponseFromCachedWindow(fallbackWindow, safePage, safeSize, userId, safeExcludeIds, refreshRequest);
+    }
+
+    private int resolveRecommendationWindowSize(int size, Set<Long> excludeVideoIds) {
+        int safeSize = Math.max(1, size);
+        int baseWindowSize = Math.max(RedisConstants.RECOMMEND_RESULT_WINDOW_SIZE, recommendResultWindowSize);
+        int maxWindowSize = Math.max(baseWindowSize, recommendResultMaxWindowSize);
+        int seenCount = excludeVideoIds == null ? 0 : excludeVideoIds.size();
+        int requiredWindowSize = seenCount + safeSize;
+        return Math.min(maxWindowSize, Math.max(baseWindowSize, requiredWindowSize));
     }
 
     /**
@@ -293,10 +315,59 @@ public class RecommendationServiceImpl implements RecommendationService {
         return new CachedRecommendationWindow(ids, ids.size(), hasMore, Instant.now().getEpochSecond(), meta);
     }
 
+    private CachedRecommendationWindow applyExcludeIds(CachedRecommendationWindow window, Set<Long> excludeVideoIds) {
+        if (window == null || window.getIds() == null || window.getIds().isEmpty() || excludeVideoIds == null || excludeVideoIds.isEmpty()) {
+            return window;
+        }
+        List<Long> filteredIds = window.getIds().stream()
+                .filter(Objects::nonNull)
+                .filter(id -> !excludeVideoIds.contains(id))
+                .toList();
+        if (filteredIds.size() == window.getIds().size()) {
+            return window;
+        }
+
+        Map<String, CachedRecommendationMeta> filteredMeta = new LinkedHashMap<>();
+        Map<String, CachedRecommendationMeta> originalMeta = window.getMeta() == null ? Collections.emptyMap() : window.getMeta();
+        for (int i = 0; i < filteredIds.size(); i++) {
+            Long id = filteredIds.get(i);
+            CachedRecommendationMeta original = originalMeta.get(String.valueOf(id));
+            if (original == null) {
+                continue;
+            }
+            CachedRecommendationMeta copy = new CachedRecommendationMeta();
+            copy.setScore(original.getScore());
+            copy.setChannels(original.getChannels());
+            copy.setRank(i + 1);
+            filteredMeta.put(String.valueOf(id), copy);
+        }
+        return new CachedRecommendationWindow(
+                filteredIds,
+                filteredIds.size(),
+                Boolean.FALSE,
+                window.getGeneratedAt(),
+                filteredMeta
+        );
+    }
+
+    private IPage<VideoVO> buildResponseFromCachedWindow(CachedRecommendationWindow window,
+                                                         int page,
+                                                         int size,
+                                                         Long userId,
+                                                         Set<Long> excludeVideoIds,
+                                                         boolean refreshRequest) {
+        CachedRecommendationWindow effectiveWindow = refreshRequest ? applyExcludeIds(window, excludeVideoIds) : window;
+        return buildPageFromCachedWindow(effectiveWindow, refreshRequest ? 1 : page, size, userId, page);
+    }
+
     /**
      * 从缓存窗口中切出当前页数据，并补齐 VideoVO 与曝光埋点。
      */
     private IPage<VideoVO> buildPageFromCachedWindow(CachedRecommendationWindow window, int page, int size, Long userId) {
+        return buildPageFromCachedWindow(window, page, size, userId, page);
+    }
+
+    private IPage<VideoVO> buildPageFromCachedWindow(CachedRecommendationWindow window, int page, int size, Long userId, int exposurePage) {
         if (window == null || window.getIds() == null || window.getIds().isEmpty()) {
             Page<VideoVO> empty = new Page<>(page, size, 0);
             empty.setRecords(Collections.emptyList());
@@ -321,7 +392,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         recExposureLogService.logRecommendationExposureFromVideos(
                 userId,
                 "recommended",
-                page,
+                exposurePage,
                 size,
                 records,
                 toMetaByVideoId(window),

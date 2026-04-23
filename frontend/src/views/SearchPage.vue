@@ -40,20 +40,25 @@
           <p>请尝试其他关键词</p>
         </div>
 
-        <div v-else-if="activeTab === 'video'" class="video-list">
-          <div v-for="video in videos" :key="video.id" class="video-item" @click="goVideo(video.id)">
-            <div class="video-cover">
-              <img :src="resolveCover(video)" alt="视频封面" @error="onCoverError" />
-              <span class="video-duration">{{ formatDuration(video.durationSeconds) }}</span>
-            </div>
-            <div class="video-info">
-              <h3 class="video-title">{{ video.title }}</h3>
-              <div class="video-meta">
-                <span class="video-up">{{ video.authorName || '未知作者' }}</span>
-                <span class="video-views">{{ formatNumber(video.playCount || 0) }} 播放</span>
-                <span class="video-date">{{ formatDate(video.createTime) }}</span>
+        <div v-else-if="activeTab === 'video'" class="video-list-wrapper">
+          <div class="video-list">
+            <div v-for="video in videos" :key="video.id" class="video-item" @click="goVideo(video.id)">
+              <div class="video-cover">
+                <img :src="resolveCover(video)" alt="视频封面" @error="onCoverError" />
+                <span class="video-duration">{{ formatDuration(video.durationSeconds) }}</span>
+              </div>
+              <div class="video-info">
+                <h3 class="video-title">{{ video.title }}</h3>
+                <div class="video-meta">
+                  <span class="video-up">{{ video.authorName || '未知作者' }}</span>
+                  <span class="video-views">{{ formatNumber(video.playCount || 0) }} 播放</span>
+                  <span class="video-date">{{ formatDate(video.createTime) }}</span>
+                </div>
               </div>
             </div>
+          </div>
+          <div v-if="hasMore" class="load-more-wrap">
+            <button class="load-more-btn" @click="performSearch(true)">加载更多</button>
           </div>
         </div>
 
@@ -76,6 +81,7 @@ import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { searchUsers, searchVideos } from '../api/video'
 import { applyImageFallbackOnce } from '../utils/imageFallback'
+import { mergeSearchPage } from '../utils/searchPagination'
 
 const route = useRoute()
 const router = useRouter()
@@ -87,6 +93,9 @@ const users = ref([])
 const noResults = ref(false)
 const activeTab = ref('video')
 const activeSort = ref('comprehensive')
+const page = ref(1)
+const hasMore = ref(false)
+const pageSize = 20
 
 const defaultCover = new URL('../assets/cover-placeholder.png', import.meta.url).href
 const avatarPlaceholder = new URL('../assets/avatar-placeholder.png', import.meta.url).href
@@ -116,15 +125,19 @@ watch(
       videos.value = []
       users.value = []
       noResults.value = false
+      page.value = 1
+      hasMore.value = false
       return
     }
 
-    await performSearch()
+    page.value = 1
+    hasMore.value = false
+    await performSearch(false)
   },
   { immediate: true }
 )
 
-async function performSearch() {
+async function performSearch(isMore = false) {
   if (!keyword.value) {
     return
   }
@@ -136,18 +149,25 @@ async function performSearch() {
       users.value = Array.isArray(result) ? result : []
       videos.value = []
       noResults.value = users.value.length === 0
+      hasMore.value = false
       return
     }
 
-    const result = await searchVideos(keyword.value, 1, 20, activeSort.value)
-    videos.value = Array.isArray(result?.records) ? result.records : []
+    const currentPage = isMore ? page.value : 1
+    const result = await searchVideos(keyword.value, currentPage, pageSize, activeSort.value)
+    const records = Array.isArray(result?.records) ? result.records : []
+    const merged = mergeSearchPage(videos.value, records, currentPage, Number(result?.pages || 0))
+    videos.value = merged.items
     users.value = []
     noResults.value = videos.value.length === 0
+    hasMore.value = merged.hasMore
+    page.value = merged.nextPage
   } catch (error) {
     console.error('搜索失败:', error)
     videos.value = []
     users.value = []
     noResults.value = true
+    hasMore.value = false
   } finally {
     loading.value = false
   }
@@ -318,10 +338,37 @@ function formatDate(dateStr) {
   color: #9499a0;
 }
 
+.video-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .video-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+}
+
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.load-more-btn {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 999px;
+  background: #fb7299;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.load-more-btn:hover {
+  background: #fc8bab;
 }
 
 .video-item {

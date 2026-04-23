@@ -105,6 +105,10 @@ video:
     fallback-delay-ms: 2000
 
 recommend:
+  result:
+    # 推荐页每次响应仍按前端 size 返回；这里控制后端可分页/排重的候选窗口大小。
+    window-size: 256
+    max-window-size: 1000
   recall:
     hot-size: 200
     fresh-size: 120
