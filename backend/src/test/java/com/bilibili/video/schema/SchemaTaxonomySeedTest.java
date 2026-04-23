@@ -123,31 +123,21 @@ class SchemaTaxonomySeedTest {
     }
 
     @Test
-    void shouldKeepCategorySeedsStrictlyAlignedAcrossSchemaAndResetSql() throws IOException {
+    void shouldKeepCategorySeedsStrictlyAlignedInSchemaSql() throws IOException {
         List<CategorySeed> schemaCategories = extractCategorySeed(Path.of("src/main/resources/db/schema.sql"));
-        List<CategorySeed> resetCategories = extractCategorySeed(Path.of("src/main/resources/db/dev_reset_taxonomy.sql"));
 
         assertThat(schemaCategories).containsExactlyElementsOf(EXPECTED_CATEGORIES);
-        assertThat(resetCategories).containsExactlyElementsOf(EXPECTED_CATEGORIES);
-        assertThat(resetCategories).containsExactlyElementsOf(schemaCategories);
         assertThat(schemaCategories)
-                .extracting(CategorySeed::name)
-                .doesNotContainAnyElementsOf(REMOVED_LEGACY_CATEGORIES);
-        assertThat(resetCategories)
                 .extracting(CategorySeed::name)
                 .doesNotContainAnyElementsOf(REMOVED_LEGACY_CATEGORIES);
     }
 
     @Test
-    void shouldKeepTagSeedsStrictlyAlignedWithFiveSpecGroupsInBothSqlFiles() throws IOException {
+    void shouldKeepTagSeedsStrictlyAlignedWithFiveSpecGroupsInSchemaSql() throws IOException {
         List<String> schemaTags = extractTagSeed(Path.of("src/main/resources/db/schema.sql"));
-        List<String> resetTags = extractTagSeed(Path.of("src/main/resources/db/dev_reset_taxonomy.sql"));
 
         assertThat(schemaTags).containsExactlyElementsOf(EXPECTED_TAGS);
-        assertThat(resetTags).containsExactlyElementsOf(EXPECTED_TAGS);
-        assertThat(resetTags).containsExactlyElementsOf(schemaTags);
         assertThat(schemaTags).doesNotContain("电影", "电视剧", "纪录片");
-        assertThat(resetTags).doesNotContain("电影", "电视剧", "纪录片");
     }
 
     private static List<String> extractTagSeed(Path path) throws IOException {

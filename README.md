@@ -33,7 +33,6 @@
 - RocketMQ 异步解耦与轻量可靠性增强
 - WebSocket 实时消息推送
 - seed 数据生成器
-- 批量行为模拟脚本（支持账号登录模式与 token 模式）
 
 ## 技术栈
 
@@ -64,70 +63,166 @@
 Video-Platform/
 ├── backend/     # Spring Boot 后端服务
 ├── frontend/    # Vue 3 + Vite 前端应用
-├── docs/        # 辅助文档（公开版优先关注 README 与核心架构文档）
 └── README.md    # 项目主说明
 ```
 
-## 环境要求
+## 从 0 到 1 启动项目
 
-建议本地环境：
+推荐使用 Docker 启动中间件，本机只安装 JDK、Maven、Node.js、npm 和 ffmpeg。这样最接近完整功能模式，也更适合别人 clone 后复现。
 
-- JDK 17
-- Node.js 18+
-- MySQL 8.x
-- Redis 7.x
-- Maven 3.9+
-- npm 9+
+### 1. 准备基础软件
 
-## 依赖说明
-
-### 轻量启动必需
-- MySQL：业务主数据
-- Redis：缓存与状态数据
-
-### 完整功能模式建议补齐
-- MinIO：视频、封面、头像、消息图片对象存储
-- Elasticsearch：搜索索引与搜索能力
-- RocketMQ：异步处理链路
-- ffmpeg：视频后处理、封面抽帧等能力
-
-> 当前仓库的目标是优先做到“依赖较少中间件也能尽量跑起来”，但这条路径没有覆盖所有依赖缺失组合的严格验证。若缺少 Elasticsearch、RocketMQ、MinIO、ffmpeg 等增强依赖，你可能还需要根据本地环境额外关闭或调整相关配置；如果你希望稳定体验完整链路，建议直接使用完整功能模式。
-
-## 轻量启动尝试模式
-
-### 1. 初始化数据库
+请先安装并确认版本：
 
 ```bash
-cd backend
-mysql -u root -p < src/main/resources/db/schema.sql
+java -version      # JDK 17
+mvn -version       # Maven 3.9+
+node -v            # Node.js 18+
+npm -v             # npm 9+
+docker -v
+docker compose version
 ```
 
-### 2. 启动基础依赖
-- MySQL
-- Redis
+如果你的 Docker 版本较旧，没有 `docker compose`，可以把下面命令里的 `docker compose` 换成 `docker-compose`。
 
-### 3. 修改后端配置
-重点检查：
-- `backend/src/main/resources/application.yaml`
-- `spring.datasource.*`
-- `spring.data.redis.*`
+### 2. 克隆项目并进入目录
 
-如暂时没有完整中间件环境，也请留意：
-- `spring.elasticsearch.uris`
-- `minio.endpoint`
-- `rocketmq.name-server`
-- `ffmpeg.path`
+```bash
+git clone <your-repo-url>
+cd Video-Platform
+```
 
-### 4. 启动后端
+### 3. 启动 Docker 中间件
+
+项目提供了本地开发用的 Docker Compose 文件：
+
+```bash
+cd backend/src/main/resources/docker
+docker compose up -d
+docker compose ps
+```
+
+默认会启动：
+
+| 服务 | 端口 | 默认账号 |
+| --- | --- | --- |
+| MySQL | `3306` | `root / 123456` |
+| Redis | `6379` | 无密码 |
+| Elasticsearch | `9200` | `elastic / 123456` |
+| Kibana | `5601` | 无 |
+| MinIO API | `9000` | `admin / 12345678` |
+| MinIO Console | `9001` | `admin / 12345678` |
+| RocketMQ NameServer | `9876` | 无 |
+| RocketMQ Broker | `10911` / `10909` | 无 |
+| RocketMQ Dashboard | `8082` | 无 |
+
+第一次启动 Elasticsearch 会安装 IK 分词插件，可能比其他容器慢一点。可以用下面命令观察日志：
+
+```bash
+docker compose logs -f elasticsearch
+docker compose logs -f rocketmq-broker
+```
+
+常用访问地址：
+
+- MinIO 控制台：`http://localhost:9001`
+- Kibana：`http://localhost:5601`
+- RocketMQ Dashboard：`http://localhost:8082`
+- Elasticsearch 健康检查：`http://localhost:9200`
+
+### 4. 初始化数据库
+
+等 MySQL 容器启动完成后，回到项目根目录执行初始化 SQL：
+
+```bash
+cd ../../../../..
+docker exec -i video_mysql mysql -uroot -p123456 < backend/src/main/resources/db/schema.sql
+```
+
+如果你本机安装了 MySQL 客户端，也可以用：
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -uroot -p123456 < backend/src/main/resources/db/schema.sql
+```
+
+SQL 会创建并使用 `video_platform` 数据库。以后想重置本地库，可以重新执行同一个 `schema.sql`。
+
+### 5. 配置 ffmpeg
+
+视频上传、封面抽帧等能力依赖 ffmpeg。
+
+Windows 推荐做法：
+
+1. 下载 ffmpeg，例如 `ffmpeg-8.0.1-full_build`
+2. 解压到本地目录
+3. 确认 `ffmpeg.exe` 路径，例如：
+
+```text
+你的 ffmpeg.exe 绝对路径
+```
+
+当前默认配置已经使用这个路径：
+
+```yaml
+ffmpeg:
+  path: ${FFMPEG_PATH:ffmpeg}
+```
+
+如果你的路径不同，可以在启动后端前设置环境变量。
+
+PowerShell：
+
+```powershell
+$env:FFMPEG_PATH="D:/your/path/ffmpeg.exe"
+```
+
+macOS / Linux：
+
+```bash
+brew install ffmpeg        # macOS
+sudo apt install ffmpeg    # Ubuntu / Debian
+export FFMPEG_PATH=ffmpeg
+```
+
+### 6. 检查后端配置
+
+主要配置文件是：
+
+```text
+backend/src/main/resources/application.yaml
+```
+
+默认值已经和 Docker Compose 对齐：
+
+```text
+MySQL:          localhost:3306 / video_platform / root / 123456
+Redis:          localhost:6379
+Elasticsearch:  http://localhost:9200 / elastic / 123456
+MinIO:          http://localhost:9000 / admin / 12345678
+RocketMQ:       localhost:9876
+ffmpeg:         FFMPEG_PATH 或默认本机路径
+```
+
+这些都是本地 Docker 开发环境的默认值。如果要覆盖配置，请在终端里设置环境变量，或创建本地的 `application-local.yaml`。本地 `.env`、`application-local.yaml` 不会被 Git 跟踪。
+
+### 7. 启动后端
+
+打开一个新的终端：
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-默认端口：`8080`
+后端默认地址：
 
-### 5. 启动前端
+- API：`http://localhost:8080`
+- Swagger UI：`http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON：`http://localhost:8080/v3/api-docs`
+
+### 8. 启动前端
+
+再打开一个新的终端：
 
 ```bash
 cd frontend
@@ -135,70 +230,70 @@ npm install
 npm run dev
 ```
 
-默认端口：`5173`
+前端默认地址：
+
+```text
+http://localhost:5173
+```
 
 前端会通过 Vite 代理把 `/api` 请求转发到 `http://localhost:8080`，并将 `/ws` WebSocket 请求转发到后端。
 
-## 完整功能模式
+### 9. 生成推荐测试数据
 
-如果你想完整体验搜索、推荐、异步处理、对象存储与消息链路，建议补齐：
-
-- MySQL
-- Redis
-- MinIO
-- Elasticsearch
-- RocketMQ
-- ffmpeg
-
-## 推荐测试数据生成
-
-如果你想验证推荐算法、冷启动、热门召回和缓存行为，可以直接运行 backend 内置 seed 命令：
+如果页面数据较少，可以用内置 seed generator 生成一批演示数据：
 
 ```bash
 cd backend
 mvn spring-boot:run "-Dspring-boot.run.arguments=--seed.enabled=true --seed.mode=medium --seed.append=true --seed.search-reindex=false --seed.random-seed=42"
 ```
 
-说明：
-- 该命令只会在显式传入 `--seed.enabled=true` 时执行
-- 当前版本只支持 `append=true`
-- 当前支持 `small` / `medium` / `large` 三种 mode
-- 支持通过 `seed.random-seed` 固定随机结果
-- 如果本地 Elasticsearch 可用，可以把 `--seed.search-reindex=false` 改成 `true`
-- 运行完成后会输出作者、用户、视频、观看、点赞、收藏、关注数量摘要，并自动退出
-- 第一版只生成 seed 占位视频 URL，不包含真实媒体资源
-
-## 批量行为模拟脚本
-
-如果你想快速批量模拟用户行为来测试推荐和热门，而不是手工逐个点击页面，可以使用：
-
-### 账号登录模式
+如果 Elasticsearch 已正常启动，并希望 seed 结束后同步重建搜索索引，可以改成：
 
 ```bash
-python backend/scripts/simulate_behavior_profiles.py \
-  --base-url http://localhost:8080 \
-  --profile technology \
-  --accounts tech1:password:captchaKey:captchaValue \
-  --show-recommended \
-  --show-hot
+mvn spring-boot:run "-Dspring-boot.run.arguments=--seed.enabled=true --seed.mode=medium --seed.append=true --seed.search-reindex=true --seed.random-seed=42"
 ```
 
-### Token 模式
+seed 命令执行完成后会自动退出，再重新启动普通后端服务：
 
 ```bash
-python backend/scripts/simulate_behavior_profiles.py \
-  --base-url http://localhost:8080 \
-  --profile technology \
-  --tokens "$TOKEN_1" "$TOKEN_2" \
-  --show-recommended \
-  --show-hot
+mvn spring-boot:run
 ```
 
-说明：
-- `--accounts` 与 `--tokens` 二选一
-- `--tokens` 模式会跳过 `/user/login`，直接调用 `/user/info` 获取真实用户名
-- 推荐摘要按账号分别打印
-- 热门榜摘要会在整个批次结束后统一打印一次
+### 10. 常见问题
+
+端口冲突：
+
+- `3306`：本机已有 MySQL
+- `6379`：本机已有 Redis
+- `8080`：后端端口被占用
+- `5173`：前端端口被占用
+- `9000/9001`：MinIO 端口被占用
+
+处理方式：关闭占用端口的服务，或修改 `docker-compose.yml` / `application.yaml` 里的端口。
+
+ffmpeg 找不到：
+
+- Windows 检查 `FFMPEG_PATH` 是否指向 `ffmpeg.exe`
+- macOS / Linux 执行 `ffmpeg -version` 确认命令可用
+
+MySQL 初始化失败：
+
+- 先确认 `video_mysql` 容器已启动
+- 再执行 `docker compose logs -f mysql` 查看启动日志
+- 如果本地数据卷已有旧数据，可以停止容器后删除 `backend/src/main/resources/docker/mysql_data/` 再重启
+
+Elasticsearch 第一次启动慢：
+
+- 第一次会安装 IK 分词插件
+- 等 `http://localhost:9200` 能访问后再启动后端更稳
+
+MinIO bucket：
+
+- `video`、`cover`、`avatar`、`message` bucket 会在上传时由后端自动创建
+
+### 可选：轻量启动
+
+如果只想先把基础接口跑起来，可以只准备 MySQL + Redis。但搜索、上传、消息异步、封面处理等链路会依赖 Elasticsearch、MinIO、RocketMQ、ffmpeg，缺少这些中间件时需要自行关闭或避开相关功能。对第一次体验项目的人，仍然建议使用上面的 Docker 完整模式。
 
 ## 当前版本边界
 
@@ -209,7 +304,7 @@ python backend/scripts/simulate_behavior_profiles.py \
 - 推荐系统的多路召回、打分、重排与曝光日志
 - Elasticsearch 搜索、搜索历史、热搜、索引同步
 - RocketMQ 驱动的异步解耦链路
-- seed 数据生成与推荐行为模拟能力
+- seed 数据生成能力
 
 当前更适合定义为“已设计 / 正在推进”的内容：
 
@@ -225,14 +320,6 @@ python backend/scripts/simulate_behavior_profiles.py \
 - 推荐、搜索、缓存等模块已经具备工程化结构，但仍保留继续增强空间，并非最终形态
 - 项目更适合学习、展示和面试讲解，不建议直接理解为成熟生产级系统
 
-## 核心文档入口
-
-- [backend/README.md](backend/README.md)
-- [frontend/README.md](frontend/README.md)
-- [系统架构说明](backend/src/main/resources/SYSTEM_ARCHITECTURE.md)
-- [推荐系统架构说明](backend/src/main/resources/RECOMMENDATION_ARCHITECTURE.md)
-- [缓存策略说明](backend/src/main/resources/CACHE_STRATEGY.md)
-- [行为模拟脚本说明](backend/scripts/README-behavior-simulator.md)
 
 ## 为什么这个项目适合放到简历 / GitHub
 
@@ -240,7 +327,7 @@ python backend/scripts/simulate_behavior_profiles.py \
 
 - 有完整业务闭环
 - 有搜索、推荐、缓存、异步解耦等工程主题
-- 有 seed generator 与 behavior simulator 这种验证工具链
+- 有 seed generator 这种验证工具链
 - 适合在面试里展开讲缓存、搜索、推荐、消息与系统演进思路
 
 如果你把它作为简历项目，它更适合的定位是：
@@ -248,3 +335,56 @@ python backend/scripts/simulate_behavior_profiles.py \
 - **高完成度个人工程项目**
 - **可演示的系统设计案例**
 - **具备清晰演进路线的 V1 版本**
+
+## 可完善 / 可扩展方向
+
+下面这些方向比较适合作为后续迭代，也适合在面试中展开讲系统演进思路。
+
+### 推荐系统
+
+- 推荐结果缓存：将推荐流按用户、分页游标、曝光集合做短 TTL 缓存，降低重复刷新和高频访问压力
+- 反馈闭环：引入点击、完播、跳出、停留时长等行为信号，优化召回权重和重排策略
+- 多路召回治理：给热门、标签、分类、作者、最新内容分别做召回质量统计，避免单一路径主导推荐结果
+- 去重与多样性：进一步控制同作者、同分类、同标签连续出现的问题，提高 feed 流体验
+- 离线特征任务：把用户兴趣、视频热度、标签偏好沉淀为周期性特征，减少在线计算压力
+
+### 搜索系统
+
+- 搜索结果缓存：对高频 query 做结果缓存，并结合视频更新事件做失效
+- 搜索排序优化：综合标题匹配、标签、播放量、互动量、新鲜度进行排序
+- 搜索建议与纠错：支持 query suggestion、拼写纠错、同义词扩展
+- 索引一致性：完善 MQ 失败补偿、重试和全量重建流程，降低数据库与 ES 不一致风险
+
+### 缓存与性能
+
+- 多级缓存治理：继续完善 Caffeine + Redis 的命中率统计、主动预热和失效策略
+- 热点视频保护：对高播放、高互动视频做更细粒度的热点 key 保护
+- 接口限流与降级：对推荐、搜索、上传、评论等高频接口做限流、熔断和降级兜底
+- 慢查询治理：补充 SQL explain、索引检查和核心接口压测报告
+
+### 消息与异步链路
+
+- MQ 可观测性：增加消息状态面板，展示发送、消费、重试、死信和补偿情况
+- 消息幂等增强：将业务幂等 key 设计沉淀为统一组件，降低重复消费风险
+- 失败补偿任务：对搜索同步、通知推送、资源清理等链路做定时补偿
+
+### 文件与视频处理
+
+- 分片上传：支持大文件分片上传、断点续传、秒传和上传进度恢复
+- 视频转码：接入多清晰度转码，如 360p / 720p / 1080p
+- HLS 播放：将原始 mp4 播放升级为 HLS 切片播放，提高大视频播放体验
+- 封面与审核：自动抽帧、封面候选、基础内容审核流程
+
+### 安全与权限
+
+- RBAC 权限模型：区分普通用户、创作者、审核员、管理员等角色
+- 登录安全：增加刷新 token、验证码策略、登录失败限制和异地登录提醒
+- 内容风控：对评论、弹幕、投稿标题和描述增加敏感词与频控策略
+
+### 部署与工程化
+
+- Docker 镜像化：补齐后端、前端 Dockerfile，形成一键部署流程
+- CI/CD：增加 GitHub Actions，自动运行后端测试、前端测试和构建
+- 配置分层：区分 `dev`、`test`、`prod` profile，避免本地配置和生产配置混杂
+- 可观测性：接入日志 traceId、指标监控、接口耗时统计和错误告警
+- API 文档完善：补充接口示例、鉴权说明、错误码说明和核心业务流程图

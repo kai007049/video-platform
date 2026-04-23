@@ -43,7 +43,7 @@
 - Elasticsearch 搜索索引同步与全量重建
 - 推荐系统多路召回、打分、重排与曝光日志
 - WebSocket 鉴权与实时消息推送
-- seed generator 与 behavior simulator 测试工具链
+- seed generator 测试工具链
 
 ## 快速开始
 
@@ -116,38 +116,6 @@ mvn spring-boot:run "-Dspring-boot.run.arguments=--seed.enabled=true --seed.mode
 - 运行完成后会输出作者、用户、视频、观看、点赞、收藏、关注数量摘要并自动退出
 - 第一版只生成 seed 占位视频 URL，不包含真实媒体资源
 
-## Behavior Simulator Script
-
-如果你想快速批量模拟用户行为来测试推荐和热门，而不是手工逐个点击页面，可以使用：
-
-### Account login mode
-
-```bash
-python backend/scripts/simulate_behavior_profiles.py \
-  --base-url http://localhost:8080 \
-  --profile technology \
-  --accounts tech1:password:captchaKey:captchaValue \
-  --show-recommended \
-  --show-hot
-```
-
-### Token mode
-
-```bash
-python backend/scripts/simulate_behavior_profiles.py \
-  --base-url http://localhost:8080 \
-  --profile technology \
-  --tokens "$TOKEN_1" "$TOKEN_2" \
-  --show-recommended \
-  --show-hot
-```
-
-说明：
-- `--accounts` 与 `--tokens` 二选一
-- `--tokens` 模式会跳过 `/user/login`，直接调用 `GET /user/info` 获取真实用户名后构造会话
-- 推荐摘要按账号分别打印
-- 热门榜摘要会在整个批次结束后统一打印一次
-
 ## 当前能力边界
 
 ### 已完成 / 已落地
@@ -156,7 +124,7 @@ python backend/scripts/simulate_behavior_profiles.py \
 - 视频详情缓存体系
 - 通知落库与消息 WebSocket 推送
 - MQ 解耦的异步后置任务
-- seed generator 与 behavior simulator 已可用于本地推荐 / 热门验证
+- seed generator 已可用于本地推荐 / 热门验证
 
 ### 已设计 / 正在推进
 - 推荐结果缓存
@@ -164,14 +132,6 @@ python backend/scripts/simulate_behavior_profiles.py \
 - 更进一步的缓存命中率与一致性优化
 - 推荐反馈闭环与效果评估
 
-## 推荐阅读顺序
-
-如果你是第一次看这个 backend，建议按下面顺序读：
-
-1. [系统架构说明](src/main/resources/SYSTEM_ARCHITECTURE.md)
-2. [推荐系统架构说明](src/main/resources/RECOMMENDATION_ARCHITECTURE.md)
-3. [缓存策略说明](src/main/resources/CACHE_STRATEGY.md)
-4. [行为模拟脚本说明](scripts/README-behavior-simulator.md)
 
 ## 总结
 

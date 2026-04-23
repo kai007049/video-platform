@@ -18,16 +18,10 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 
-# Python
-agent-service/.venv/
-agent-service/venv/
-agent-service/__pycache__/
-agent-service/**/*.pyc
-agent-service/**/__pycache__/
-
 # Local data
 backend/src/main/resources/docker/minio_data/
 backend/src/main/resources/docker/es_data/
+backend/src/main/resources/md/
 src/main/resources/docker/minio_data/
 src/main/resources/docker/es_data/
 
@@ -35,6 +29,7 @@ src/main/resources/docker/es_data/
 .env
 .env.*
 frontend/.env
+frontend/node_modules
 frontend/.env.*
 agent-service/.env
 agent-service/.env.*
@@ -47,3 +42,10 @@ agent-service/app/evals/__pycache__/
 
 # Claude / worktrees
 .worktrees/
+.claude/
+docs/
+backend/src/main/resources/docker/minio/
+backend/src/main/resources/application-local.yaml
+backend/src/main/resources/application-*.local.yaml
+backend/*.sql
+!backend/src/main/resources/db/*.sql

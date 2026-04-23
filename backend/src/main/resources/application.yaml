@@ -6,9 +6,9 @@ spring:
     name: video-platform
 
   datasource:
-    url: jdbc:mysql://localhost:3306/bilibili?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: root
-    password: 123456
+    url: jdbc:mysql://localhost:3306/video_platform?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20
@@ -26,9 +26,9 @@ spring:
           min-idle: 0
 
   elasticsearch:
-    uris: http://localhost:9200
-    username: elastic
-    password: 123456
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:123456}
 
   servlet:
     multipart:
@@ -52,14 +52,14 @@ mybatis-plus:
 
 # JWT
 jwt:
-  secret: your-256-bit-secret-key-for-jwt-signature-must-be-long-enough
-  expiration: 86400000  # 24 hours in ms
+  secret: ${JWT_SECRET:change-me-to-a-long-random-secret-before-production}
+  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours in ms
 
 # MinIO
 minio:
-  endpoint: http://localhost:9000
-  access-key: admin
-  secret-key: 12345678
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:admin}
+  secret-key: ${MINIO_SECRET_KEY:12345678}
   bucket-video: video
   bucket-cover: cover
   bucket-avatar: avatar
@@ -94,9 +94,9 @@ logging:
     org.springframework.web: warn
 
 
-# ffmpeg下载路径
+# ffmpeg 可执行文件路径
 ffmpeg:
-  path: "D:/app包/ffmpeg/ffmpeg-8.0.1-full_build/ffmpeg-8.0.1-full_build/bin/ffmpeg.exe"
+  path: ${FFMPEG_PATH:ffmpeg}
 
 video:
   search:

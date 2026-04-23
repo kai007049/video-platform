@@ -1,5 +1,35 @@
--- 仿 Bilibili 视频平台数据库建表语句
+--  Video Platform database initialization script
 -- MySQL 8.0+
+-- Execute from repository root with:
+--   mysql -u root -p < backend/src/main/resources/db/schema.sql
+
+CREATE DATABASE IF NOT EXISTS video_platform
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE video_platform;
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS rec_exposure_log;
+DROP TABLE IF EXISTS user_interest_tag;
+DROP TABLE IF EXISTS video_tag_feature;
+DROP TABLE IF EXISTS video_tag;
+DROP TABLE IF EXISTS tag;
+DROP TABLE IF EXISTS favorite;
+DROP TABLE IF EXISTS follow;
+DROP TABLE IF EXISTS watch_history;
+DROP TABLE IF EXISTS notification;
+DROP TABLE IF EXISTS message;
+DROP TABLE IF EXISTS danmu;
+DROP TABLE IF EXISTS video_like;
+DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS video;
+DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS user;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 
 
