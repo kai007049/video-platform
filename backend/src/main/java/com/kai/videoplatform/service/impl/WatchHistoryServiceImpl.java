@@ -1,0 +1,102 @@
+package com.kai.videoplatform.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.kai.videoplatform.entity.WatchHistory;
+import com.kai.videoplatform.common.RedisConstants;
+import com.kai.videoplatform.mapper.WatchHistoryMapper;
+import com.kai.videoplatform.service.RecommendationFeatureService;
+import com.kai.videoplatform.service.WatchHistoryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class WatchHistoryServiceImpl implements WatchHistoryService {
+
+    private static final String WATCH_PROGRESS_KEY_PREFIX = RedisConstants.VIDEO_WATCH_PROGRESS_KEY_PREFIX;
+    private static final long WATCH_PROGRESS_EXPIRE_DAYS = RedisConstants.VIDEO_WATCH_PROGRESS_EXPIRE_DAYS;
+
+    private final WatchHistoryMapper watchHistoryMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RecommendationFeatureService recommendationFeatureService;
+
+    @Override
+    public void saveProgress(Long userId, Long videoId, int watchSeconds) {
+        if (userId == null) return;
+
+        Integer previousWatchSeconds = getLastWatchSeconds(userId, videoId);
+        int safeWatchSeconds = Math.max(0, watchSeconds);
+        // 仅对本次新增观看时长计入兴趣画像，避免重复上报同一进度导致兴趣权重被放大。
+        int watchDeltaSeconds = previousWatchSeconds == null ? safeWatchSeconds : Math.max(0, safeWatchSeconds - previousWatchSeconds);
+
+        // 先尝试按唯一键更新，避免并发场景下“先查再插”触发重复插入。
+        int updated = updateExistingProgress(userId, videoId, safeWatchSeconds);
+        if (updated == 0) {
+            try {
+                WatchHistory history = new WatchHistory();
+                history.setUserId(userId);
+                history.setVideoId(videoId);
+                history.setWatchSeconds(safeWatchSeconds);
+                watchHistoryMapper.insert(history);
+            } catch (DuplicateKeyException ex) {
+                // 并发下可能有别的请求已插入成功，这里回退为更新即可。
+                updateExistingProgress(userId, videoId, safeWatchSeconds);
+            }
+        }
+
+        String key = WATCH_PROGRESS_KEY_PREFIX + userId;
+        redisTemplate.opsForHash().put(key, String.valueOf(videoId), safeWatchSeconds);
+        redisTemplate.expire(key, WATCH_PROGRESS_EXPIRE_DAYS, java.util.concurrent.TimeUnit.DAYS);
+
+        if (watchDeltaSeconds <= 0) {
+            return;
+        }
+        double delta = Math.max(0.2D, Math.min(watchDeltaSeconds / 120.0D, 2.0D));
+        recommendationFeatureService.increaseUserInterestByVideo(userId, videoId, delta);
+    }
+
+    @Override
+    public Integer getLastWatchSeconds(Long userId, Long videoId) {
+        if (userId == null) return null;
+        String key = WATCH_PROGRESS_KEY_PREFIX + userId;
+        Object cached = redisTemplate.opsForHash().get(key, String.valueOf(videoId));
+        if (cached != null) {
+            if (cached instanceof Number) {
+                return ((Number) cached).intValue();
+            }
+            try {
+                return Integer.parseInt(cached.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        WatchHistory h = watchHistoryMapper.selectOne(
+                new LambdaQueryWrapper<WatchHistory>()
+                        .eq(WatchHistory::getUserId, userId)
+                        .eq(WatchHistory::getVideoId, videoId));
+        if (h != null) {
+            redisTemplate.opsForHash().put(key, String.valueOf(videoId), h.getWatchSeconds());
+            redisTemplate.expire(key, WATCH_PROGRESS_EXPIRE_DAYS, java.util.concurrent.TimeUnit.DAYS);
+            return h.getWatchSeconds();
+        }
+        return null;
+    }
+
+    @Override
+    public void recordWatch(Long userId, Long videoId, int watchSeconds) {
+        saveProgress(userId, videoId, watchSeconds);
+    }
+
+    private int updateExistingProgress(Long userId, Long videoId, int watchSeconds) {
+        WatchHistory update = new WatchHistory();
+        update.setWatchSeconds(watchSeconds);
+        return watchHistoryMapper.update(
+                update,
+                new LambdaQueryWrapper<WatchHistory>()
+                        .eq(WatchHistory::getUserId, userId)
+                        .eq(WatchHistory::getVideoId, videoId)
+        );
+    }
+}
