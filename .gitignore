@@ -43,6 +43,7 @@ agent-service/app/evals/__pycache__/
 # Claude / worktrees
 .worktrees/
 .claude/
+docs/superpowers/
 backend/src/main/resources/docker/minio/
 backend/src/main/resources/application-local.yaml
 backend/src/main/resources/application-*.local.yaml
