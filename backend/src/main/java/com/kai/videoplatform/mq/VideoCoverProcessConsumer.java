@@ -4,6 +4,7 @@ import com.kai.videoplatform.common.MqTopics;
 import com.kai.videoplatform.model.mq.VideoProcessMessage;
 import com.kai.videoplatform.service.impl.MqReliabilityService;
 import com.kai.videoplatform.service.impl.VideoCoverProcessService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
         consumerGroup = "video-cover-process-consumer",
         maxReconsumeTimes = 5
 )
+@Schema(description = "视频封面处理消费者")
 public class VideoCoverProcessConsumer implements RocketMQListener<VideoProcessMessage> {
 
     private final VideoCoverProcessService videoCoverProcessService;

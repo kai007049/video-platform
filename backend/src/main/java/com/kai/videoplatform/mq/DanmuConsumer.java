@@ -3,6 +3,7 @@ package com.kai.videoplatform.mq;
 import com.kai.videoplatform.common.MqTopics;
 import com.kai.videoplatform.model.mq.DanmuMessage;
 import com.kai.videoplatform.service.impl.MqReliabilityService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
         consumerGroup = "danmu-process-consumer",
         maxReconsumeTimes = 5
 )
+@Schema(description = "弹幕处理消费者")
 public class DanmuConsumer implements RocketMQListener<DanmuMessage> {
 
     private final MqReliabilityService mqReliabilityService;

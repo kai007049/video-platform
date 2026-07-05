@@ -50,6 +50,15 @@ class MqReliabilityServiceTest {
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         lenient().when(redisTemplate.opsForHash()).thenReturn(null);
         when(redisTemplate.hasKey(anyString())).thenAnswer(invocation -> kvStore.containsKey(invocation.getArgument(0)));
+        lenient().when(redisTemplate.delete(anyString())).thenAnswer(invocation -> {
+            kvStore.remove(invocation.getArgument(0));
+            return true;
+        });
+        lenient().when(valueOperations.setIfAbsent(anyString(), any(), any(Duration.class))).thenAnswer(invocation -> {
+            String key = invocation.getArgument(0);
+            Object value = invocation.getArgument(1);
+            return kvStore.putIfAbsent(key, value) == null;
+        });
         lenient().doAnswer(invocation -> {
             kvStore.put(invocation.getArgument(0), invocation.getArgument(1));
             return null;
@@ -73,6 +82,22 @@ class MqReliabilityServiceTest {
         mqReliabilityService.consumeWithIdempotency(MqTopics.SEARCH_SYNC, duplicate, handled::incrementAndGet);
 
         assertThat(handled.get()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldSkipDuplicateWhileProcessingLockIsHeld() {
+        SearchSyncMessage message = new SearchSyncMessage("video", 10L, "update");
+        setField(message, "eventId", "evt-processing");
+        setField(message, "bizKey", "search:video:10:update");
+        setField(message, "eventType", "update");
+
+        String processingKey = "mq:consume:done:processing:biz:search_sync:search:video:10:update";
+        kvStore.put(processingKey, "1");
+
+        AtomicInteger handled = new AtomicInteger();
+        mqReliabilityService.consumeWithIdempotency(MqTopics.SEARCH_SYNC, message, handled::incrementAndGet);
+
+        assertThat(handled.get()).isZero();
     }
 
     @Test

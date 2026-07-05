@@ -25,6 +25,11 @@ public class VideoUploadDTO {
     private String description;
 
     /**
+     * 上传会话 ID
+     */
+    private String uploadSessionId;
+
+    /**
      * 上传视频文件
      */
     @NotNull(message = "视频文件不能为空")

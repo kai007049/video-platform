@@ -8,6 +8,7 @@ import com.kai.videoplatform.mapper.VideoMapper;
 import com.kai.videoplatform.model.mq.NotifyMessage;
 import com.kai.videoplatform.service.NotificationService;
 import com.kai.videoplatform.service.impl.MqReliabilityService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -23,6 +24,7 @@ import org.springframework.util.StringUtils;
         consumerGroup = "notify-event-consumer",
         maxReconsumeTimes = 5
 )
+@Schema(description = "通知消息消费者")
 public class NotifyConsumer implements RocketMQListener<NotifyMessage> {
 
     private final NotificationService notificationService;

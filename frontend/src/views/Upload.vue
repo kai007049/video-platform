@@ -9,9 +9,9 @@
         </div>
       </div>
       <div class="header-right">
-        <div v-if="videoFile" class="file-badge">
+        <div v-if="uploadSession" class="session-badge">
           <span class="badge-dot"></span>
-          已选择视频
+          会话 {{ uploadSession.status }} · {{ uploadSession.progress ?? 0 }}%
         </div>
       </div>
     </div>
@@ -19,23 +19,11 @@
     <form class="upload-layout" @submit.prevent="submit">
       <div class="left-panel">
         <div class="panel-card">
-          <div class="card-header">
-            <span class="card-icon">🎬</span>
-            <span class="card-title">视频文件</span>
-          </div>
-          <div
-            class="video-drop-zone"
-            :class="{ dragging: isVideoDragging, 'has-file': !!videoFile }"
-            @click="videoInput?.click()"
-            @dragover.prevent="onDragOver"
-            @dragleave.prevent="onDragLeave"
-            @drop="onDropVideo"
-          >
+          <div class="card-header"><span class="card-icon">🎬</span><span class="card-title">视频文件</span></div>
+          <div class="video-drop-zone" :class="{ dragging: isVideoDragging, 'has-file': !!videoFile }" @click="videoInput?.click()" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop="onDropVideo">
             <input ref="videoInput" type="file" accept="video/*" hidden @change="onVideoChange" />
             <div v-if="!videoFile" class="drop-idle">
-              <div class="drop-circle">
-                <span class="drop-plus">+</span>
-              </div>
+              <div class="drop-circle"><span class="drop-plus">+</span></div>
               <p class="drop-main">点击或拖拽视频到此处</p>
               <p class="drop-sub">支持 MP4、AVI、MOV 等常见格式</p>
             </div>
@@ -51,16 +39,8 @@
         </div>
 
         <div class="panel-card">
-          <div class="card-header">
-            <span class="card-icon">🖼️</span>
-            <span class="card-title">封面图片</span>
-            <span class="card-tip">建议 16:9</span>
-          </div>
-          <div
-            class="cover-drop-zone"
-            :class="{ 'has-cover': !!coverFile }"
-            @click="coverInput?.click()"
-          >
+          <div class="card-header"><span class="card-icon">🖼️</span><span class="card-title">封面图片</span><span class="card-tip">建议 16:9</span></div>
+          <div class="cover-drop-zone" :class="{ 'has-cover': !!coverFile }" @click="coverInput?.click()">
             <input ref="coverInput" type="file" accept="image/*" hidden @change="onCoverChange" />
             <div v-if="!coverFile" class="cover-idle">
               <div class="cover-icon">📷</div>
@@ -69,9 +49,7 @@
             </div>
             <div v-else class="cover-selected">
               <img :src="coverPreviewUrl" class="cover-preview" alt="封面预览" />
-              <div class="cover-overlay">
-                <span>更换封面</span>
-              </div>
+              <div class="cover-overlay"><span>更换封面</span></div>
             </div>
           </div>
         </div>
@@ -84,91 +62,30 @@
 
       <div class="right-panel">
         <div class="panel-card">
-          <div class="card-header">
-            <span class="card-icon">✏️</span>
-            <span class="card-title">视频标题</span>
-          </div>
-          <div class="input-with-btn">
-            <input
-              v-model.trim="form.title"
-              class="form-input"
-              type="text"
-              maxlength="80"
-              placeholder="请输入清晰准确的视频标题"
-            />
-          </div>
+          <div class="card-header"><span class="card-icon">✏️</span><span class="card-title">视频标题</span></div>
+          <input v-model.trim="form.title" class="form-input" type="text" maxlength="80" placeholder="请输入清晰准确的视频标题" />
         </div>
 
         <div class="panel-card">
-          <div class="card-header">
-            <span class="card-icon">📝</span>
-            <span class="card-title">视频简介</span>
-          </div>
-          <div class="textarea-group">
-            <textarea
-              v-model.trim="form.description"
-              class="form-textarea"
-              rows="4"
-              maxlength="500"
-              placeholder="请填写视频亮点、信息来源或观看提示"
-            />
-            <button
-              type="button"
-              class="ai-btn ai-btn-sm"
-              :disabled="loadingSuggest"
-              @click="recommendTags"
-            >
-              <span>✨</span>
-              <span>{{ loadingSuggest ? '生成中...' : '智能推荐' }}</span>
-            </button>
-          </div>
+          <div class="card-header"><span class="card-icon">📝</span><span class="card-title">视频简介</span></div>
+          <textarea v-model.trim="form.description" class="form-textarea" rows="4" maxlength="500" placeholder="请填写视频亮点、信息来源或观看提示" />
         </div>
 
         <div class="panel-card">
           <div class="card-header card-header--stacked">
-            <div class="card-header-main">
-              <span class="card-icon">📂</span>
-              <span class="card-title">分类选择</span>
-              <span v-if="selectedCategoryLabel" class="card-selected-label">{{ selectedCategoryLabel }}</span>
-            </div>
-            <p v-if="categoryHintText" class="card-helper-text">{{ categoryHintText }}</p>
+            <div class="card-header-main"><span class="card-icon">📂</span><span class="card-title">分类选择</span></div>
           </div>
-
           <div v-if="parentCategories.length > 0" class="category-section">
             <div class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">一级分区</span>
-              </div>
+              <div class="tag-group-header"><span class="tag-group-label">一级分区</span></div>
               <div class="tag-list">
-                <button
-                  v-for="parent in parentCategories"
-                  :key="parent.id"
-                  type="button"
-                  class="tag-chip category-chip"
-                  :class="{ active: selectedParentCategoryId === parent.id }"
-                  @click="selectParentCategory(parent)"
-                >
-                  {{ parent.name }}
-                </button>
+                <button v-for="parent in parentCategories" :key="parent.id" type="button" class="tag-chip category-chip" :class="{ active: selectedParentCategoryId === parent.id }" @click="selectParentCategory(parent)">{{ parent.name }}</button>
               </div>
             </div>
-
             <div v-if="activeChildCategories.length > 0" class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">二级分区（推荐）</span>
-                <button type="button" class="link-btn" @click="selectCurrentParentAsCategory">直接使用一级分类</button>
-              </div>
+              <div class="tag-group-header"><span class="tag-group-label">二级分区（推荐）</span><button type="button" class="link-btn" @click="selectCurrentParentAsCategory">直接使用一级分类</button></div>
               <div class="tag-list">
-                <button
-                  v-for="child in activeChildCategories"
-                  :key="child.id"
-                  type="button"
-                  class="tag-chip"
-                  :class="{ active: form.categoryId === child.id }"
-                  @click="selectChildCategory(child)"
-                >
-                  {{ child.name }}
-                </button>
+                <button v-for="child in activeChildCategories" :key="child.id" type="button" class="tag-chip" :class="{ active: form.categoryId === child.id }" @click="selectChildCategory(child)">{{ child.name }}</button>
               </div>
             </div>
           </div>
@@ -176,93 +93,34 @@
         </div>
 
         <div class="panel-card">
-          <div class="card-header">
-            <span class="card-icon">🏷️</span>
-            <span class="card-title">标签</span>
-            <span v-if="selectedTags.length > 0" class="card-count">已选 {{ selectedTags.length }}</span>
-          </div>
-
+          <div class="card-header"><span class="card-icon">🏷️</span><span class="card-title">标签</span><span v-if="selectedTags.length > 0" class="card-count">已选 {{ selectedTags.length }}</span></div>
           <div v-if="tags.length > 0" class="tag-section">
             <div v-if="selectedTags.length > 0" class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">已选标签</span>
-                <button type="button" class="clear-btn" @click="form.tagIds = []">清空</button>
-              </div>
+              <div class="tag-group-header"><span class="tag-group-label">已选标签</span><button type="button" class="clear-btn" @click="form.tagIds = []">清空</button></div>
               <div class="tag-list">
-                <button
-                  v-for="tag in selectedTags"
-                  :key="`selected-${tag.id}`"
-                  type="button"
-                  class="tag-chip active"
-                  @click="toggleTag(tag.id)"
-                >
-                  {{ tag.name }} ✕
-                </button>
+                <button v-for="tag in selectedTags" :key="`selected-${tag.id}`" type="button" class="tag-chip active" @click="toggleTag(tag.id)">{{ tag.name }} ✕</button>
               </div>
             </div>
-
             <div v-if="recommendedTags.length > 0" class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label ai-label">智能推荐</span>
-              </div>
+              <div class="tag-group-header"><span class="tag-group-label ai-label">智能推荐</span></div>
               <div class="tag-list">
-                <button
-                  v-for="tag in recommendedTags"
-                  :key="`recommended-${tag.id}`"
-                  type="button"
-                  class="tag-chip suggested"
-                  @click="toggleTag(tag.id)"
-                >
-                  {{ tag.name }}
-                </button>
+                <button v-for="tag in recommendedTags" :key="`recommended-${tag.id}`" type="button" class="tag-chip suggested" @click="toggleTag(tag.id)">{{ tag.name }}</button>
               </div>
             </div>
-
             <div v-if="categoryRelatedTags.length > 0" class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">当前分类相关标签</span>
-              </div>
+              <div class="tag-group-header"><span class="tag-group-label">当前分类相关标签</span></div>
               <div class="tag-list">
-                <button
-                  v-for="tag in categoryRelatedTags"
-                  :key="`category-${tag.id}`"
-                  type="button"
-                  class="tag-chip"
-                  @click="toggleTag(tag.id)"
-                >
-                  {{ tag.name }}
-                </button>
+                <button v-for="tag in categoryRelatedTags" :key="`category-${tag.id}`" type="button" class="tag-chip" @click="toggleTag(tag.id)">{{ tag.name }}</button>
               </div>
             </div>
-
             <div class="tag-group">
-              <div class="tag-group-header">
-                <span class="tag-group-label">更多标签</span>
-                <button v-if="hasMoreTags" type="button" class="expand-btn" @click="showAllTags = !showAllTags">
-                  {{ showAllTags ? '▲ 收起' : '▼ 展开更多' }}
-                </button>
-              </div>
-              <input
-                v-model.trim="tagKeyword"
-                class="form-input tag-search"
-                type="text"
-                maxlength="20"
-                placeholder="🔍 搜索标签..."
-              />
-
+              <div class="tag-group-header"><span class="tag-group-label">更多标签</span><button v-if="hasMoreTags" type="button" class="expand-btn" @click="showAllTags = !showAllTags">{{ showAllTags ? '▲ 收起' : '▼ 展开更多' }}</button></div>
+              <input v-model.trim="tagKeyword" class="form-input tag-search" type="text" maxlength="20" placeholder="🔍 搜索标签..." />
               <div v-if="groupedMoreTags.length > 0" class="tag-group-list">
                 <div v-for="group in groupedMoreTags" :key="group.key" class="nested-tag-group">
                   <p class="nested-tag-group-label">{{ group.label }}</p>
                   <div class="tag-list">
-                    <button
-                      v-for="tag in group.tags"
-                      :key="`${group.key}-${tag.id}`"
-                      type="button"
-                      class="tag-chip"
-                      @click="toggleTag(tag.id)"
-                    >
-                      {{ tag.name }}
-                    </button>
+                    <button v-for="tag in group.tags" :key="`${group.key}-${tag.id}`" type="button" class="tag-chip" @click="toggleTag(tag.id)">{{ tag.name }}</button>
                   </div>
                 </div>
               </div>
@@ -273,16 +131,10 @@
         </div>
 
         <div class="submit-section">
-          <p v-if="error" class="error-msg">
-            <span>⚠️</span>
-            {{ error }}
-          </p>
+          <p v-if="error" class="error-msg"><span>⚠️</span>{{ error }}</p>
           <div class="submit-row">
             <button type="button" class="cancel-btn" @click="$router.back()">取消</button>
-            <button class="submit-btn" type="submit" :disabled="loading">
-              <span v-if="loading" class="btn-spinner"></span>
-              <span>{{ loading ? '上传中...' : '立即投稿 🚀' }}</span>
-            </button>
+            <button class="submit-btn" type="submit" :disabled="loading"><span v-if="loading" class="btn-spinner"></span><span>{{ loading ? '上传中...' : '立即投稿 🚀' }}</span></button>
           </div>
         </div>
       </div>
@@ -293,21 +145,17 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { uploadVideo } from '../api/video'
+import { createUploadSession, uploadVideo, updateUploadSessionProgress } from '../api/video'
 import { getCategoryTree } from '../api/category'
-import { getTagList, recommendTags as recommendTagsApi } from '../api/tag'
+import { getTagList } from '../api/tag'
 import { validateUploadForm } from './uploadValidation'
-import {
-  buildUploadTagSections,
-  resolveCategorySelectionState
-} from './uploadTagCategoryState.js'
+import { buildUploadTagSections, resolveCategorySelectionState } from './uploadTagCategoryState.js'
 
 const router = useRouter()
 const videoInput = ref(null)
 const coverInput = ref(null)
 const loading = ref(false)
 const error = ref('')
-const loadingSuggest = ref(false)
 const isVideoDragging = ref(false)
 const videoFile = ref(null)
 const coverFile = ref(null)
@@ -319,6 +167,7 @@ const tagKeyword = ref('')
 const showAllTags = ref(false)
 const aiSuggestedTagIds = ref([])
 const defaultVisibleTagCount = 18
+const uploadSession = ref(null)
 
 const form = reactive({
   title: '',
@@ -328,16 +177,13 @@ const form = reactive({
 })
 
 const parentCategories = computed(() => categories.value || [])
-
 const categoryState = computed(() => resolveCategorySelectionState({
   categories: parentCategories.value,
   selectedParentCategoryId: selectedParentCategoryId.value,
   categoryId: form.categoryId
 }))
-
-const selectedCategoryLabel = computed(() => categoryState.value.selectedCategoryLabel)
 const activeChildCategories = computed(() => categoryState.value.activeChildCategories)
-const categoryHintText = computed(() => categoryState.value.categoryHintText)
+const selectedCategoryLabel = computed(() => categoryState.value.selectedCategoryLabel)
 
 const tagSections = computed(() => buildUploadTagSections({
   tags: tags.value,
@@ -355,27 +201,17 @@ const categoryRelatedTags = computed(() => tagSections.value.categoryTags)
 const groupedMoreTags = computed(() => tagSections.value.moreTagGroups)
 const hasMoreTags = computed(() => tagSections.value.hasMoreTags)
 
-function resetCategoryDerivedState() {
-  aiSuggestedTagIds.value = []
-  tagKeyword.value = ''
-  showAllTags.value = false
+function prettySize(bytes = 0) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`
 }
 
-function syncSelectedCategory(categoryId) {
-  if (!categoryId) {
-    selectedParentCategoryId.value = null
-    form.categoryId = ''
-    return
-  }
-
-  const resolvedState = resolveCategorySelectionState({
-    categories: parentCategories.value,
-    selectedParentCategoryId: selectedParentCategoryId.value,
-    categoryId
-  })
-
-  selectedParentCategoryId.value = resolvedState.selectedParentCategoryId
-  form.categoryId = categoryId
+function toggleTag(tagId) {
+  const idx = form.tagIds.indexOf(tagId)
+  if (idx >= 0) form.tagIds.splice(idx, 1)
+  else form.tagIds.push(tagId)
 }
 
 function selectParentCategory(parent) {
@@ -393,30 +229,6 @@ function selectCurrentParentAsCategory() {
   }
 }
 
-watch(
-  () => form.categoryId,
-  (newCategoryId, oldCategoryId) => {
-    if (!oldCategoryId || newCategoryId === oldCategoryId) {
-      return
-    }
-
-    resetCategoryDerivedState()
-  }
-)
-
-function prettySize(bytes = 0) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-  return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`
-}
-
-function toggleTag(tagId) {
-  const idx = form.tagIds.indexOf(tagId)
-  if (idx >= 0) form.tagIds.splice(idx, 1)
-  else form.tagIds.push(tagId)
-}
-
 function onVideoChange(e) {
   videoFile.value = e.target.files?.[0] || null
 }
@@ -424,11 +236,7 @@ function onVideoChange(e) {
 function onCoverChange(e) {
   const file = e.target.files?.[0] || null
   coverFile.value = file
-  if (file) {
-    coverPreviewUrl.value = URL.createObjectURL(file)
-  } else {
-    coverPreviewUrl.value = ''
-  }
+  coverPreviewUrl.value = file ? URL.createObjectURL(file) : ''
 }
 
 function onDragOver() {
@@ -455,7 +263,6 @@ function onDropVideo(e) {
 async function loadCategories() {
   try {
     categories.value = await getCategoryTree()
-    syncSelectedCategory(form.categoryId)
     if (!selectedParentCategoryId.value && parentCategories.value.length > 0) {
       selectedParentCategoryId.value = parentCategories.value[0].id
     }
@@ -472,25 +279,12 @@ async function loadTags() {
   }
 }
 
-async function recommendTags() {
-  if (!form.title.trim() && !form.description.trim()) {
-    error.value = '请先填写标题或简介，再获取推荐标签'
-    return
-  }
-  loadingSuggest.value = true
-  error.value = ''
-  try {
-    const ids = await recommendTagsApi({
-      title: form.title || '',
-      description: form.description || ''
-    })
-    aiSuggestedTagIds.value = Array.isArray(ids) ? [...new Set(ids)] : []
-  } catch (e) {
-    error.value = e.message || '推荐标签失败'
-  } finally {
-    loadingSuggest.value = false
-  }
-}
+watch(() => form.categoryId, (newCategoryId, oldCategoryId) => {
+  if (!oldCategoryId || newCategoryId === oldCategoryId) return
+  aiSuggestedTagIds.value = []
+  tagKeyword.value = ''
+  showAllTags.value = false
+})
 
 async function submit() {
   error.value = ''
@@ -508,13 +302,25 @@ async function submit() {
 
   loading.value = true
   try {
+    uploadSession.value = await createUploadSession({
+      fileName: videoFile.value.name,
+      fileSize: videoFile.value.size,
+      fileHash: `${videoFile.value.name}:${videoFile.value.size}`
+    })
+
     const fd = new FormData()
+    fd.append('uploadSessionId', uploadSession.value.sessionId)
     fd.append('video', videoFile.value)
     if (coverFile.value) fd.append('cover', coverFile.value)
     fd.append('title', form.title.trim())
     fd.append('description', form.description.trim())
     fd.append('categoryId', String(form.categoryId))
     form.tagIds.forEach(tagId => fd.append('tagIds', String(tagId)))
+
+    await updateUploadSessionProgress(uploadSession.value.sessionId, {
+      uploadedBytes: videoFile.value.size,
+      progress: 100
+    })
 
     const res = await uploadVideo(fd)
     alert('上传成功')
@@ -533,771 +339,49 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.upload-page {
-  min-height: 100vh;
-  background: #f8fafc;
-  padding: 32px 40px 48px;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.header-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.2);
-  flex-shrink: 0;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  color: #1f2937;
-  line-height: 1.2;
-}
-
-.page-subtitle {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: #94a3b8;
-  font-weight: 400;
-}
-
-.file-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #16a34a;
-}
-
-.badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  animation: pulse-dot 1.5s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.85); }
-}
-
-.upload-layout {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 24px;
-  align-items: start;
-}
-
-.left-panel,
-.right-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.panel-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.25s;
-}
-
-.panel-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.card-header--stacked {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-}
-
-.card-header-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-icon {
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #1f2937;
-  flex: 1;
-}
-
-.card-tip {
-  font-size: 11px;
-  color: #94a3b8;
-  background: #f1f5f9;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-.card-count {
-  font-size: 12px;
-  color: #4f46e5;
-  background: #eef2ff;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-weight: 600;
-}
-
-.card-selected-label {
-  font-size: 12px;
-  color: #16a34a;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-weight: 600;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.card-helper-text {
-  margin: 0;
-  font-size: 12px;
-  color: #64748b;
-}
-
-.video-drop-zone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  background: #f8fafc;
-  min-height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s;
-  padding: 20px;
-}
-
-.video-drop-zone:hover,
-.video-drop-zone.dragging {
-  border-color: #374151;
-  background: #f1f5f9;
-  box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.08);
-}
-
-.video-drop-zone.has-file {
-  border-style: solid;
-  border-color: #d1d5db;
-  background: #ffffff;
-}
-
-.drop-idle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
-}
-
-.drop-circle {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.25);
-}
-
-.drop-plus {
-  color: #ffffff;
-  font-size: 28px;
-  line-height: 1;
-  font-weight: 300;
-}
-
-.drop-main {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.drop-sub {
-  margin: 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.drop-selected {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
-.file-icon-wrap {
-  font-size: 32px;
-  flex-shrink: 0;
-}
-
-.file-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.file-name {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1f2937;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-size {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.file-remove {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #94a3b8;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.file-remove:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-  color: #dc2626;
-}
-
-.cover-drop-zone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  background: #f8fafc;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s;
-  overflow: hidden;
-  position: relative;
-}
-
-.cover-drop-zone:hover {
-  border-color: #374151;
-  background: #f1f5f9;
-}
-
-.cover-drop-zone.has-cover {
-  border-style: solid;
-  border-color: #d1d5db;
-  min-height: 160px;
-}
-
-.cover-idle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  padding: 20px;
-}
-
-.cover-icon {
-  font-size: 28px;
-}
-
-.cover-main {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.cover-sub {
-  margin: 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.cover-selected {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  min-height: 160px;
-}
-
-.cover-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  min-height: 160px;
-}
-
-.cover-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.cover-drop-zone:hover .cover-overlay {
-  opacity: 1;
-}
-
-.upload-progress-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.progress-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #374151;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.progress-text {
-  font-size: 13px;
-  color: #475569;
-  font-weight: 500;
-}
-
-.form-input {
-  width: 100%;
-  height: 42px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8fafc;
-  color: #1f2937;
-  font-size: 14px;
-  padding: 0 14px;
-  transition: all 0.2s;
-  box-sizing: border-box;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #374151;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.08);
-}
-
-.form-textarea {
-  width: 100%;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8fafc;
-  color: #1f2937;
-  font-size: 14px;
-  padding: 12px 14px;
-  transition: all 0.2s;
-  resize: vertical;
-  min-height: 96px;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.form-textarea:focus {
-  outline: none;
-  border-color: #374151;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.08);
-}
-
-.input-with-btn {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.input-with-btn .form-input {
-  flex: 1;
-}
-
-.textarea-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ai-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 16px;
-  height: 42px;
-  border-radius: 10px;
-  border: 1.5px solid #d1d5db;
-  background: #ffffff;
-  color: #374151;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.ai-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  border-color: transparent;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.2);
-  transform: translateY(-1px);
-}
-
-.ai-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.ai-btn-sm {
-  align-self: flex-end;
-  height: 38px;
-  padding: 0 14px;
-  font-size: 12px;
-}
-
-.tag-section,
-.category-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.tag-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.tag-group-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.tag-group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.tag-group-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.tag-group-label.ai-label {
-  color: #7c3aed;
-}
-
-.clear-btn {
-  border: none;
-  background: transparent;
-  color: #94a3b8;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.2s;
-}
-
-.clear-btn:hover {
-  color: #dc2626;
-}
-
-.link-btn {
-  border: none;
-  background: transparent;
-  color: #4f46e5;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 0;
-}
-
-.link-btn:hover {
-  color: #3730a3;
-}
-
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag-search {
-  height: 36px;
-  font-size: 13px;
-}
-
-.tag-chip {
-  border: 1.5px solid #e2e8f0;
-  border-radius: 999px;
-  background: #f8fafc;
-  color: #475569;
-  font-size: 13px;
-  height: 30px;
-  padding: 0 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
-}
-
-.tag-chip:hover {
-  border-color: #374151;
-  color: #1f2937;
-  background: #f1f5f9;
-}
-
-.tag-chip.active {
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  border-color: transparent;
-  color: #ffffff;
-  box-shadow: 0 2px 6px rgba(31, 41, 55, 0.2);
-}
-
-.tag-chip.suggested {
-  border-color: #c4b5fd;
-  color: #7c3aed;
-  background: #f5f3ff;
-}
-
-.tag-chip.suggested:hover {
-  background: #ede9fe;
-  border-color: #a78bfa;
-}
-
-.category-chip {
-  font-weight: 700;
-}
-
-.expand-btn {
-  border: none;
-  background: transparent;
-  color: #64748b;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 0;
-  transition: color 0.2s;
-  font-weight: 500;
-}
-
-.expand-btn:hover {
-  color: #1f2937;
-}
-
-.nested-tag-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.nested-tag-group-label {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.submit-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.error-msg {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
-  color: #dc2626;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.submit-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.cancel-btn {
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 10px;
-  border: 1.5px solid #e2e8f0;
-  background: #ffffff;
-  color: #475569;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.cancel-btn:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-  color: #1f2937;
-}
-
-.submit-btn {
-  height: 44px;
-  padding: 0 32px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.2);
-}
-
-.submit-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(31, 41, 55, 0.3);
-  transform: translateY(-1px);
-}
-
-.submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-.empty-tip {
-  margin: 0;
-  color: #94a3b8;
-  font-size: 13px;
-}
-
-@media (max-width: 900px) {
-  .upload-page {
-    padding: 20px 16px 32px;
-  }
-
-  .upload-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .input-with-btn {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .ai-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .ai-btn-sm {
-    align-self: stretch;
-  }
-
-  .submit-row {
-    flex-direction: column-reverse;
-  }
-
-  .cancel-btn,
-  .submit-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
+.upload-page { min-height: 100vh; background: #f8fafc; padding: 32px 40px 48px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(31, 41, 55, 0.2); flex-shrink: 0; }
+.page-title { margin: 0; font-size: 24px; font-weight: 800; color: #1f2937; line-height: 1.2; }
+.page-subtitle { margin: 4px 0 0; font-size: 13px; color: #94a3b8; font-weight: 400; }
+.session-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 999px; font-size: 13px; font-weight: 600; color: #2563eb; }
+.badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; animation: pulse-dot 1.5s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.85); } }
+.upload-layout { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
+.left-panel, .right-panel { display: flex; flex-direction: column; gap: 16px; }
+.panel-card { background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+.card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.card-header--stacked { flex-direction: column; align-items: stretch; gap: 8px; }
+.card-header-main { display: flex; align-items: center; gap: 8px; }
+.card-title { font-weight: 600; }
+.card-tip, .card-count { font-size: 12px; color: #64748b; }
+.form-input, .form-textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 12px 14px; font-size: 14px; background: #fff; }
+.form-textarea { resize: vertical; }
+.video-drop-zone, .cover-drop-zone { border: 1px dashed #cbd5e1; border-radius: 16px; padding: 28px 18px; cursor: pointer; background: #f8fafc; }
+.drop-idle, .cover-idle, .drop-selected, .cover-selected { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; }
+.drop-circle, .cover-icon, .file-icon-wrap { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #e2e8f0; }
+.drop-main, .cover-main, .file-name { margin: 0; font-weight: 600; }
+.drop-sub, .cover-sub, .file-size { margin: 0; color: #64748b; font-size: 13px; }
+.file-remove { border: none; background: transparent; cursor: pointer; }
+.cover-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; }
+.tag-group { margin-bottom: 16px; }
+.tag-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-chip, .category-chip, .clear-btn, .expand-btn, .link-btn { border-radius: 999px; padding: 6px 12px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; }
+.tag-chip.active, .category-chip.active, .tag-chip.suggested { background: var(--bili-pink); color: #fff; border-color: var(--bili-pink); }
+.tag-search { margin-bottom: 12px; }
+.tag-group-list { display: flex; flex-direction: column; gap: 12px; }
+.nested-tag-group-label, .empty-tip { margin: 0 0 10px; color: #64748b; font-size: 13px; }
+.submit-section { background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; }
+.error-msg { margin: 0 0 12px; color: #ef4444; }
+.submit-row { display: flex; justify-content: flex-end; gap: 12px; }
+.cancel-btn, .submit-btn { padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; }
+.cancel-btn { background: #e2e8f0; }
+.submit-btn { background: var(--bili-pink); color: #fff; }
+.upload-progress-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: #eff6ff; color: #2563eb; }
+.progress-spinner, .btn-spinner { width: 14px; height: 14px; border: 2px solid rgba(37, 99, 235, 0.25); border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.btn-spinner { border-color: rgba(255, 255, 255, 0.35); border-top-color: #fff; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 1100px) { .upload-layout { grid-template-columns: 1fr; } }
 </style>

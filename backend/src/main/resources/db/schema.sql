@@ -13,6 +13,7 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS rec_exposure_log;
+DROP TABLE IF EXISTS mq_outbox_event;
 DROP TABLE IF EXISTS user_interest_tag;
 DROP TABLE IF EXISTS video_tag_feature;
 DROP TABLE IF EXISTS video_tag;
@@ -77,12 +78,17 @@ create table video
     duration_seconds int        default 0                 not null comment '视频时长(秒)',
     is_recommended   tinyint(1) default 0                 not null comment '是否推荐',
     save_count       bigint     default 0                 not null comment '收藏数',
-    category_id      bigint     default 0                 not null comment '种类id'
+    category_id      bigint     default 0                 not null comment '种类id',
+    deleted          tinyint(1) default 0                 not null comment '逻辑删除标记: 0未删除 1已删除',
+    delete_time      datetime                             null comment '逻辑删除时间'
 )
     comment '视频表' collate = utf8mb4_unicode_ci;
 
 create index idx_video_author
     on video (author_id);
+
+create index idx_video_deleted_create_time
+    on video (deleted, create_time);
 
 create index idx_video_create_time
     on video (create_time);
@@ -166,6 +172,41 @@ create table notification
     create_time datetime default CURRENT_TIMESTAMP null comment '创建时间'
 )
     comment '系统通知表';
+
+-- outbox: 可靠消息事件表，用于承接关键链路的最终一致性
+create table mq_outbox_event
+(
+    id               bigint auto_increment
+        primary key,
+    event_id         varchar(64)                          not null comment '全局事件ID',
+    biz_key          varchar(255)                         null comment '业务幂等键',
+    trace_id         varchar(64)                          null comment '链路追踪ID',
+    event_type       varchar(64)                          not null comment '事件类型',
+    version          int      default 1                   not null comment '事件版本',
+    topic            varchar(64)                          not null comment 'RocketMQ Topic',
+    payload_class    varchar(255)                         not null comment '消息体类名',
+    payload_json     longtext                             not null comment '消息体 JSON',
+    status           varchar(32) default 'NEW'            not null comment '状态: NEW/CLAIMED/SENT/RETRY_WAIT/FINAL_FAILED',
+    retry_count      int        default 0                 not null comment '重试次数',
+    next_retry_at    datetime                             null comment '下次可重试时间',
+    claim_token      varchar(64)                          null comment '抢占令牌',
+    claimed_at       datetime                             null comment '抢占时间',
+    lease_until      datetime                             null comment '租约到期时间',
+    rocketmq_msg_id  varchar(128)                         null comment 'RocketMQ消息ID',
+    last_error       varchar(2000)                        null comment '最近一次错误',
+    sent_at          datetime                             null comment '发送成功时间',
+    create_time      datetime   default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time      datetime   default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    constraint uk_mq_outbox_event
+        unique (event_id)
+)
+    comment 'MQ outbox事件表' collate = utf8mb4_unicode_ci;
+
+create index idx_mq_outbox_status_retry
+    on mq_outbox_event (status, next_retry_at, id);
+
+create index idx_mq_outbox_status_lease
+    on mq_outbox_event (status, lease_until);
 
 -- ========== V2 扩展：推荐、历史、关注、收藏、UP主、Admin ==========
 
@@ -470,4 +511,3 @@ insert into tag (name) values
 ('影评'),
 ('吐槽'),
 ('配音');
-

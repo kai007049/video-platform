@@ -1,7 +1,7 @@
 package com.kai.videoplatform.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kai.videoplatform.common.Constants;
+import com.kai.videoplatform.common.MqTopics;
 import com.kai.videoplatform.common.RedisConstants;
 import com.kai.videoplatform.entity.Tag;
 import com.kai.videoplatform.entity.Video;
@@ -22,8 +22,8 @@ import com.kai.videoplatform.model.mq.SearchSyncMessage;
 import com.kai.videoplatform.model.mq.VideoDeleteMessage;
 import com.kai.videoplatform.model.mq.VideoProcessMessage;
 import com.kai.videoplatform.model.vo.VideoVO;
-import com.kai.videoplatform.service.MQService;
 import com.kai.videoplatform.service.RecommendationFeatureService;
+import com.kai.videoplatform.service.UploadSessionService;
 import com.kai.videoplatform.service.VideoCacheService;
 import com.kai.videoplatform.utils.MinioUtils;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -67,7 +70,8 @@ public class VideoCommandService {
     private final MinioUtils minioUtils;
     private final RedisTemplate<String, Object> redisTemplate;
     private final VideoCacheService videoCacheService;
-    private final MQService mqService;
+    private final UploadSessionService uploadSessionService;
+    private final MqOutboxServiceImpl mqOutboxService;
     private final VideoViewAssembler videoViewAssembler;
     private final VideoPostProcessFallbackService videoPostProcessFallbackService;
     private final RecommendationFeatureService recommendationFeatureService;
@@ -76,88 +80,128 @@ public class VideoCommandService {
      * 上传视频并创建记录。
      * 标题/简介/分类/标签必填，封面可选。
      */
+    @Transactional
     public VideoVO upload(VideoUploadDTO dto, Long authorId) {
-        MultipartFile videoFile = dto.getVideo();
-        MultipartFile coverFile = dto.getCover();
-        if (videoFile == null || videoFile.isEmpty()) {
-            throw new BizException(400, "视频文件不能为空");
-        }
-        validateVideoFile(videoFile);
-        validateManualMetadata(dto);
-
-        String videoUrl;
-        String coverUrl;
-        boolean useDefaultCover = false;
+        String uploadSessionId = dto.getUploadSessionId();
+        boolean sessionAttached = false;
         try {
-            videoUrl = minioUtils.uploadVideo(videoFile);
-            if (coverFile != null && !coverFile.isEmpty()) {
-                coverUrl = minioUtils.uploadCover(coverFile);
-            } else {
-                coverUrl = DEFAULT_COVER_OBJECT;
-                useDefaultCover = true;
+            MultipartFile videoFile = dto.getVideo();
+            MultipartFile coverFile = dto.getCover();
+            if (StringUtils.hasText(uploadSessionId)) {
+                uploadSessionService.markUploading(uploadSessionId, authorId);
+                sessionAttached = true;
             }
+            if (videoFile == null || videoFile.isEmpty()) {
+                throw new BizException(400, "视频文件不能为空");
+            }
+            validateVideoFile(videoFile);
+            validateManualMetadata(dto);
+
+            String videoUrl;
+            String coverUrl;
+            boolean useDefaultCover = false;
+            try {
+                videoUrl = minioUtils.uploadVideo(videoFile);
+                if (coverFile != null && !coverFile.isEmpty()) {
+                    coverUrl = minioUtils.uploadCover(coverFile);
+                } else {
+                    coverUrl = DEFAULT_COVER_OBJECT;
+                    useDefaultCover = true;
+                }
+            } catch (Exception e) {
+                throw new BizException(500, "文件上传失败: " + e.getMessage());
+            }
+
+            String title = dto.getTitle().trim();
+            String description = dto.getDescription().trim();
+            List<Long> tagIds = dto.getTagIds().stream()
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            Video video = new Video();
+            video.setTitle(title);
+            video.setDescription(description);
+            video.setAuthorId(authorId);
+            video.setCoverUrl(coverUrl);
+            video.setVideoUrl(videoUrl);
+            video.setPlayCount(0L);
+            video.setLikeCount(0L);
+            video.setSaveCount(0L);
+            video.setDurationSeconds(0);
+            video.setIsRecommended(false);
+            video.setCategoryId(dto.getCategoryId());
+            videoMapper.insert(video);
+
+            saveTags(video.getId(), tagIds);
+            recommendationFeatureService.syncVideoTagFeatures(
+                    video.getId(),
+                    tagIds,
+                    "manual",
+                    "v1",
+                    buildManualConfidenceMap(tagIds)
+            );
+
+            VideoProcessMessage processMessage = new VideoProcessMessage(video.getId(), authorId);
+            processMessage.setBizKey("video:" + video.getId() + ":process");
+            mqOutboxService.enqueue(MqTopics.VIDEO_PROCESS, processMessage);
+
+            SearchSyncMessage createSyncMessage = new SearchSyncMessage("video", video.getId(), "create");
+            createSyncMessage.setBizKey("search:video:" + video.getId() + ":create");
+            mqOutboxService.enqueue(MqTopics.SEARCH_SYNC, createSyncMessage);
+
+            VideoProcessMessage coverProcessMessage = new VideoProcessMessage(video.getId(), authorId);
+            coverProcessMessage.setBizKey("video:" + video.getId() + ":cover");
+            mqOutboxService.enqueue(MqTopics.VIDEO_COVER_PROCESS, coverProcessMessage);
+            if (useDefaultCover) {
+                runAfterCommit(() -> videoPostProcessFallbackService.triggerCoverProcessFallback(video.getId()));
+            }
+            if (sessionAttached) {
+                runAfterCommit(() -> {
+                    try {
+                        uploadSessionService.markCompleted(uploadSessionId, authorId, video.getId(), videoFile.getSize());
+                    } catch (Exception e) {
+                        log.warn("[Upload] mark session completed failed, sessionId={}, videoId={}", uploadSessionId, video.getId(), e);
+                    }
+                });
+            }
+            incrHotScore(video.getId(), Constants.HOT_WEIGHT_PLAY);
+
+            return videoViewAssembler.toVideoVO(video, authorId);
+        } catch (BizException e) {
+            if (sessionAttached) {
+                try {
+                    uploadSessionService.markFailed(uploadSessionId, authorId, e.getMessage());
+                } catch (Exception ex) {
+                    log.warn("[Upload] mark session failed failed, sessionId={}", uploadSessionId, ex);
+                }
+            }
+            throw e;
         } catch (Exception e) {
+            if (sessionAttached) {
+                try {
+                    uploadSessionService.markFailed(uploadSessionId, authorId, e.getMessage());
+                } catch (Exception ex) {
+                    log.warn("[Upload] mark session failed failed, sessionId={}", uploadSessionId, ex);
+                }
+            }
             throw new BizException(500, "文件上传失败: " + e.getMessage());
         }
-
-        String title = dto.getTitle().trim();
-        String description = dto.getDescription().trim();
-        List<Long> tagIds = dto.getTagIds().stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        Video video = new Video();
-        video.setTitle(title);
-        video.setDescription(description);
-        video.setAuthorId(authorId);
-        video.setCoverUrl(coverUrl);
-        video.setVideoUrl(videoUrl);
-        video.setPlayCount(0L);
-        video.setLikeCount(0L);
-        video.setSaveCount(0L);
-        video.setDurationSeconds(0);
-        video.setIsRecommended(false);
-        video.setCategoryId(dto.getCategoryId());
-        videoMapper.insert(video);
-
-        saveTags(video.getId(), tagIds);
-        recommendationFeatureService.syncVideoTagFeatures(
-                video.getId(),
-                tagIds,
-                "manual",
-                "v1",
-                buildManualConfidenceMap(tagIds)
-        );
-
-        VideoProcessMessage processMessage = new VideoProcessMessage(video.getId(), authorId);
-        processMessage.setBizKey("video:" + video.getId() + ":process");
-        mqService.sendVideoProcess(processMessage);
-
-        SearchSyncMessage createSyncMessage = new SearchSyncMessage("video", video.getId(), "create");
-        createSyncMessage.setBizKey("search:video:" + video.getId() + ":create");
-        mqService.sendSearchSync(createSyncMessage);
-
-        VideoProcessMessage coverProcessMessage = new VideoProcessMessage(video.getId(), authorId);
-        coverProcessMessage.setBizKey("video:" + video.getId() + ":cover");
-        mqService.sendVideoCoverProcess(coverProcessMessage);
-        if (useDefaultCover) {
-            videoPostProcessFallbackService.triggerCoverProcessFallback(video.getId());
-        }
-        incrHotScore(video.getId(), Constants.HOT_WEIGHT_PLAY);
-
-        return videoViewAssembler.toVideoVO(video, authorId);
     }
 
+    @Transactional
     public void updateVideo(Video video) {
         videoMapper.updateById(video);
         videoCacheService.invalidateVideo(video.getId());
         SearchSyncMessage updateSyncMessage = new SearchSyncMessage("video", video.getId(), "update");
         updateSyncMessage.setBizKey("search:video:" + video.getId() + ":update");
-        mqService.sendSearchSync(updateSyncMessage);
+        mqOutboxService.enqueue(MqTopics.SEARCH_SYNC, updateSyncMessage);
     }
 
     public void recordPlayCount(Long videoId) {
+        if (videoMapper.selectById(videoId) == null) {
+            return;
+        }
         String key = PLAY_COUNT_KEY + videoId;
         redisTemplate.opsForHash().increment(key, RedisConstants.VIDEO_STAT_PLAY, 1);
         redisTemplate.expire(key, PLAY_COUNT_EXPIRE, PLAY_COUNT_EXPIRE_UNIT);
@@ -186,8 +230,10 @@ public class VideoCommandService {
         }
 
         // 先同步删除强关联业务数据，保证事务提交后数据库里不再保留 video_id 残留关系。
-        deleteVideoRelatedRows(videoId);
-        videoMapper.deleteById(videoId);
+        int updated = videoMapper.softDeleteById(videoId);
+        if (updated == 0) {
+            throw new BizException(409, "瑙嗛鍒犻櫎鐘舵€佸凡鍙戠敓鍙樻洿");
+        }
 
         // 立即清理与该视频强绑定的缓存和 Redis 状态，避免删除后仍被展示或统计任务继续消费。
         cleanupVideoRuntimeState(videoId);
@@ -195,32 +241,16 @@ public class VideoCommandService {
         // 外部资源和索引属于最终一致性副作用，走 MQ 更适合做重试和容错。
         VideoDeleteMessage deleteMessage = new VideoDeleteMessage(videoId, video.getVideoUrl(), video.getCoverUrl());
         deleteMessage.setBizKey("video:" + videoId + ":delete");
-        mqService.sendVideoDelete(deleteMessage);
+        mqOutboxService.enqueue(MqTopics.VIDEO_DELETE, deleteMessage);
 
         SearchSyncMessage deleteSyncMessage = new SearchSyncMessage("video", videoId, "delete");
         deleteSyncMessage.setBizKey("search:video:" + videoId + ":delete");
-        mqService.sendSearchSync(deleteSyncMessage);
+        mqOutboxService.enqueue(MqTopics.SEARCH_SYNC, deleteSyncMessage);
     }
 
     /**
      * 删除视频后同步清理所有强关联表，避免孤儿数据残留。
      */
-    private void deleteVideoRelatedRows(Long videoId) {
-        videoTagMapper.delete(new LambdaQueryWrapper<VideoTag>()
-                .eq(com.kai.videoplatform.entity.VideoTag::getVideoId, videoId));
-        videoTagFeatureMapper.delete(new LambdaQueryWrapper<com.kai.videoplatform.entity.VideoTagFeature>()
-                .eq(com.kai.videoplatform.entity.VideoTagFeature::getVideoId, videoId));
-        videoLikeMapper.delete(new LambdaQueryWrapper<com.kai.videoplatform.entity.VideoLike>()
-                .eq(com.kai.videoplatform.entity.VideoLike::getVideoId, videoId));
-        favoriteMapper.delete(new LambdaQueryWrapper<com.kai.videoplatform.entity.Favorite>()
-                .eq(com.kai.videoplatform.entity.Favorite::getVideoId, videoId));
-        commentMapper.delete(new LambdaQueryWrapper<com.kai.videoplatform.entity.Comment>()
-                .eq(com.kai.videoplatform.entity.Comment::getVideoId, videoId));
-        danmuMapper.delete(new LambdaQueryWrapper<com.kai.videoplatform.entity.Danmu>()
-                .eq(com.kai.videoplatform.entity.Danmu::getVideoId, videoId));
-        watchHistoryMapper.delete(new LambdaQueryWrapper<com.kai.videoplatform.entity.WatchHistory>()
-                .eq(com.kai.videoplatform.entity.WatchHistory::getVideoId, videoId));
-    }
 
     /**
      * 清理视频详情缓存、评论缓存、统计缓存和热榜成员，避免删除后仍然被读取。
@@ -291,6 +321,19 @@ public class VideoCommandService {
         String key = Constants.HOT_RANK_PREFIX + Constants.HOT_WINDOW_HOURS + "h";
         redisTemplate.opsForZSet().incrementScore(key, videoId.toString(), delta);
         redisTemplate.expire(key, Constants.HOT_WINDOW_HOURS, TimeUnit.HOURS);
+    }
+
+    private void runAfterCommit(Runnable action) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            action.run();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                action.run();
+            }
+        });
     }
 
     private void validateVideoFile(MultipartFile videoFile) {

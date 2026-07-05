@@ -1,60 +1,66 @@
-import test from 'node:test'
-import assert from 'node:assert/strict'
+import { describe, expect, it } from 'vitest'
+import { validateUploadForm } from '../src/views/uploadValidation.js'
 
-const { validateUploadForm } = await import('../src/views/uploadValidation.js').catch(() => ({}))
+describe('validateUploadForm', () => {
+  it('returns the current validation messages in order and empty string for valid input', () => {
+    expect(
+      validateUploadForm({
+        videoFile: null,
+        title: '标题',
+        description: '简介',
+        categoryId: 1,
+        tagIds: [1]
+      })
+    ).toBe('请选择视频文件')
 
-function validForm() {
-  return {
-    videoFile: { name: 'demo.mp4' },
-    title: '测试标题',
-    description: '测试简介',
-    categoryId: 1,
-    tagIds: [1]
-  }
-}
+    expect(
+      validateUploadForm({
+        videoFile: { name: 'video.mp4' },
+        title: '   ',
+        description: '简介',
+        categoryId: 1,
+        tagIds: [1]
+      })
+    ).toBe('请输入视频标题')
 
-test('requires video file before upload', () => {
-  const form = validForm()
-  form.videoFile = null
+    expect(
+      validateUploadForm({
+        videoFile: { name: 'video.mp4' },
+        title: '标题',
+        description: '   ',
+        categoryId: 1,
+        tagIds: [1]
+      })
+    ).toBe('请输入视频简介')
 
-  assert.equal(validateUploadForm?.(form), '请选择视频文件')
-})
+    expect(
+      validateUploadForm({
+        videoFile: { name: 'video.mp4' },
+        title: '标题',
+        description: '简介',
+        categoryId: null,
+        tagIds: [1]
+      })
+    ).toBe('请选择视频分类')
 
-test('requires title before upload', () => {
-  const form = validForm()
-  form.title = '   '
+    expect(
+      validateUploadForm({
+        videoFile: { name: 'video.mp4' },
+        title: '标题',
+        description: '简介',
+        categoryId: 1,
+        tagIds: []
+      })
+    ).toBe('请至少选择一个标签')
 
-  assert.equal(validateUploadForm?.(form), '请输入视频标题')
-})
-
-test('requires description before upload', () => {
-  const form = validForm()
-  form.description = '   '
-
-  assert.equal(validateUploadForm?.(form), '请输入视频简介')
-})
-
-test('requires category before upload', () => {
-  const form = validForm()
-  form.categoryId = ''
-
-  assert.equal(validateUploadForm?.(form), '请选择视频分类')
-})
-
-test('requires tag before upload', () => {
-  const form = validForm()
-  form.tagIds = []
-
-  assert.equal(validateUploadForm?.(form), '请至少选择一个标签')
-})
-
-test('accepts first-level category id when category is selected', () => {
-  const form = validForm()
-  form.categoryId = 5
-
-  assert.equal(validateUploadForm?.(form), '')
-})
-
-test('passes when required fields are complete', () => {
-  assert.equal(validateUploadForm?.(validForm()), '')
+    expect(
+      validateUploadForm({
+        videoFile: { name: 'video.mp4' },
+        title: '标题',
+        description: '简介',
+        categoryId: 1,
+        tagIds: [1, 2]
+      })
+    ).toBe('')
+  })
 })

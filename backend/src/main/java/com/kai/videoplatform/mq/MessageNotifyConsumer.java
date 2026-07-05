@@ -6,6 +6,7 @@ import com.kai.videoplatform.service.impl.MqReliabilityService;
 import com.kai.videoplatform.ws.MessageWebSocketServer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
         consumerGroup = "message-notify-consumer",
         maxReconsumeTimes = 5
 )
+@Schema(description = "消息通知消费者")
 public class MessageNotifyConsumer implements RocketMQListener<MessageNotifyMessage> {
 
     private final MessageWebSocketServer messageWebSocketServer;

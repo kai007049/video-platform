@@ -221,6 +221,42 @@ seed 执行完成后会自动退出，再重新启动普通后端服务：
 mvn spring-boot:run
 ```
 
+## CI
+
+项目包含一个最小 GitHub Actions 工作流：
+
+- 后端：`mvn -B test`
+- 前端：`npm ci && npm run test && npm run build`
+
+本地可以直接复用这组命令，保证和 CI 校验口径一致。
+
+## 可观测性
+
+后端启动后可直接访问：
+
+- `http://localhost:8080/actuator/health`
+- `http://localhost:8080/actuator/prometheus`
+
+如需本地查看指标面板，可在 `backend/src/main/resources/docker` 目录执行：
+
+```bash
+docker compose up -d prometheus grafana
+```
+
+默认地址：
+
+- Prometheus：`http://localhost:9090`
+- Grafana：`http://localhost:3000`
+
+## 压测
+
+已提供可复用的 k6 基线脚本：
+
+- 视频详情：`ops/load/k6/video-detail.js`
+- 搜索接口：`ops/load/k6/search.js`
+
+说明文档见 `ops/load/README.md`。
+
 ## 常见问题
 
 ### 端口冲突

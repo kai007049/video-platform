@@ -1,9 +1,11 @@
 package com.kai.videoplatform.mq;
 
 import com.kai.videoplatform.common.MqTopics;
+import com.kai.videoplatform.mapper.VideoMapper;
 import com.kai.videoplatform.model.mq.SearchSyncMessage;
 import com.kai.videoplatform.service.SearchService;
 import com.kai.videoplatform.service.impl.MqReliabilityService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -18,9 +20,11 @@ import org.springframework.stereotype.Component;
         consumerGroup = "search-sync-consumer",
         maxReconsumeTimes = 5
 )
+@Schema(description = "搜索同步消费者")
 public class SearchSyncConsumer implements RocketMQListener<SearchSyncMessage> {
 
     private final SearchService searchService;
+    private final VideoMapper videoMapper;
     private final MqReliabilityService mqReliabilityService;
 
     @Override
@@ -33,20 +37,10 @@ public class SearchSyncConsumer implements RocketMQListener<SearchSyncMessage> {
                 return;
             }
 
-            String action = message.getAction();
-            if (action == null) {
-                return;
-            }
-            switch (action) {
-                case "create":
-                case "update":
-                    searchService.indexVideo(message.getEntityId());
-                    break;
-                case "delete":
-                    searchService.deleteVideo(message.getEntityId());
-                    break;
-                default:
-                    log.warn("unknown search sync action: {}", action);
+            if (videoMapper.selectById(message.getEntityId()) == null) {
+                searchService.deleteVideo(message.getEntityId());
+            } else {
+                searchService.indexVideo(message.getEntityId());
             }
         });
     }

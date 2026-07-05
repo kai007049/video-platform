@@ -4,6 +4,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kai.videoplatform.common.Result;
 import com.kai.videoplatform.exception.BizException;
 import com.kai.videoplatform.model.dto.VideoUploadDTO;
+import com.kai.videoplatform.model.dto.UploadSessionInitDTO;
+import com.kai.videoplatform.model.dto.UploadSessionProgressDTO;
+import com.kai.videoplatform.model.vo.PageResponseVO;
+import com.kai.videoplatform.model.vo.UploadSessionVO;
+import com.kai.videoplatform.service.UploadSessionService;
 import com.kai.videoplatform.model.vo.VideoVO;
 import com.kai.videoplatform.service.VideoService;
 import com.kai.videoplatform.service.WatchHistoryService;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,6 +60,7 @@ public class VideoController {
     private final VideoService videoService;
     private final MinioUtils minioUtils;
     private final WatchHistoryService watchHistoryService;
+    private final UploadSessionService uploadSessionService;
 
     /**
      * 上传视频（标题/简介/分类/标签必填，封面可选）。
@@ -64,6 +71,52 @@ public class VideoController {
             @Valid @ModelAttribute VideoUploadDTO dto) {
         Long userId = UserContext.get();
         return Result.success(videoService.upload(dto, userId));
+    }
+
+    @PostMapping("/upload/sessions")
+    @Operation(summary = "创建上传会话")
+    public Result<com.kai.videoplatform.model.vo.UploadSessionVO> createUploadSession(
+            @Valid @RequestBody UploadSessionInitDTO dto) {
+        Long userId = UserContext.get();
+        return Result.success(uploadSessionService.createSession(userId, dto));
+    }
+
+    @GetMapping("/upload/sessions")
+    @Operation(summary = "上传会话列表")
+    public Result<PageResponseVO<UploadSessionVO>> listUploadSessions(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Long userId = UserContext.get();
+        return Result.success(uploadSessionService.listSessions(userId, page, size));
+    }
+
+    @GetMapping("/upload/sessions/{sessionId}")
+    @Operation(summary = "上传会话详情")
+    public Result<UploadSessionVO> getUploadSession(@PathVariable String sessionId) {
+        Long userId = UserContext.get();
+        UploadSessionVO session = uploadSessionService.getSession(userId, sessionId);
+        if (session == null) {
+            throw new BizException(404, "上传会话不存在");
+        }
+        return Result.success(session);
+    }
+
+    @PostMapping("/upload/sessions/{sessionId}/progress")
+    @Operation(summary = "更新上传进度")
+    public Result<UploadSessionVO> updateUploadSessionProgress(
+            @PathVariable String sessionId,
+            @Valid @RequestBody UploadSessionProgressDTO dto) {
+        Long userId = UserContext.get();
+        return Result.success(uploadSessionService.updateProgress(sessionId, userId, dto));
+    }
+
+    @PostMapping("/upload/sessions/{sessionId}/cancel")
+    @Operation(summary = "取消上传会话")
+    public Result<UploadSessionVO> cancelUploadSession(
+            @PathVariable String sessionId,
+            @RequestParam(required = false) String reason) {
+        Long userId = UserContext.get();
+        return Result.success(uploadSessionService.cancelSession(sessionId, userId, reason));
     }
 
     @GetMapping("/list")

@@ -15,22 +15,25 @@ public class WebSocketConfig implements WebSocketConfigurer {
     private final MessageWebSocketServer messageWebSocketServer;
     private final DanmuWebSocketHandler danmuWebSocketHandler;
     private final MessageWebSocketAuthInterceptor messageWebSocketAuthInterceptor;
+    private final SecurityProperties securityProperties;
 
     public WebSocketConfig(MessageWebSocketServer messageWebSocketServer,
                            DanmuWebSocketHandler danmuWebSocketHandler,
-                           MessageWebSocketAuthInterceptor messageWebSocketAuthInterceptor) {
+                           MessageWebSocketAuthInterceptor messageWebSocketAuthInterceptor,
+                           SecurityProperties securityProperties) {
         this.messageWebSocketServer = messageWebSocketServer;
         this.danmuWebSocketHandler = danmuWebSocketHandler;
         this.messageWebSocketAuthInterceptor = messageWebSocketAuthInterceptor;
+        this.securityProperties = securityProperties;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(messageWebSocketServer, "/ws/message")
                 .addInterceptors(messageWebSocketAuthInterceptor)
-                .setAllowedOrigins("*");
+                .setAllowedOrigins(securityProperties.normalizedAllowedWsOrigins());
 
         registry.addHandler(danmuWebSocketHandler, "/ws/danmu/{videoId}")
-                .setAllowedOrigins("*");
+                .setAllowedOrigins(securityProperties.normalizedAllowedWsOrigins());
     }
 }

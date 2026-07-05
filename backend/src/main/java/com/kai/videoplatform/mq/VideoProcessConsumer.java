@@ -8,6 +8,7 @@ import com.kai.videoplatform.model.mq.VideoProcessMessage;
 import com.kai.videoplatform.service.VideoCacheService;
 import com.kai.videoplatform.service.impl.MqReliabilityService;
 import com.kai.videoplatform.utils.VideoCoverExtractor;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
         consumerGroup = "video-process-consumer",
         maxReconsumeTimes = 5
 )
+@Schema(description = "视频处理消费者")
 public class VideoProcessConsumer implements RocketMQListener<VideoProcessMessage> {
 
     private final VideoMapper videoMapper;

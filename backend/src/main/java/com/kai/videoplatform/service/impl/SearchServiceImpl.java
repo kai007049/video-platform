@@ -148,7 +148,10 @@ public class SearchServiceImpl implements SearchService {
         if (videoId == null) return;
         // 先从数据库查出最新视频数据，再写入 ES，避免索引内容过旧。
         Video video = videoMapper.selectById(videoId);
-        if (video == null) return;
+        if (video == null) {
+            videoSearchService.delete(videoId);
+            return;
+        }
         videoSearchService.index(video);
     }
 

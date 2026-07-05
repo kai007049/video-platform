@@ -117,7 +117,7 @@ public class MQServiceImpl implements MQService {
     }
 
     private void sendAsyncWithRetry(String topic, BaseMqMessage payload, String scene) {
-        fillMessageMetadata(topic, payload);
+        MqMessageMetadataSupport.fillMessageMetadata(topic, payload);
         sendAsyncWithRetry(topic, payload, scene, 1);
     }
 
@@ -223,6 +223,7 @@ public class MQServiceImpl implements MQService {
         }
         try {
             DeadLetterRecord record = new DeadLetterRecord();
+            record.setRecordId(payload.getEventId());
             record.setEventId(payload.getEventId());
             record.setBizKey(payload.getBizKey());
             record.setTraceId(payload.getTraceId());
@@ -232,8 +233,10 @@ public class MQServiceImpl implements MQService {
             record.setPayloadJson(objectMapper.writeValueAsString(payload));
             record.setStatus("PENDING");
             record.setRetryCount(attempt);
-            record.setCompensationAttempts(0);
+            record.setReplayAttempts(0);
             record.setReason(reason);
+            record.setLastReplayError(reason);
+            record.setLastReplayAt(null);
             record.setOccurredAt(LocalDateTime.now());
             record.setNextRetryAt(LocalDateTime.now().plusSeconds(Math.max(5, retryDelayMs / 1000)));
 
@@ -269,26 +272,31 @@ public class MQServiceImpl implements MQService {
             }
             try {
                 DeadLetterRecord record = objectMapper.readValue(String.valueOf(rawRecord), DeadLetterRecord.class);
+                markDeadLetterReplayAttempt(record);
                 BaseMqMessage payload = (BaseMqMessage) objectMapper.readValue(record.getPayloadJson(), Class.forName(record.getPayloadClass()));
                 template.syncSend(record.getTopic(), payload);
-                hashOperations.delete(hashKey, eventId);
+                record.setStatus("REPLAYED_SUCCESS");
+                record.setLastReplayError(null);
+                record.setNextRetryAt(null);
+                hashOperations.put(hashKey, eventId, objectMapper.writeValueAsString(record));
                 redisTemplate.opsForZSet().remove(scheduleKey, eventId);
                 logDeadLetterReplaySuccess(record.getTopic(), record, payload);
             } catch (Exception ex) {
                 try {
                     DeadLetterRecord record = objectMapper.readValue(String.valueOf(rawRecord), DeadLetterRecord.class);
-                    record.setCompensationAttempts(record.getCompensationAttempts() + 1);
-                    record.setReason(ex.getMessage());
-                    record.setOccurredAt(LocalDateTime.now());
+                    markDeadLetterReplayAttempt(record);
+                    record.setStatus(record.getReplayAttempts() != null && record.getReplayAttempts() >= maxRetries ? "FINAL_FAILED" : "RETRY_WAIT");
+                    record.setLastReplayError(ex.getMessage());
+                    record.setLastReplayAt(LocalDateTime.now());
                     BaseMqMessage payload = null;
                     try {
                         payload = (BaseMqMessage) objectMapper.readValue(record.getPayloadJson(), Class.forName(record.getPayloadClass()));
                     } catch (Exception ignored) {
                     }
-                    loggerDelegate.logCompensationFailure(record.getTopic(), record.getScene(), payload, record.getCompensationAttempts(), ex);
-                    if (record.getCompensationAttempts() >= maxRetries) {
-                        record.setStatus("FINAL_FAILED");
+                    loggerDelegate.logCompensationFailure(record.getTopic(), record.getScene(), payload, record.getReplayAttempts(), ex);
+                    if ("FINAL_FAILED".equals(record.getStatus())) {
                         redisTemplate.opsForZSet().remove(scheduleKey, eventId);
+                        record.setNextRetryAt(null);
                     } else {
                         record.setNextRetryAt(LocalDateTime.now().plusSeconds(Math.max(5, retryDelayMs / 1000)));
                         redisTemplate.opsForZSet().add(scheduleKey, eventId, toScore(record.getNextRetryAt()));
@@ -305,12 +313,20 @@ public class MQServiceImpl implements MQService {
         loggerDelegate.logCompensationSuccess(topic, record.getScene(), payload);
     }
 
+    private void markDeadLetterReplayAttempt(DeadLetterRecord record) {
+        int replayAttempts = record.getReplayAttempts() == null ? 0 : record.getReplayAttempts();
+        record.setReplayAttempts(replayAttempts + 1);
+        record.setLastReplayAt(LocalDateTime.now());
+        record.setLastReplayError(null);
+    }
+
     private double toScore(LocalDateTime dateTime) {
         return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     @Data
     static class DeadLetterRecord {
+        private String recordId;
         private String eventId;
         private String bizKey;
         private String traceId;
@@ -320,8 +336,10 @@ public class MQServiceImpl implements MQService {
         private String payloadJson;
         private String status;
         private Integer retryCount;
-        private Integer compensationAttempts;
+        private Integer replayAttempts;
         private String reason;
+        private String lastReplayError;
+        private LocalDateTime lastReplayAt;
         private LocalDateTime occurredAt;
         private LocalDateTime nextRetryAt;
     }

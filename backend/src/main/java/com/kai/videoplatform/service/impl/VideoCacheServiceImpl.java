@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.LongAdder;
 
 @Service
 @RequiredArgsConstructor
@@ -49,16 +50,27 @@ public class VideoCacheServiceImpl implements VideoCacheService {
     private final Cache<String, Object> localVideoCache;
     private final RedisTemplate<String, Object> redisTemplate;
     private final java.util.concurrent.ExecutorService cacheDelayExecutor;
+    private final LongAdder totalRequests = new LongAdder();
+    private final LongAdder localCacheHits = new LongAdder();
+    private final LongAdder redisCacheHits = new LongAdder();
+    private final LongAdder databaseLoads = new LongAdder();
 
     /**
      * 从缓存中获取视频详情
      */
     @Override
     public VideoVO getVideoFromCache(Long videoId) {
+        return getVideoFromCache(videoId, true);
+    }
+
+    private VideoVO getVideoFromCache(Long videoId, boolean countHit) {
         //  本地缓存
         String localKey = LOCAL_KEY_PREFIX + videoId;
         Object localCached = localVideoCache.getIfPresent(localKey);
         if (localCached instanceof VideoBaseCache base) {
+            if (countHit) {
+                localCacheHits.increment();
+            }
             return mergeVideoVO(base, loadStats(videoId));
         }
         // Redis缓存
@@ -74,6 +86,9 @@ public class VideoCacheServiceImpl implements VideoCacheService {
             return null;
         }
 
+        if (countHit) {
+            redisCacheHits.increment();
+        }
         if (isLocalCacheEligible(videoId)) { // 本地缓存有效
             localVideoCache.put(localKey, base);
         }
@@ -133,6 +148,7 @@ public class VideoCacheServiceImpl implements VideoCacheService {
      */
     @Override
     public VideoVO getOrLoadVideo(Long videoId, java.util.function.Supplier<VideoVO> loader) {
+        totalRequests.increment();
         VideoVO cached = getVideoFromCache(videoId);
         if (cached != null) {
             return cached;
@@ -142,13 +158,14 @@ public class VideoCacheServiceImpl implements VideoCacheService {
         Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", LOCK_TTL);
         if (Boolean.TRUE.equals(locked)) {
             try {
+                databaseLoads.increment();
                 VideoVO loaded = loader.get();
                 if (loaded == null) {
                     setVideoCache(videoId, null);
                     return null;
                 }
                 setVideoCache(videoId, loaded);
-                return getVideoFromCache(videoId);
+                return getVideoFromCache(videoId, false);
             } finally {
                 redisTemplate.delete(lockKey);
             }
@@ -165,6 +182,24 @@ public class VideoCacheServiceImpl implements VideoCacheService {
     @Override
     public void invalidateVideo(Long videoId) {
         doubleDeleteVideoCache(videoId);
+    }
+
+    @Override
+    public VideoCacheService.VideoDetailCacheMetricsSnapshot getVideoDetailCacheMetrics() {
+        return new VideoCacheService.VideoDetailCacheMetricsSnapshot(
+                totalRequests.sum(),
+                localCacheHits.sum(),
+                redisCacheHits.sum(),
+                databaseLoads.sum()
+        );
+    }
+
+    @Override
+    public void resetVideoDetailCacheMetrics() {
+        totalRequests.reset();
+        localCacheHits.reset();
+        redisCacheHits.reset();
+        databaseLoads.reset();
     }
 
     private VideoStatsCache loadStats(Long videoId) {

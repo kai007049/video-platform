@@ -43,6 +43,10 @@ public class MessageWebSocketServer extends TextWebSocketHandler {
         }
     }
 
+    public int activeSessionCount() {
+        return SESSIONS.size();
+    }
+
     private Long getUserId(WebSocketSession session) {
         Object userId = session.getAttributes().get(MessageWebSocketAuthInterceptor.WS_USER_ID_ATTR);
         if (userId instanceof Long value) {

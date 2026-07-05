@@ -1,5 +1,6 @@
 package com.kai.videoplatform.ws;
 
+import com.kai.videoplatform.common.Constants;
 import com.kai.videoplatform.entity.User;
 import com.kai.videoplatform.mapper.UserMapper;
 import com.kai.videoplatform.model.dto.DanmuDTO;
@@ -126,6 +127,12 @@ public class DanmuWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public int activeSessionCount() {
+        return roomSessions.values().stream()
+                .mapToInt(Map::size)
+                .sum();
+    }
+
     private Long getVideoIdFromUri(WebSocketSession session) {
         String path = session.getUri() != null ? session.getUri().getPath() : "";
         String[] parts = path.split("/");
@@ -150,7 +157,12 @@ public class DanmuWebSocketHandler extends TextWebSocketHandler {
             return null;
         }
         try {
-            return jwtUtils.getUserIdFromToken(token);
+            Long userId = jwtUtils.getUserIdFromToken(token);
+            Object redisToken = redisTemplate.opsForValue().get(Constants.loginTokenPrefix + ":" + userId);
+            if (redisToken == null || !token.equals(redisToken)) {
+                return null;
+            }
+            return userId;
         } catch (Exception e) {
             return null;
         }

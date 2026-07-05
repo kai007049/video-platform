@@ -30,6 +30,21 @@ export const saveProgress = (id, seconds) =>
 export const uploadVideo = (formData) =>
   request.post('/video/upload', formData, { timeout: 300000 })
 
+export const createUploadSession = (payload) =>
+  request.post('/video/upload/sessions', payload)
+
+export const listUploadSessions = (page = 1, size = 10) =>
+  request.get('/video/upload/sessions', { params: { page, size } })
+
+export const getUploadSession = (sessionId) =>
+  request.get(`/video/upload/sessions/${sessionId}`)
+
+export const updateUploadSessionProgress = (sessionId, payload) =>
+  request.post(`/video/upload/sessions/${sessionId}/progress`, payload)
+
+export const cancelUploadSession = (sessionId, reason) =>
+  request.post(`/video/upload/sessions/${sessionId}/cancel`, null, { params: reason ? { reason } : {} })
+
 export const getCreatorVideos = (page = 1, size = 12) =>
   request.get('/video/creator', { params: { page, size } })
 

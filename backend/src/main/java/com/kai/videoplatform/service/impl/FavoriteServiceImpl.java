@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kai.videoplatform.common.Constants;
 import com.kai.videoplatform.common.RedisConstants;
 import com.kai.videoplatform.entity.Favorite;
+import com.kai.videoplatform.exception.BizException;
 import com.kai.videoplatform.mapper.FavoriteMapper;
 import com.kai.videoplatform.mapper.VideoMapper;
 import com.kai.videoplatform.model.mq.NotifyMessage;
@@ -35,6 +36,10 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     @Transactional
     public void add(Long userId, Long videoId) {
+        var video = videoMapper.selectById(videoId);
+        if (video == null) {
+            throw new BizException(404, "瑙嗛涓嶅瓨鍦?");
+        }
         Favorite existing = favoriteMapper.selectOne(
                 new LambdaQueryWrapper<Favorite>()
                         .eq(Favorite::getUserId, userId)
@@ -49,7 +54,6 @@ public class FavoriteServiceImpl implements FavoriteService {
             redisTemplate.opsForHash().increment(statsKey, RedisConstants.VIDEO_STAT_SAVE, 1);
             redisTemplate.expire(statsKey, RedisConstants.VIDEO_STATS_EXPIRE_DAYS, RedisConstants.DEFAULT_TIME_UNIT_DAYS);
 
-            var video = videoMapper.selectById(videoId);
             if (video != null && video.getAuthorId() != null && !video.getAuthorId().equals(userId)) {
                 NotifyMessage notifyMessage = new NotifyMessage("favorite", video.getAuthorId(), videoId, null);
                 notifyMessage.setBizKey("notify:user:" + video.getAuthorId() + ":favorite:" + videoId + ":actor:" + userId);

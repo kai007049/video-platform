@@ -15,6 +15,10 @@ public interface VideoCacheService {
 
     void invalidateVideo(Long videoId);
 
+    VideoDetailCacheMetricsSnapshot getVideoDetailCacheMetrics();
+
+    void resetVideoDetailCacheMetrics();
+
     default VideoVO getVideoWithLoader(Long videoId, java.util.function.Supplier<VideoVO> loader) {
         return getOrLoadVideo(videoId, loader);
     }
@@ -25,5 +29,8 @@ public interface VideoCacheService {
 
     default void doubleDeleteVideoCache(Long videoId) {
         invalidateVideo(videoId);
+    }
+
+    record VideoDetailCacheMetricsSnapshot(long total, long localHit, long redisHit, long dbLoad) {
     }
 }

@@ -3,6 +3,7 @@ package com.kai.videoplatform.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kai.videoplatform.entity.WatchHistory;
 import com.kai.videoplatform.common.RedisConstants;
+import com.kai.videoplatform.mapper.VideoMapper;
 import com.kai.videoplatform.mapper.WatchHistoryMapper;
 import com.kai.videoplatform.service.RecommendationFeatureService;
 import com.kai.videoplatform.service.WatchHistoryService;
@@ -19,12 +20,14 @@ public class WatchHistoryServiceImpl implements WatchHistoryService {
     private static final long WATCH_PROGRESS_EXPIRE_DAYS = RedisConstants.VIDEO_WATCH_PROGRESS_EXPIRE_DAYS;
 
     private final WatchHistoryMapper watchHistoryMapper;
+    private final VideoMapper videoMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RecommendationFeatureService recommendationFeatureService;
 
     @Override
     public void saveProgress(Long userId, Long videoId, int watchSeconds) {
         if (userId == null) return;
+        if (videoMapper.selectById(videoId) == null) return;
 
         Integer previousWatchSeconds = getLastWatchSeconds(userId, videoId);
         int safeWatchSeconds = Math.max(0, watchSeconds);

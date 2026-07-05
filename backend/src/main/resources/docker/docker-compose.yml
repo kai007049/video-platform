@@ -2,25 +2,25 @@
 
 services:
 
-  mysql:
-    image: mysql:8.0
-    container_name: video_mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      MYSQL_DATABASE: video_platform
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./mysql_data:/var/lib/mysql
-  redis:
-    image: redis:7
-    container_name: video_redis
-    ports:
-      - "6379:6379"
+#  mysql:
+#    image: mysql:8.0
+#    container_name: video_mysql
+#    restart: always
+#    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+#      MYSQL_DATABASE: video_platform
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - ./mysql_data:/var/lib/mysql
+#  redis:
+#    image: redis:7
+#    container_name: video_redis
+#    ports:
+#      - "6379:6379"
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.6
     container_name: video_es
     environment:
       - discovery.type=single-node
@@ -38,7 +38,7 @@ services:
       /usr/local/bin/docker-entrypoint.sh"
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.13.4
+    image: docker.elastic.co/kibana/kibana:8.18.6
     container_name: video_kibana
     depends_on:
       - elasticsearch
@@ -89,3 +89,21 @@ services:
       - NAMESRV_ADDR=rocketmq-nameserver:9876
     ports:
       - "8082:8082"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: video_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: video_grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro

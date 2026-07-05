@@ -58,6 +58,15 @@ class MqReliabilityServiceConsumerFailureRecordTest {
             kvStore.put(invocation.getArgument(0), invocation.getArgument(1));
             return null;
         }).when(valueOperations).set(anyString(), any(), any(Duration.class));
+        lenient().when(valueOperations.setIfAbsent(anyString(), any(), any(Duration.class))).thenAnswer(invocation -> {
+            String key = invocation.getArgument(0);
+            Object value = invocation.getArgument(1);
+            return kvStore.putIfAbsent(key, value) == null;
+        });
+        lenient().when(redisTemplate.delete(anyString())).thenAnswer(invocation -> {
+            kvStore.remove(invocation.getArgument(0));
+            return true;
+        });
     }
 
     @Test

@@ -35,6 +35,9 @@ public class MqReliabilityService {
     @Value("${mq.reliability.consumer.dedup-ttl-hours:168}")
     private long consumeDedupTtlHours;
 
+    @Value("${mq.reliability.consumer.processing-ttl-minutes:5}")
+    private long consumerProcessingTtlMinutes;
+
     @Value("${mq.reliability.consumer.failure-record-key:mq:consumer:failures}")
     private String consumerFailureRecordKey;
 
@@ -45,6 +48,7 @@ public class MqReliabilityService {
     public void consumeWithIdempotency(String topic, String consumerGroup, Object payload, Runnable handler) {
         String eventDedupKey = buildEventDedupKey(topic, payload);
         String bizDedupKey = buildBusinessDedupKey(topic, payload);
+        String processingKey = buildProcessingKey(topic, payload);
         BaseMqMessage baseMessage = payload instanceof BaseMqMessage message ? message : null;
 
         if (eventDedupKey != null && Boolean.TRUE.equals(redisTemplate.hasKey(eventDedupKey))) {
@@ -55,15 +59,20 @@ public class MqReliabilityService {
             loggerDelegate.logConsumerDuplicate(topic, consumerGroup, "bizKey", bizDedupKey, baseMessage);
             return;
         }
+        if (!acquireProcessing(processingKey)) {
+            loggerDelegate.logConsumerDuplicate(topic, consumerGroup, "processing", processingKey, baseMessage);
+            return;
+        }
 
         try {
             handler.run();
-            markHandled(eventDedupKey, bizDedupKey);
+            markHandled(eventDedupKey, bizDedupKey, processingKey);
             loggerDelegate.logConsumerSuccess(topic, consumerGroup, eventDedupKey, bizDedupKey, baseMessage);
         } catch (RetryableMqException e) {
+            releaseProcessing(processingKey);
             throw e;
         } catch (NonRetryableMqException | ManualInterventionMqException e) {
-            markHandled(eventDedupKey, bizDedupKey);
+            markHandled(eventDedupKey, bizDedupKey, processingKey);
             persistConsumerFailure(topic, consumerGroup, payload, e);
             loggerDelegate.logConsumerTerminal(
                     topic,
@@ -74,6 +83,9 @@ public class MqReliabilityService {
                     e instanceof ManualInterventionMqException ? "MANUAL_INTERVENTION" : "NON_RETRYABLE",
                     e.getMessage()
             );
+        } catch (RuntimeException e) {
+            releaseProcessing(processingKey);
+            throw e;
         }
     }
 
@@ -100,14 +112,44 @@ public class MqReliabilityService {
         }
     }
 
-    private void markHandled(String eventDedupKey, String bizDedupKey) {
+    private void markHandled(String eventDedupKey, String bizDedupKey, String processingKey) {
         Duration ttl = Duration.ofHours(consumeDedupTtlHours);
-        if (eventDedupKey != null) {
-            redisTemplate.opsForValue().set(eventDedupKey, "1", ttl);
+        try {
+            if (eventDedupKey != null) {
+                redisTemplate.opsForValue().set(eventDedupKey, "1", ttl);
+            }
+            if (bizDedupKey != null) {
+                redisTemplate.opsForValue().set(bizDedupKey, "1", ttl);
+            }
+        } finally {
+            releaseProcessing(processingKey);
         }
-        if (bizDedupKey != null) {
-            redisTemplate.opsForValue().set(bizDedupKey, "1", ttl);
+    }
+
+    private boolean acquireProcessing(String processingKey) {
+        if (processingKey == null) {
+            return true;
         }
+        Duration ttl = Duration.ofMinutes(Math.max(1L, consumerProcessingTtlMinutes));
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(processingKey, "1", ttl));
+    }
+
+    private void releaseProcessing(String processingKey) {
+        if (processingKey != null) {
+            redisTemplate.delete(processingKey);
+        }
+    }
+
+    private String buildProcessingKey(String topic, Object payload) {
+        if (payload instanceof BaseMqMessage message) {
+            if (message.getBizKey() != null && !message.getBizKey().isBlank()) {
+                return consumeDedupPrefix + ":processing:biz:" + topic + ":" + message.getBizKey();
+            }
+            if (message.getEventId() != null && !message.getEventId().isBlank()) {
+                return consumeDedupPrefix + ":processing:event:" + topic + ":" + message.getEventId();
+            }
+        }
+        return consumeDedupPrefix + ":processing:hash:" + topic + ":" + digestPayload(payload);
     }
 
     private String buildEventDedupKey(String topic, Object payload) {

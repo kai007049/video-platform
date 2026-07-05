@@ -2,6 +2,7 @@ package com.kai.videoplatform.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 视频实体
+ * 瑙嗛瀹炰綋
  */
 @Data
 @TableName("video")
@@ -18,42 +19,49 @@ public class Video {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @Schema(description = "标题")
+    @Schema(description = "鏍囬")
     private String title;
 
-    @Schema(description = "描述")
+    @Schema(description = "鎻忚堪")
     private String description;
 
-    @Schema(description = "作者ID")
+    @Schema(description = "浣滆€匢D")
     private Long authorId;
 
-    @Schema(description = "封面URL")
+    @Schema(description = "灏侀潰URL")
     private String coverUrl;
 
-    @Schema(description = "预览URL")
+    @Schema(description = "棰勮URL")
     private String previewUrl;
 
-    @Schema(description = "视频URL")
+    @Schema(description = "瑙嗛URL")
     private String videoUrl;
 
-    @Schema(description = "播放次数")
+    @Schema(description = "鎾斁娆℃暟")
     private Long playCount;
 
-    @Schema(description = "点赞次数")
+    @Schema(description = "鐐硅禐娆℃暟")
     private Long likeCount;
 
-    @Schema(description = "收藏次数")
+    @Schema(description = "鏀惰棌娆℃暟")
     private Long saveCount;
 
-    @Schema(description = "视频时长（秒）")
+    @Schema(description = "瑙嗛鏃堕暱(绉?)")
     private Integer durationSeconds;
 
-    @Schema(description = "是否推荐")
+    @Schema(description = "鏄惁鎺ㄨ崘")
     private Boolean isRecommended;
 
-    @Schema(description = "分类ID")
+    @Schema(description = "鍒嗙被ID")
     private Long categoryId;
 
-    @Schema(description = "创建时间")
+    @TableLogic
+    @Schema(description = "逻辑删除标记")
+    private Boolean deleted;
+
+    @Schema(description = "逻辑删除时间")
+    private LocalDateTime deleteTime;
+
+    @Schema(description = "鍒涘缓鏃堕棿")
     private LocalDateTime createTime;
 }

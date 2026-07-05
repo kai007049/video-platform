@@ -7,6 +7,7 @@ import com.kai.videoplatform.entity.User;
 import com.kai.videoplatform.exception.BizException;
 import com.kai.videoplatform.mapper.UserMapper;
 import com.kai.videoplatform.service.SearchService;
+import com.kai.videoplatform.service.VideoCacheService;
 import com.kai.videoplatform.service.VideoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,7 @@ public class AdminController {
     private final SearchService searchService;
     private final UserMapper userMapper;
     private final com.kai.videoplatform.utils.MinioUtils minioUtils;
+    private final VideoCacheService videoCacheService;
 
     @GetMapping("/videos")
     @Operation(summary = "视频列表")
@@ -99,6 +101,21 @@ public class AdminController {
         data.put("indexed", count);
         data.put("message", "视频搜索索引重建完成");
         return Result.success(data);
+    }
+
+    @GetMapping("/metrics/video-detail-cache")
+    @Operation(summary = "视频详情缓存统计")
+    public Result<VideoCacheService.VideoDetailCacheMetricsSnapshot> videoDetailCacheMetrics(HttpServletRequest request) {
+        ensureAdmin(request);
+        return Result.success(videoCacheService.getVideoDetailCacheMetrics());
+    }
+
+    @PostMapping("/metrics/video-detail-cache/reset")
+    @Operation(summary = "重置视频详情缓存统计")
+    public Result<Void> resetVideoDetailCacheMetrics(HttpServletRequest request) {
+        ensureAdmin(request);
+        videoCacheService.resetVideoDetailCacheMetrics();
+        return Result.success();
     }
 
     private void ensureAdmin(HttpServletRequest request) {

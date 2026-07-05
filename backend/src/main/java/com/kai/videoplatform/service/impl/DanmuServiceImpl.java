@@ -3,6 +3,7 @@ package com.kai.videoplatform.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kai.videoplatform.entity.Danmu;
 import com.kai.videoplatform.entity.User;
+import com.kai.videoplatform.exception.BizException;
 import com.kai.videoplatform.mapper.DanmuMapper;
 import com.kai.videoplatform.mapper.UserMapper;
 import com.kai.videoplatform.mapper.VideoMapper;
@@ -33,6 +34,10 @@ public class DanmuServiceImpl implements DanmuService {
 
     @Override
     public void saveDanmu(DanmuDTO dto) {
+        var video = dto.getVideoId() == null ? null : videoMapper.selectById(dto.getVideoId());
+        if (video == null) {
+            throw new BizException(404, "瑙嗛涓嶅瓨鍦?");
+        }
         Danmu danmu = new Danmu();
         danmu.setVideoId(dto.getVideoId());
         danmu.setUserId(dto.getUserId());
@@ -44,7 +49,6 @@ public class DanmuServiceImpl implements DanmuService {
         DanmuMessage danmuMessage = new DanmuMessage(danmu.getVideoId(), danmu.getUserId(), danmu.getContent(), danmu.getTimePoint());
         danmuMessage.setBizKey("danmu:video:" + danmu.getVideoId() + ":user:" + danmu.getUserId() + ":" + danmu.getTimePoint());
         mqService.sendDanmu(danmuMessage);
-        var video = dto.getVideoId() == null ? null : videoMapper.selectById(dto.getVideoId());
         if (video != null && video.getAuthorId() != null && !video.getAuthorId().equals(danmu.getUserId())) {
             NotifyMessage notifyMessage = new NotifyMessage("danmu", video.getAuthorId(), danmu.getVideoId(), danmu.getContent());
             notifyMessage.setBizKey("notify:user:" + video.getAuthorId() + ":danmu:" + danmu.getId());

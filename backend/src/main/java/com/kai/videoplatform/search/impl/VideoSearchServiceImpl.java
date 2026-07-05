@@ -44,9 +44,7 @@ public class VideoSearchServiceImpl implements VideoSearchService {
         }
         doc.setCategory(categoryName);
 
-        if (video.getCreateTime() != null) {
-            doc.setCreateTime(video.getCreateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
-        }
+        doc.setCreateTime(video.getCreateTime());
         doc.setViews(video.getPlayCount() == null ? 0L : video.getPlayCount());
         doc.setLikes(video.getLikeCount() == null ? 0L : video.getLikeCount());
 
